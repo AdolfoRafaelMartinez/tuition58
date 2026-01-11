@@ -1,9 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Node.js Weather App</title>
     <link rel="stylesheet" type="text/css" href="/styles.css" />
 </head>
 <body>
-    <h1>Hello world</h1>
+    <div class="container">
+        <h1>Hello from a Node.js App!</h1>
+        <p>This page is being rendered by a Node.js and Express server.</p>
+
+        <% if (weather) { %>
+            <div class="weather-data">
+                <p>I fetched the weather for you:</p>
+                <p><strong>Today's high in Austin is <%= weather.temperature %>°<%= weather.temperatureUnit %></strong></p>
+            </div>
+        <% } else { %>
+            <p>Could not fetch the weather data.</p>
+        <% } %>
+
+        <a href="/api" class="api-link">View API Endpoint</a>
+    </div>
 </body>
 </html>
