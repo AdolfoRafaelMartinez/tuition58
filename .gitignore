@@ -1,0 +1,27 @@
+dist/
+
+# Dependencies
+node_modules
+jspm_packages/
+.npm
+
+# Optional npm cache files
+.npm
+.eslintcache
+.stylelintcache
+
+# Logs and temporary files
+npm-debug.log*
+*.log
+npm-shrinkwrap.json
+*.tgz
+
+# Environment files
+.env
+.env.*
+!.env.example # Keep the example file in the repository
+
+# IDE/OS files
+.DS_Store # Mac specific
+Thumbs.db # Windows specific
+.vscode/ # VS Code configuration
