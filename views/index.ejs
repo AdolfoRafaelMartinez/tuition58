@@ -18,6 +18,14 @@
             <p>Could not fetch the weather data.</p>
         <% } %>
 
+        <% if (kalshi && kalshi.balance) { %>
+            <div class="kalshi-data">
+                <p>Your Kalshi portfolio balance is: <strong>$<%= kalshi.balance.toFixed(2) %></strong></p>
+            </div>
+        <% } else { %>
+            <p>Could not fetch the Kalshi portfolio balance.</p>
+        <% } %>
+
         <a href="/api" class="api-link">View API Endpoint</a>
     </div>
 </body>
