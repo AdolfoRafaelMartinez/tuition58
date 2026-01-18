@@ -7,8 +7,6 @@ import { getKalshiBalance, placeKalshiOrder } from "./services/kalshiService.js"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-debugger;
-
 const app = express();
 const port = parseInt(process.env.PORT) || process.argv[3] || 8080;
 

@@ -61,6 +61,20 @@ async function getKalshiBalance() {
     }
 }
 
+function signPssText(privateKeyPem: string, text: string): string {
+    const sign = crypto.createSign('RSA-SHA256');
+    sign.update(text);
+    sign.end();
+
+    const signature = sign.sign({
+        key: privateKeyPem,
+        padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+        saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST,
+    });
+
+    return signature.toString('base64');
+}
+
 async function placeKalshiOrder(orderParams: any) {
     try {
         if (!process.env.API_KEY || !process.env.RSA_PRIVATE_KEY) {
@@ -71,19 +85,20 @@ async function placeKalshiOrder(orderParams: any) {
         const apiKey = process.env.API_KEY;
         const privateKey = fs.readFileSync(process.env.RSA_PRIVATE_KEY, 'utf8');
         const timestamp = Date.now().toString();
-        const method = 'POST';
         const resourcePath = '/trade-api/v2/portfolio/orders';
-        const body = JSON.stringify(orderParams);
 
-        const stringToSign = `${timestamp}${method}${resourcePath}${body}`;
+        const body = JSON.stringify({
+            ...orderParams,
+            client_order_id: crypto.randomUUID().toString(),
+        });
 
-        const signer = crypto.createSign('RSA-SHA256');
-        signer.update(stringToSign);
-        signer.end();
-        const signature = signer.sign(privateKey, 'base64');
+        const method = 'POST';
+        
+        const stringToSign = `${timestamp}${method}${resourcePath}`;
 
+        const signature = signPssText(privateKey, stringToSign);
         const options = {
-            method: 'POST',
+            method: method,
             headers: {
                 'KALSHI-ACCESS-KEY': apiKey,
                 'KALSHI-ACCESS-SIGNATURE': signature,
@@ -93,7 +108,7 @@ async function placeKalshiOrder(orderParams: any) {
             body: body
         };
 
-        const response = await fetch('https://api.elections.kalshi.com/trade-api/v2/portfolio/orders', options);
+        const response = await fetch(`https://api.elections.kalshi.com${resourcePath}`, options);
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -103,7 +118,7 @@ async function placeKalshiOrder(orderParams: any) {
 
         const orderResponse = await response.json();
 
-        if (orderResponse && orderResponse.order) {
+        if (orderResponse) {
             return {
                 data: orderResponse,
                 error: null,
