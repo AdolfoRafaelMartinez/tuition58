@@ -1,5 +1,4 @@
 import * as dotenv from 'dotenv';
-import { Configuration, PortfolioApi } from 'kalshi-typescript';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 
@@ -12,19 +11,43 @@ async function getKalshiBalance() {
             return { data: null, error: "Missing Kalshi API credentials." };
         }
 
-        const config = new Configuration({
-            apiKey: process.env.API_KEY,
-            privateKeyPath: process.env.RSA_PRIVATE_KEY,
-            basePath: 'https://api.elections.kalshi.com/trade-api/v2'
-        });
+        const apiKey = process.env.API_KEY;
+        const privateKey = fs.readFileSync(process.env.RSA_PRIVATE_KEY, 'utf8');
+        const timestamp = Date.now().toString();
+        const method = 'GET';
+        const resourcePath = '/trade-api/v2/portfolio/balance';
+        const body = ''; // No body for a GET request
 
-        const portfolioApi = new PortfolioApi(config);
-        const balanceResponse = await portfolioApi.getBalance();
+        const stringToSign = `${timestamp}${method}${resourcePath}${body}`;
 
-        if (balanceResponse && balanceResponse.data && typeof balanceResponse.data.balance === 'number') {
+        const signer = crypto.createSign('RSA-SHA256');
+        signer.update(stringToSign);
+        signer.end();
+        const signature = signer.sign(privateKey, 'base64');
+
+        const options = {
+            method: 'GET',
+            headers: {
+                'KALSHI-ACCESS-KEY': apiKey,
+                'KALSHI-ACCESS-SIGNATURE': signature,
+                'KALSHI-ACCESS-TIMESTAMP': timestamp
+            }
+        };
+
+        const response = await fetch('https://api.elections.kalshi.com/trade-api/v2/portfolio/balance', options);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error fetching Kalshi balance:', errorText);
+            return { data: null, error: `Failed to fetch Kalshi balance: ${response.statusText} - ${errorText}` };
+        }
+
+        const balanceResponse = await response.json();
+
+        if (balanceResponse && typeof balanceResponse.balance === 'number') {
             return {
                 data: {
-                    balance: balanceResponse.data.balance / 100
+                    balance: balanceResponse.balance / 100
                 },
                 error: null,
             };

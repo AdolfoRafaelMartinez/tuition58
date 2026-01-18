@@ -16,7 +16,6 @@
                 "dotenv": "^17.2.3",
                 "ejs": "^3.1.9",
                 "express": "^4.21.2",
-                "kalshi-typescript": "^3.4.0",
                 "node-fetch": "^3.3.2"
         },
         "devDependencies": {
