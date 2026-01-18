@@ -1,4 +1,4 @@
-      {
+{
         "compilerOptions": {
           "target": "es2020",
           "module": "nodenext",
@@ -6,5 +6,6 @@
           "esModuleInterop": true,
           "sourceMap": true,
           "outDir": "dist"
-        }
+        },
+        "include": ["src/**/*"]
       }
