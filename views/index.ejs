@@ -26,7 +26,95 @@
             <p>Could not fetch the Kalshi portfolio balance.</p>
         <% } %>
 
+        <div class="order-form-container">
+            <h2>Place a Kalshi Order</h2>
+            <form id="kalshi-order-form">
+                <div class="form-group">
+                    <label for="ticker">Ticker:</label>
+                    <input type="text" id="ticker" name="ticker" required>
+                </div>
+                <div class="form-group">
+                    <label for="side">Side:</label>
+                    <select id="side" name="side">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="action">Action:</label>
+                    <select id="action" name="action">
+                        <option value="buy">Buy</option>
+                        <option value="sell">Sell</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="count">Count:</label>
+                    <input type="number" id="count" name="count" required>
+                </div>
+                <div class="form-group">
+                    <label for="type">Type:</label>
+                    <select id="type" name="type">
+                        <option value="limit">Limit</option>
+                        <option value="market">Market</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="yes_price">Yes Price (Cents):</label>
+                    <input type="number" id="yes_price" name="yes_price">
+                </div>
+                 <div class="form-group">
+                    <label for="client_order_id">Client Order ID:</label>
+                    <input type="text" id="client_order_id" name="client_order_id" required>
+                </div>
+
+                <button type="submit">Place Order</button>
+            </form>
+            <div id="order-response"></div>
+        </div>
+
         <a href="/api" class="api-link">View API Endpoint</a>
     </div>
+
+    <script>
+        document.getElementById('kalshi-order-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const formData = new FormData(form);
+            const orderParams = {};
+            formData.forEach((value, key) => {
+                if (value) {
+                   if(key === 'count' || key === 'yes_price') {
+                        orderParams[key] = parseInt(key === 'yes_price' ? value : value, 10);
+                    } else {
+                        orderParams[key] = value;
+                    }
+                }
+            });
+
+            const responseContainer = document.getElementById('order-response');
+
+            try {
+                const response = await fetch('/api/kalshi/order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderParams)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    responseContainer.innerHTML = `<p>Order placed successfully!</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                } else {
+                    responseContainer.innerHTML = `<p>Error placing order:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                console.error('Error placing order:', error);
+                responseContainer.innerHTML = `<p>An unexpected error occurred. Please check the console for details.</p>`;
+            }
+        });
+    </script>
 </body>
 </html>
