@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from 'url';
-import { getAustinWeatherForecast } from "./examples/weather.js";
+import { getAustinWeatherForecast } from "./services/weather.js";
 import { getKalshiBalance, placeKalshiOrder } from "./services/kalshiService.js";
 
 const __filename = fileURLToPath(import.meta.url);
