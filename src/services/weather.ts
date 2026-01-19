@@ -21,7 +21,7 @@ export async function getAustinWeatherForecast(): Promise<WeatherResult> {
         }
 
         const data: any = await response.json();
-        const forecast = data.properties.periods[0];
+        const forecast = data.properties.periods.find(element => element.isDaytime);
 
         return {
             data: {
