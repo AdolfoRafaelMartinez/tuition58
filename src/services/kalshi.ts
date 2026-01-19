@@ -1,64 +1,16 @@
+
 import * as dotenv from 'dotenv';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
+import * as path from 'path';
+import axios from 'axios';
 
 dotenv.config();
 
-async function getKalshiBalance() {
-    try {
-        if (!process.env.API_KEY || !process.env.RSA_PRIVATE_KEY) {
-            console.error("Missing Kalshi API credentials. Please check your .env file.");
-            return { data: null, error: "Missing Kalshi API credentials." };
-        }
-
-        const apiKey = process.env.API_KEY;
-        const privateKey = fs.readFileSync(process.env.RSA_PRIVATE_KEY, 'utf8');
-        const timestamp = Date.now().toString();
-        const method = 'GET';
-        const resourcePath = '/trade-api/v2/portfolio/balance';
-        const body = ''; // No body for a GET request
-
-        const stringToSign = `${timestamp}${method}${resourcePath}${body}`;
-
-        const signer = crypto.createSign('RSA-SHA256');
-        signer.update(stringToSign);
-        signer.end();
-        const signature = signer.sign(privateKey, 'base64');
-
-        const options = {
-            method: 'GET',
-            headers: {
-                'KALSHI-ACCESS-KEY': apiKey,
-                'KALSHI-ACCESS-SIGNATURE': signature,
-                'KALSHI-ACCESS-TIMESTAMP': timestamp
-            }
-        };
-
-        const response = await fetch('https://api.elections.kalshi.com/trade-api/v2/portfolio/balance', options);
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error fetching Kalshi balance:', errorText);
-            return { data: null, error: `Failed to fetch Kalshi balance: ${response.statusText} - ${errorText}` };
-        }
-
-        const balanceResponse = await response.json();
-
-        if (balanceResponse && typeof balanceResponse.balance === 'number') {
-            return {
-                data: {
-                    balance: balanceResponse.balance / 100
-                },
-                error: null,
-            };
-        } else {
-             return { data: null, error: 'Failed to retrieve a valid balance from Kalshi API.' };
-        }
-    } catch (error) {
-        console.error('Error fetching Kalshi balance:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-        return { data: null, error: `Failed to fetch Kalshi balance: ${errorMessage}` };
-    }
+function loadPrivateKeyFromFile(filePath: string) {
+    const absolutePath = path.resolve(filePath);
+    const privateKeyPem = fs.readFileSync(absolutePath, 'utf8');
+    return privateKeyPem;
 }
 
 function signPssText(privateKeyPem: string, text: string): string {
@@ -74,6 +26,53 @@ function signPssText(privateKeyPem: string, text: string): string {
 
     return signature.toString('base64');
 }
+
+async function getKalshiBalance() {
+    try {
+        if (!process.env.API_KEY || !process.env.RSA_PRIVATE_KEY) {
+            console.error("Missing Kalshi API credentials. Please check your .env file.");
+            return { data: null, error: "Missing Kalshi API credentials." };
+        }
+
+        const currentTimeMilliseconds = Date.now();
+        const timestampStr = currentTimeMilliseconds.toString();
+
+        const privateKeyPem = loadPrivateKeyFromFile(process.env.RSA_PRIVATE_KEY);
+
+        const method = "GET";
+        const baseUrl = 'https://api.elections.kalshi.com'
+        const url_path = '/trade-api/v2/portfolio/balance';
+
+        // Strip query parameters from path before signing
+        const pathWithoutQuery = url_path.split('?')[0];
+        const msgString = timestampStr + method + pathWithoutQuery;
+        const sig = signPssText(privateKeyPem, msgString);
+
+        const headers = {
+            'KALSHI-ACCESS-KEY': process.env.API_KEY,
+            'KALSHI-ACCESS-SIGNATURE': sig,
+            'KALSHI-ACCESS-TIMESTAMP': timestampStr
+        };
+
+        const response = await axios.get(baseUrl + url_path, { headers });
+        
+        if (response.data && typeof response.data.balance === 'number') {
+            return {
+                data: {
+                    balance: response.data.balance / 100
+                },
+                error: null,
+            };
+        } else {
+             return { data: null, error: 'Failed to retrieve a valid balance from Kalshi API.' };
+        }
+    } catch (error) {
+        console.error('Error fetching Kalshi balance:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { data: null, error: `Failed to fetch Kalshi balance: ${errorMessage}` };
+    }
+}
+
 
 async function placeKalshiOrder(orderParams: any) {
     try {
