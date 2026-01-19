@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="313369bf-8ff2-49f7-a78a-4bb1ec00952e" name="Changes" comment="configuration">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="313369bf-8ff2-49f7-a78a-4bb1ec00952e" name="Changes" comment="success: balance works" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -70,7 +68,7 @@
       <option name="presentableId" value="Default" />
       <updated>1768857253185</updated>
       <workItem from="1768857254590" duration="33000" />
-      <workItem from="1768857288649" duration="2614000" />
+      <workItem from="1768857288649" duration="3543000" />
     </task>
     <task id="LOCAL-00001" summary="configuration">
       <option name="closed" value="true" />
@@ -80,7 +78,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768857321992</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="success: balance works">
+      <option name="closed" value="true" />
+      <created>1768864425323</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1768864425323</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -88,7 +94,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="configuration" />
-    <option name="LAST_COMMIT_MESSAGE" value="configuration" />
+    <MESSAGE value="success: balance works" />
+    <option name="LAST_COMMIT_MESSAGE" value="success: balance works" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -108,6 +115,18 @@
           <line>30</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="28" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/index.ts</url>
+          <line>12</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="29" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/services/weather.ts</url>
+          <line>25</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="30" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
