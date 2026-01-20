@@ -9,16 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const eventTicker = document.getElementById('event-ticker').value;
 
             try {
-                const response = await fetch(`/api/kalshi/markets?event_ticker=${eventTicker}`);
-                const markets = await response.json();
+                const response = await fetch(`/api/kalshi/markets/${eventTicker}`);
+                const data = await response.json();
 
-                if (markets.error) {
-                    marketResult.innerHTML = `<p>Error: ${markets.error}</p>`;
+                if (data.error) {
+                    marketResult.innerHTML = `<p>Error: ${data.error}</p>`;
                     return;
                 }
 
                 let html = '<ul>';
-                for (const market of markets) {
+                for (const market of data.markets) {
                     html += `<li><strong>${market.ticker}:</strong> ${market.title} (Yes: ${market.yes_price}¢, No: ${market.no_price}¢)</li>`;
                 }
                 html += '</ul>';

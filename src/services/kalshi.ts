@@ -73,6 +73,44 @@ async function getKalshiBalance() {
     }
 }
 
+async function getKalshiMarkets(event_ticker: string) {
+    try {
+        if (!process.env.API_KEY || !process.env.RSA_PRIVATE_KEY) {
+            console.error("Missing Kalshi API credentials. Please check your .env file.");
+            return { data: null, error: "Missing Kalshi API credentials." };
+        }
+
+        const currentTimeMilliseconds = Date.now();
+        const timestampStr = currentTimeMilliseconds.toString();
+
+        const privateKeyPem = loadPrivateKeyFromFile(process.env.RSA_PRIVATE_KEY);
+
+        const method = "GET";
+        const baseUrl = 'https://api.elections.kalshi.com'
+        const url_path = `/trade-api/v2/markets/${event_ticker}`;
+
+        // Strip query parameters from path before signing
+        const pathWithoutQuery = url_path.split('?')[0];
+        const msgString = timestampStr + method + pathWithoutQuery;
+        const sig = signPssText(privateKeyPem, msgString);
+
+        const headers = {
+            'KALSHI-ACCESS-KEY': process.env.API_KEY,
+            'KALSHI-ACCESS-SIGNATURE': sig,
+            'KALSHI-ACCESS-TIMESTAMP': timestampStr
+        };
+
+        const response = await axios.get(baseUrl + url_path, { headers });
+        
+        return { data: response.data, error: null };
+
+    } catch (error) {
+        console.error(`Error fetching Kalshi markets for ${event_ticker}:`, error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { data: null, error: `Failed to fetch Kalshi markets: ${errorMessage}` };
+    }
+}
+
 
 async function placeKalshiOrder(orderParams: any) {
     try {
@@ -133,4 +171,4 @@ async function placeKalshiOrder(orderParams: any) {
 }
 
 
-export { getKalshiBalance, placeKalshiOrder };
+export { getKalshiBalance, placeKalshiOrder, getKalshiMarkets };

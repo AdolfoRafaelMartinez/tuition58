@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from 'url';
 import { getAustinWeatherForecast } from "./services/weather.js";
-import { getKalshiBalance, placeKalshiOrder } from "./services/kalshi.js";
+import { getKalshiBalance, placeKalshiOrder, getKalshiMarkets } from "./services/kalshi.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +24,16 @@ app.get('/', async (req, res) => {
 app.post('/api/kalshi/order', async (req, res) => {
     const orderParams = req.body;
     const result = await placeKalshiOrder(orderParams);
+    if (result.error) {
+        res.status(500).json({ error: result.error });
+    } else {
+        res.json(result.data);
+    }
+});
+
+app.get('/api/kalshi/markets/:event_ticker', async (req, res) => {
+    const event_ticker = req.params.event_ticker;
+    const result = await getKalshiMarkets(event_ticker);
     if (result.error) {
         res.status(500).json({ error: result.error });
     } else {
