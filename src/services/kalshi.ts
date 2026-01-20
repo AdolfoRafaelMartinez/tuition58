@@ -59,7 +59,7 @@ async function getKalshiBalance() {
         if (response.data && typeof response.data.balance === 'number') {
             return {
                 data: {
-                    balance: response.data.balance / 100
+                    balance: response.data.balance
                 },
                 error: null,
             };
