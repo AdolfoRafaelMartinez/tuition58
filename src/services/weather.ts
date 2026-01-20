@@ -4,8 +4,8 @@ interface Forecast {
     name: string;
     temperature: number;
     temperatureUnit: string;
-    shortForecast: string;
-    detailedForecast: string;
+    startTime: string;
+    endTime: string;
 }
 
 interface WeatherResult {
@@ -28,8 +28,8 @@ export async function getAustinWeatherForecast(): Promise<WeatherResult> {
                 name: forecast.name,
                 temperature: forecast.temperature,
                 temperatureUnit: forecast.temperatureUnit,
-                shortForecast: forecast.shortForecast,
-                detailedForecast: forecast.detailedForecast,
+                startTime: forecast.startTime,
+                endTime: forecast.endTime,
             },
             error: null,
         };
