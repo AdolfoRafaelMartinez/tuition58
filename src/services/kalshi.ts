@@ -75,12 +75,10 @@ async function getKalshiBalance() {
 
 async function getKalshiMarkets(event_ticker: string) {
     try {
-        const response = await axios.get(`https://api.elections.kalshi.com/trade-api/v2/events/${event_ticker}`, {
-            params: {
-                with_nested_markets: true
-            }
-        });
-        return { data: response.data, error: null };
+        const options = {method: 'GET'};
+        const response = await fetch(`https://api.elections.kalshi.com/trade-api/v2/markets?event_ticker=${event_ticker}`, options);
+        const data = await response.json();
+        return { data: data, error: null };
     } catch (error) {
         console.error(`Error fetching Kalshi markets for ${event_ticker}:`, error);
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
