@@ -19,6 +19,17 @@
             <% } %>
         </div>
         <div class="section">
+            <h2>Today's High</h2>
+            <% if (cliWeather && cliWeather.maxTemp) { %>
+                <p><strong>Max Temperature:</strong> <%= cliWeather.maxTemp %>°F</p>
+                <p><strong>Time:</strong> <%= cliWeather.maxTempTime %></p>
+            <% } else if (cliWeather && cliWeather.error) { %>
+                <p><%= cliWeather.error %></p>
+            <% } else { %>
+                <p>Maximum temperature data not available.</p>
+            <% } %>
+        </div>
+        <div class="section">
             <h2>Kalshi</h2>
             <% if (kalshi) { %>
                 <p><strong>Balance:</strong> $<%= (kalshi.balance / 100).toFixed(2) %></p>
