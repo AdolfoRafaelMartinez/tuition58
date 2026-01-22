@@ -14,15 +14,22 @@ export async function getAustinCliWeather(): Promise<CliWeatherResult> {
         }
 
         const text = await response.text();
-        const maxTempRegex = /MAXIMUM\s*\d{1,2}\s*\d{1,2}:\d{1,2}\s\D{2}/;
-        const match = text.match(maxTempRegex);
-        if (!match) {
-            return { maxTemp: null, maxTempTime: null, error: 'Could not parse max temperature from weather data.' };
+
+        const dateRegex = /CLIMATE REPORT\D*\d{1,3}\s\D*\d{1,2}\s\d{4}/;
+        const date_match = text.match(dateRegex);
+        if (!date_match) {
+            return { maxTempTime: null, error: 'Could not get date and time.' };
         }
-        const split = match[0].split(/\s+/);
+        const maxTempTime = date_match[0].split(/\s+/);
+        const maxTempRegex = /MAXIMUM\s*\d{1,2}\s*\d{1,2}:\d{1,2}\s\D{2}/;
+        const temp_match = text.match(maxTempRegex);
+        if (!temp_match) {
+            return { maxTemp: null, error: 'Could not parse max temperature from weather data.' };
+        }
+        const maxTemp = temp_match[0].split(/\s+/);
         return {
-            maxTemp: split[1],
             maxTempTime: split[2] + " " + split[3],
+            maxTemp: split[1],
             error: null
         };
     } catch (error) {
