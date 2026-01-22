@@ -10,7 +10,7 @@
     <div class="container">
         <h1>Kalshi Trade Bot</h1>
         <div class="section">
-            <h2>Weather</h2>
+            <h2>Forecast</h2>
             <% if (weather) { %>
                 <p><strong><%= weather.name %>:</strong> <%= weather.temperature %>°<%= weather.temperatureUnit %></p>
                 <p><strong>Start Time:</strong> <%= new Date(weather.startTime).toLocaleString() %></p>
@@ -19,7 +19,7 @@
             <% } %>
         </div>
         <div class="section">
-            <h2>Today's High</h2>
+            <h2>Observed</h2>
             <% if (cliWeather && cliWeather.maxTemp) { %>
                 <p><strong>Max Temperature:</strong> <%= cliWeather.maxTemp %>°F</p>
                 <p><strong>Time:</strong> <%= cliWeather.maxTempTime %></p>
