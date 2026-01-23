@@ -1,8 +1,11 @@
 
+import * as dotenv from 'dotenv';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { KalshiBalanceResult } from '../models/kalshi.js';
+
+dotenv.config();
 
 function loadPrivateKeyFromFile(filePath: string) {
     const absolutePath = path.resolve(filePath);
