@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let html = '<ul>';
                 for (const market of data.markets) {
-                    html += `<li><strong>${market.ticker}:</strong> ${market.title} (Yes: ${market.yes_price}¢, No: ${market.no_price}¢)</li>`;
+                    html += `<li><strong>${market.ticker}:</strong> ${market.yes_sub_title}</li>`;
                 }
                 html += '</ul>';
 
