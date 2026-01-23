@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let html = '<ul>';
                 for (const market of data.markets) {
-                    html += `<li><strong>${market.ticker}:</strong> ${market.yes_sub_title}</li>`;
+                    const numericPart = market.ticker.match(/\d+/);
+                    html += `<li><strong>${market.ticker}:</strong> ${numericPart ? numericPart[2] : ''}</li>`;
                 }
                 html += '</ul>';
 
