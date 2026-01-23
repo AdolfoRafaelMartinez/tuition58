@@ -1,11 +1,8 @@
 
-import * as dotenv from 'dotenv';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import axios from 'axios';
-
-dotenv.config();
+import { KalshiBalanceResult } from '../models/kalshi.js';
 
 function loadPrivateKeyFromFile(filePath: string) {
     const absolutePath = path.resolve(filePath);
@@ -27,7 +24,7 @@ function signPssText(privateKeyPem: string, text: string): string {
     return signature.toString('base64');
 }
 
-async function getKalshiBalance() {
+export async function getKalshiBalance(): Promise<KalshiBalanceResult> {
     try {
         if (!process.env.API_KEY || !process.env.RSA_PRIVATE_KEY) {
             console.error("Missing Kalshi API credentials. Please check your .env file.");
@@ -54,12 +51,13 @@ async function getKalshiBalance() {
             'KALSHI-ACCESS-TIMESTAMP': timestampStr
         };
 
-        const response = await axios.get(baseUrl + url_path, { headers });
+        const response = await fetch(baseUrl + url_path, { headers });
+        const responseData = await response.json();
         
-        if (response.data && typeof response.data.balance === 'number') {
+        if (responseData && typeof responseData.balance === 'number') {
             return {
                 data: {
-                    balance: response.data.balance
+                    balance: responseData.balance
                 },
                 error: null,
             };
@@ -73,7 +71,7 @@ async function getKalshiBalance() {
     }
 }
 
-async function getKalshiMarkets(event_ticker: string) {
+export async function getKalshiMarkets(event_ticker: string) {
     try {
         const options = {method: 'GET'};
         const response = await fetch(`https://api.elections.kalshi.com/trade-api/v2/markets?event_ticker=${event_ticker}`, options);
@@ -87,7 +85,7 @@ async function getKalshiMarkets(event_ticker: string) {
 }
 
 
-async function placeKalshiOrder(orderParams: any) {
+export async function placeKalshiOrder(orderParams: any) {
     try {
         if (!process.env.API_KEY || !process.env.RSA_PRIVATE_KEY) {
             console.error("Missing Kalshi API credentials. Please check your .env file.");
@@ -120,7 +118,7 @@ async function placeKalshiOrder(orderParams: any) {
             body: body
         };
 
-        const response = await fetch(`https://api.elections.kalshi.com${resourcePath}`, options);
+        const response = await fetch(`httpshttps://api.elections.kalshi.com${resourcePath}`, options);
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -144,6 +142,3 @@ async function placeKalshiOrder(orderParams: any) {
         return { data: null, error: `Failed to place Kalshi order: ${errorMessage}` };
     }
 }
-
-
-export { getKalshiBalance, placeKalshiOrder, getKalshiMarkets };

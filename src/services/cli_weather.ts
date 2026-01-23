@@ -1,10 +1,6 @@
-import fetch from 'node-fetch';
 
-interface CliWeatherResult {
-    when_max: string | null;
-    temp_max: string | null;
-    error: string | null;
-}
+import fetch from 'node-fetch';
+import { CliWeatherResult } from '../models/cli_weather.js';
 
 export async function getAustinCliWeather(): Promise<CliWeatherResult> {
     try {

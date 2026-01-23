@@ -1,17 +1,6 @@
+
 import fetch from 'node-fetch';
-
-interface Forecast {
-    name: string;
-    temperature: number;
-    temperatureUnit: string;
-    startTime: string;
-    endTime: string;
-}
-
-interface WeatherResult {
-    data: Forecast | null;
-    error: string | null;
-}
+import { Forecast, WeatherResult } from '../models/weather.js';
 
 export async function getAustinWeatherForecast(): Promise<WeatherResult> {
     try {
@@ -22,6 +11,10 @@ export async function getAustinWeatherForecast(): Promise<WeatherResult> {
 
         const data: any = await response.json();
         const forecast = data.properties.periods.find(element => element.isDaytime);
+
+        if (!forecast) {
+            return { data: null, error: 'Could not find daytime forecast.' };
+        }
 
         return {
             data: {
