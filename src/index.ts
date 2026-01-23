@@ -39,17 +39,6 @@ app.get('/api/kalshi/markets/:event_ticker', async (req, res) => {
     if (result.error) {
         res.status(500).json({ error: result.error });
     } else {
-        if (result.data && result.data.markets) {
-            result.data.markets.sort((a, b) => {
-                if (a.yes_sub_title < b.yes_sub_title) {
-                    return 1;
-                }
-                if (a.yes_sub_title > b.yes_sub_title) {
-                    return -1;
-                }
-                return 0;
-            });
-        }
         res.json(result.data);
     }
 });
