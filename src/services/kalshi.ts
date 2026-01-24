@@ -79,6 +79,21 @@ export async function getKalshiMarkets(event_ticker: string) {
         const options = {method: 'GET'};
         const response = await fetch(`https://api.elections.kalshi.com/trade-api/v2/markets?event_ticker=${event_ticker}`, options);
         const data = await response.json();
+        let markets = data.markets;
+        markets.forEach((market, ndx) => {
+            market.value = Number(market.ticker.match(/\d+\.?\d$/));
+        });
+        markets.sort((a, b) => a.value - b.value);
+        markets.forEach((market, ndx) => {
+            if(ndx == 0){
+                market.value = market.value - 1;
+            } else {
+                if(Number.isInteger(market.value)){
+                    market.value = market.value + 1;
+                }
+                market.value = Math.floor(market.value);
+            }
+        });
         return { data: data, error: null };
     } catch (error) {
         console.error(`Error fetching Kalshi markets for ${event_ticker}:`, error);
