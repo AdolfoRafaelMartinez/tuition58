@@ -19,10 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let html = '<ul>';
                 for (const market of data.markets) {
-                    const letterPart = market.ticker.match(/-\D/)[0];
-                    const bin_or_tail = letterPart.includes("B") ? "bin" : "tail";
-                    const value = Number(market.ticker.match(/\d+\.?\d$/));
-                    html += `<li><strong>${market.ticker}:</strong> ${bin_lower} a ${bin_or_tail}, $${market.yes_sub_title}</li>`;
+                    html += `<li><strong>${market.ticker}: ${market.yes_sub_title}</li>`;
                 }
                 html += '</ul>';
 
