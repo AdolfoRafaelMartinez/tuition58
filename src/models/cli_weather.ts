@@ -1,6 +1,7 @@
 
 export interface CliWeatherResult {
-    when_max: string | null;
-    temp_max: string | null;
+    report_when: string | null;
+    observation_when: string | null;
+    observation_max: string | null;
     error: string | null;
 }

@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from 'url';
 import { getAustinWeatherForecast } from "./services/weather.js";
-import { getAustinCliWeather } from "./services/cli_weather.js";
+import { getClimateReport } from "./services/cli_weather.js";
 import { getKalshiBalance, placeKalshiOrder, getKalshiMarkets } from "./services/kalshi.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -18,7 +18,7 @@ app.use(express.json());
 
 app.get('/', async (req, res) => {
   const weather = await getAustinWeatherForecast();
-  const cliWeather = await getAustinCliWeather();
+  const cliWeather = await getClimateReport();
   const kalshi = await getKalshiBalance();
   res.render('index', { weather: weather.data, cliWeather: cliWeather, kalshi: kalshi.data });
 });

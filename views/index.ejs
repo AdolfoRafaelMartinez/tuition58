@@ -20,8 +20,9 @@
         </div>
         <div class="section">
             <h2>Observed</h2>
-            <% if (cliWeather && cliWeather.temp_max) { %>
-                <p><%= cliWeather.temp_max %></p>
+            <% if (cliWeather && cliWeather.observation_max) { %>
+                <p><%= cliWeather.observation_max %> at <%= cliWeather.observation_when %></p>
+                <p>Reported at <%= cliWeather.report_when %></p>
             <% } else if (cliWeather && cliWeather.error) { %>
                 <p><%= cliWeather.error %></p>
             <% } else { %>
