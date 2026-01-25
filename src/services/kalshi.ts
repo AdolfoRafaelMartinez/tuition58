@@ -118,10 +118,25 @@ export async function placeKalshiOrder(orderParams: any) {
         const timestamp = Date.now().toString();
         const resourcePath = '/trade-api/v2/portfolio/orders';
 
-        const body = JSON.stringify({
-            ...orderParams,
+        const { ticker, action, side, yes_price, count } = orderParams;
+
+        const kalshiOrder: any = {
+            ticker,
+            side,
+            count,
+            buy_or_sell: action,
+            type: 'limit',
             client_order_id: crypto.randomUUID().toString(),
-        });
+            time_in_force: 'immediate_or_cancel',
+        };
+
+        if (side === 'yes') {
+            kalshiOrder.yes_price = yes_price;
+        } else {
+            kalshiOrder.no_price = 100 - yes_price;
+        }
+
+        const body = JSON.stringify(kalshiOrder);
 
         const method = 'POST';
         

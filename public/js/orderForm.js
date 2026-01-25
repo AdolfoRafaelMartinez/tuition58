@@ -7,8 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
 
             const ticker = document.getElementById('ticker').value;
+            const action = document.getElementById('action').value;
             const side = document.getElementById('side').value;
-            const price = document.getElementById('price').value;
+            const yes_price = document.getElementById('yes_price').value;
             const count = document.getElementById('count').value;
 
             try {
@@ -17,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ ticker, side, price: parseInt(price), count: parseInt(count) }),
+                    body: JSON.stringify({ ticker, action, side, yes_price: parseInt(yes_price), count: parseInt(count) }),
                 });
 
                 const result = await response.json();
