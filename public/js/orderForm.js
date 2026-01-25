@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     orderResult.innerHTML = `<p>Order placed successfully!</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                    orderResult.classList.add('glow-animation');
+                    orderResult.addEventListener('animationend', () => {
+                        orderResult.classList.remove('glow-animation');
+                    }, { once: true });
                 } else {
                     orderResult.innerHTML = `<p>Error placing order:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
                 }

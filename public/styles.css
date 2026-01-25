@@ -119,3 +119,19 @@ pre {
     white-space: pre-wrap;
     word-wrap: break-word;
 }
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.2);
+  }
+}
+
+.glow-animation {
+  animation: glow 1.5s ease-in-out;
+}
