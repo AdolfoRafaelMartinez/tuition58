@@ -124,7 +124,7 @@ export async function placeKalshiOrder(orderParams: any) {
             ticker,
             side,
             count,
-            buy_or_sell: action,
+            action,
             type: 'limit',
             client_order_id: crypto.randomUUID().toString(),
             time_in_force: 'immediate_or_cancel',
