@@ -75,31 +75,35 @@ export async function getKalshiBalance(): Promise<KalshiBalanceResult> {
 }
 
 export async function getKalshiMarkets(event_ticker: string) {
-    try {
+    // try {
         const options = {method: 'GET'};
         const response = await fetch(`https://api.elections.kalshi.com/trade-api/v2/markets?event_ticker=${event_ticker}`, options);
         const data = await response.json();
         let markets = data.markets;
         markets.forEach((market, ndx) => {
-            market.value = Number(market.ticker.match(/\d+\.?\d$/));
+            market.lower = Number(market.ticker.match(/\d+\.?\d$/));
         });
-        markets.sort((a, b) => a.value - b.value);
+        markets.sort((a, b) => a.lower - b.lower);
         markets.forEach((market, ndx) => {
             if(ndx == 0){
-                market.value = market.value - 1;
+                market.lower = market.lower - 1;
             } else {
-                if(Number.isInteger(market.value)){
-                    market.value = market.value + 1;
+                if(Number.isInteger(market.lower)){
+                    market.lower = market.lower + 1;
                 }
-                market.value = Math.floor(market.value);
+                market.lower = Math.floor(market.lower);
+                const is_bin = market.ticker.toLowerCase().match(/b\d/);
+                if(is_bin){
+                    market.upper = market.lower + 1;
+                }
             }
         });
         return { data: data, error: null };
-    } catch (error) {
-        console.error(`Error fetching Kalshi markets for ${event_ticker}:`, error);
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-        return { data: null, error: `Failed to fetch Kalshi markets: ${errorMessage}` };
-    }
+    // } catch (error) {
+    //     console.error(`Error fetching Kalshi markets for ${event_ticker}:`, error);
+    //     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    //     return { data: null, error: `Failed to fetch Kalshi markets: ${errorMessage}` };
+    // }
 }
 
 
