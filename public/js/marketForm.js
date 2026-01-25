@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const eventTicker = document.getElementById('event-ticker').value;
 
             try {
+                const weatherResponse = await fetch('/api/weather');
+                const weatherData = await weatherResponse.json();
+                const temp_max = parseFloat(weatherData.temp_max.split(" ").pop());
+
                 const response = await fetch(`/api/kalshi/markets/${eventTicker}`);
                 const data = await response.json();
 
@@ -19,7 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let html = '<ul>';
                 for (const market of data.markets) {
-                    html += `<li><strong>${market.ticker}: ${market.yes_sub_title} lower: ${market.lower} upper: ${market.upper}</li>`;
+                    html += `<li><strong>${market.ticker}: ${market.yes_sub_title} lower: ${market.lower} upper: ${market.upper}`;
+                    if(temp_max >= market.lower && temp_max <= market.upper) {
+                        html += ` buy this`;
+                    }
+                    html += `</strong></li>`;
                 }
                 html += '</ul>';
 
