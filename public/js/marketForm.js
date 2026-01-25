@@ -23,11 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let html = '<ul>';
                 for (const market of data.markets) {
-                    html += `<li><strong>${market.ticker}: ${market.yes_sub_title}, lower: ${market.lower}, upper: ${market.upper}, ask: ${market.yes_ask}</li>`;
+                    html += `<li><strong>${market.ticker}:</strong> ${market.yes_sub_title}, lower: ${market.lower}, upper: ${market.upper}, ask: ${market.ask}`;
                     if(temp_max >= market.lower && temp_max <= market.upper) {
-                        html += ` buy this`;
+                        html += ` <span class="buy-recommendation">buy this</span>`;
                     }
-                    html += `</strong></li>`;
+                    html += `</li>`;
                 }
                 html += '</ul>';
 
