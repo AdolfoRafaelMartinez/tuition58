@@ -2,7 +2,7 @@
 import fetch from 'node-fetch';
 import { Forecast, WeatherResult } from '../models/weather.js';
 
-export async function getAustinWeatherForecast(): Promise<WeatherResult> {
+export async function get_forecast(): Promise<WeatherResult> {
     try {
         const response = await fetch('https://api.weather.gov/gridpoints/EWX/156,91/forecast');
         if (!response.ok) {

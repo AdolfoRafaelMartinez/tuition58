@@ -1,8 +1,8 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from 'url';
-import { getAustinWeatherForecast } from "./services/weather.js";
-import { getAustinCliWeather } from "./services/cli_weather.js";
+import { get_forecast } from "./services/forecast.js";
+import { get_observed } from "./services/observed.js";
 import { getKalshiBalance, placeKalshiOrder, getKalshiMarkets } from "./services/kalshi.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,14 +17,14 @@ app.use(express.static(path.join(__dirname, 'public/')));
 app.use(express.json());
 
 app.get('/', async (req, res) => {
-  const weather = await getAustinWeatherForecast();
-  const cliWeather = await getAustinCliWeather();
+  const weather = await get_forecast();
+  const cliWeather = await get_observed();
   const kalshi = await getKalshiBalance();
   res.render('index', { weather: weather.data, cliWeather: cliWeather, kalshi: kalshi.data });
 });
 
-app.get('/api/weather', async (req, res) => {
-    const cliWeather = await getAustinCliWeather();
+app.get('/api/observed', async (req, res) => {
+    const cliWeather = await get_observed();
     if (cliWeather.error) {
         res.status(500).json({ error: cliWeather.error });
     } else {
