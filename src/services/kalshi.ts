@@ -75,7 +75,7 @@ export async function getKalshiBalance(): Promise<KalshiBalanceResult> {
 }
 
 export async function getKalshiMarkets(event_ticker: string) {
-    // try {
+    try {
         const options = {method: 'GET'};
         const response = await fetch(`https://api.elections.kalshi.com/trade-api/v2/markets?event_ticker=${event_ticker}`, options);
         const data = await response.json();
@@ -98,11 +98,11 @@ export async function getKalshiMarkets(event_ticker: string) {
             }
         });
         return { data: data, error: null };
-    // } catch (error) {
-    //     console.error(`Error fetching Kalshi markets for ${event_ticker}:`, error);
-    //     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-    //     return { data: null, error: `Failed to fetch Kalshi markets: ${errorMessage}` };
-    // }
+    } catch (error) {
+        console.error(`Error fetching Kalshi markets for ${event_ticker}:`, error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { data: null, error: `Failed to fetch Kalshi markets: ${errorMessage}` };
+    }
 }
 
 
