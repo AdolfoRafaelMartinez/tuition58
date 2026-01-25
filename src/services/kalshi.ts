@@ -82,18 +82,18 @@ export async function getKalshiMarkets(event_ticker: string) {
         let markets = data.markets;
         markets.forEach((market) => {
             market.value = Number(market.ticker.match(/\d+\.?\d$/));
-            const is_bin = market.ticker.toLowerCase().match(/b\d/);
+            market.is_bin = market.ticker.toLowerCase().match(/b\d/);
         });
         markets.sort((a, b) => a.value - b.value);
         markets.forEach((market, ndx) => {
             if(ndx == 0){
-                market.upper = market.value;
+                market.upper = market.value - 1;
             } else {
-                if(is_bin){
+                if(market.is_bin){
                     market.lower = Math.floor(market.value);
                     market.upper = Math.ceil(market.value);
                 } else {
-                    market.lower = Math.floor(market.value);
+                    market.lower = market.value + 1;
                 }
             }
         });

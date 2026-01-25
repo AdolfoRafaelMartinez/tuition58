@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let html = '<ul>';
                 for (const market of data.markets) {
-                    html += `<li><strong>${market.ticker}: ${market.yes_sub_title} lower: ${market.lower} upper: ${market.upper}`;
+                    html += `<li><strong>${market.ticker}: ${market.yes_sub_title}, lower: ${market.lower}, upper: ${market.upper}`;
                     if(temp_max >= market.lower && temp_max <= market.upper) {
                         html += ` buy this`;
                     }
