@@ -111,6 +111,8 @@ button:hover {
 .buy-recommendation {
     color: #e74c3c;
     font-weight: bold;
+    font-size: 1.2em;
+    text-transform: uppercase;
 }
 
 pre {
