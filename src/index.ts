@@ -23,6 +23,15 @@ app.get('/', async (req, res) => {
   res.render('index', { weather: weather.data, cliWeather: cliWeather, kalshi: kalshi.data });
 });
 
+app.get('/api/forecast', async (req, res) => {
+    const forecast = await get_forecast();
+    if (forecast.error) {
+        res.status(500).json({ error: forecast.error });
+    } else {
+        res.json(forecast.data);
+    }
+});
+
 app.get('/api/observed', async (req, res) => {
     const cliWeather = await get_observed();
     if (cliWeather.error) {

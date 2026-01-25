@@ -9,9 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const eventTicker = document.getElementById('event-ticker').value;
 
             try {
-                const weatherResponse = await fetch('/api/observed');
+                const weatherResponse = await fetch('/api/forecast');
                 const weatherData = await weatherResponse.json();
-                const temp_max = parseFloat(weatherData.temp_max.split(" ").pop());
+                const temp_max = parseFloat(weatherData.temperature);
 
                 const response = await fetch(`/api/kalshi/markets/${eventTicker}`);
                 const data = await response.json();
