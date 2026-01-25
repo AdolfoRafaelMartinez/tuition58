@@ -2,7 +2,7 @@
 import fetch from 'node-fetch';
 import { CliWeatherResult } from '../models/cli_weather.js';
 
-export async function getClimateReport(): Promise<CliWeatherResult> {
+export async function get_maximum(): Promise<CliWeatherResult> {
     try {
         const response = await fetch('https://forecast.weather.gov/product.php?site=EWX&product=CLI&issuedby=AUS');
         if (!response.ok) {
