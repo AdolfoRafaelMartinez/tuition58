@@ -107,7 +107,7 @@ export async function getKalshiMarkets(event_ticker: string) {
 
 
 export async function placeKalshiOrder(orderParams: any) {
-    try {
+    // try {
         if (!process.env.API_KEY || !process.env.RSA_PRIVATE_KEY) {
             console.error("Missing Kalshi API credentials. Please check your .env file.");
             return { data: null, error: "Missing Kalshi API credentials." };
@@ -139,7 +139,7 @@ export async function placeKalshiOrder(orderParams: any) {
             body: body
         };
 
-        const response = await fetch(`httpshttps://api.elections.kalshi.com${resourcePath}`, options);
+        const response = await fetch(`https://api.elections.kalshi.com${resourcePath}`, options);
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -157,9 +157,9 @@ export async function placeKalshiOrder(orderParams: any) {
         } else {
              return { data: null, error: 'Failed to place order with Kalshi API. Invalid response from server.' };
         }
-    } catch (error) {
-        console.error('Error placing Kalshi order:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-        return { data: null, error: `Failed to place Kalshi order: ${errorMessage}` };
-    }
+    // } catch (error) {
+    //     console.error('Error placing Kalshi order:', error);
+    //     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    //     return { data: null, error: `Failed to place Kalshi order: ${errorMessage}` };
+    // }
 }
