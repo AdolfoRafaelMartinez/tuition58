@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ((temp_max + 1) >= market.lower && (temp_max + 1) <= market.upper) ||
                         ((temp_max - 1) >= market.lower && (temp_max - 1) <= market.upper)
                     ) {
-                        html += ` AND THIS`;
+                        html += ` <span style="color: red;">AND THIS</span>`;
                     }
                     html += `</li>`;
                 }
