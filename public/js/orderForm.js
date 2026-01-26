@@ -1,74 +1,70 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Form 1
-    const orderForm1 = document.getElementById('order-form');
+    const combinedOrderForm = document.getElementById('combined-order-form');
     const orderResult1 = document.getElementById('order-result');
-
-    if (orderForm1) {
-        orderForm1.addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            const ticker = document.getElementById('ticker').value;
-            const action = document.getElementById('action').value;
-            const side = document.getElementById('side').value;
-            const yes_price = document.getElementById('yes_price').value;
-            const count = document.getElementById('count').value;
-
-            try {
-                const response = await fetch('/api/kalshi/order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ticker, action, side, yes_price: parseInt(yes_price), count: parseInt(count) }),
-                });
-                const result = await response.json();
-
-                if (response.ok) {
-                    orderResult1.innerHTML = `<p>Order placed successfully!</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
-                    orderResult1.classList.add('glow-animation');
-                    orderResult1.addEventListener('animationend', () => {
-                        orderResult1.classList.remove('glow-animation');
-                    }, { once: true });
-                } else {
-                    orderResult1.innerHTML = `<p>Error placing order:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
-                }
-            } catch (error) {
-                orderResult1.innerHTML = `<p>Error: ${error.message}</p>`;
-            }
-        });
-    }
-
-    // Form 2
-    const orderForm2 = document.getElementById('order-form-2');
     const orderResult2 = document.getElementById('order-result-2');
 
-    if (orderForm2) {
-        orderForm2.addEventListener('submit', async (event) => {
+    if (combinedOrderForm) {
+        combinedOrderForm.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            const ticker = document.getElementById('ticker-2').value;
-            const action = document.getElementById('action-2').value;
-            const side = document.getElementById('side-2').value;
-            const yes_price = document.getElementById('yes_price-2').value;
-            const count = document.getElementById('count-2').value;
+            // Order 1
+            const ticker1 = document.getElementById('ticker').value;
+            const action1 = document.getElementById('action').value;
+            const side1 = document.getElementById('side').value;
+            const yes_price1 = document.getElementById('yes_price').value;
+            const count1 = document.getElementById('count').value;
 
-            try {
-                const response = await fetch('/api/kalshi/order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ticker, action, side, yes_price: parseInt(yes_price), count: parseInt(count) }),
-                });
-                const result = await response.json();
+            if (ticker1) {
+                try {
+                    const response = await fetch('/api/kalshi/order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ticker: ticker1, action: action1, side: side1, yes_price: parseInt(yes_price1), count: parseInt(count1) }),
+                    });
+                    const result = await response.json();
 
-                if (response.ok) {
-                    orderResult2.innerHTML = `<p>Order placed successfully!</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
-                    orderResult2.classList.add('glow-animation');
-                    orderResult2.addEventListener('animationend', () => {
-                        orderResult2.classList.remove('glow-animation');
-                    }, { once: true });
-                } else {
-                    orderResult2.innerHTML = `<p>Error placing order:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                    if (response.ok) {
+                        orderResult1.innerHTML = `<p>Order 1 placed successfully!</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                        orderResult1.classList.add('glow-animation');
+                        orderResult1.addEventListener('animationend', () => {
+                            orderResult1.classList.remove('glow-animation');
+                        }, { once: true });
+                    } else {
+                        orderResult1.innerHTML = `<p>Error placing order 1:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                    }
+                } catch (error) {
+                    orderResult1.innerHTML = `<p>Error: ${error.message}</p>`;
                 }
-            } catch (error) {
-                orderResult2.innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+
+            // Order 2
+            const ticker2 = document.getElementById('ticker-2').value;
+            const action2 = document.getElementById('action-2').value;
+            const side2 = document.getElementById('side-2').value;
+            const yes_price2 = document.getElementById('yes_price-2').value;
+            const count2 = document.getElementById('count-2').value;
+
+            if (ticker2) {
+                try {
+                    const response = await fetch('/api/kalshi/order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ticker: ticker2, action: action2, side: side2, yes_price: parseInt(yes_price2), count: parseInt(count2) }),
+                    });
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        orderResult2.innerHTML = `<p>Order 2 placed successfully!</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                        orderResult2.classList.add('glow-animation');
+                        orderResult2.addEventListener('animationend', () => {
+                            orderResult2.classList.remove('glow-animation');
+                        }, { once: true });
+                    } else {
+                        orderResult2.innerHTML = `<p>Error placing order 2:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                    }
+                } catch (error) {
+                    orderResult2.innerHTML = `<p>Error: ${error.message}</p>`;
+                }
             }
         });
     }

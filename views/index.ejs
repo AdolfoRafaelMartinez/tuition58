@@ -47,49 +47,50 @@
             <div id="market-result"></div>
         </div>
         <div class="section">
-            <h2>Place an Order</h2>
-            <form id="order-form">
-                <label for="ticker">Ticker:</label>
-                <input type="text" id="ticker" name="ticker" required>
-                <label for="action">Action:</label>
-                <select id="action" name="action">
-                    <option value="buy">Buy</option>
-                    <option value="sell">Sell</option>
-                </select>
-                <label for="side">Side:</label>
-                <select id="side" name="side">
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                </select>
-                <label for="yes_price">Yes Price (in cents):</label>
-                <input type="number" id="yes_price" name="yes_price" min="1" max="99" required>
-                <label for="count">Count:</label>
-                <input type="number" id="count" name="count" min="1" required>
-                <button type="submit">Place Order</button>
+            <h2>Place Orders</h2>
+            <form id="combined-order-form">
+                <div class="order-section">
+                    <h3>Order 1</h3>
+                    <label for="ticker">Ticker:</label>
+                    <input type="text" id="ticker" name="ticker" required>
+                    <label for="action">Action:</label>
+                    <select id="action" name="action">
+                        <option value="buy">Buy</option>
+                        <option value="sell">Sell</option>
+                    </select>
+                    <label for="side">Side:</label>
+                    <select id="side" name="side">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                    <label for="yes_price">Yes Price (in cents):</label>
+                    <input type="number" id="yes_price" name="yes_price" min="1" max="99" required>
+                    <label for="count">Count:</label>
+                    <input type="number" id="count" name="count" min="1" required>
+                </div>
+                <hr>
+                <div class="order-section">
+                    <h3>Order 2</h3>
+                    <label for="ticker-2">Ticker:</label>
+                    <input type="text" id="ticker-2" name="ticker-2">
+                    <label for="action-2">Action:</label>
+                    <select id="action-2" name="action-2">
+                        <option value="buy">Buy</option>
+                        <option value="sell">Sell</option>
+                    </select>
+                    <label for="side-2">Side:</label>
+                    <select id="side-2" name="side-2">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                    <label for="yes_price-2">Yes Price (in cents):</label>
+                    <input type="number" id="yes_price-2" name="yes_price-2" min="1" max="99">
+                    <label for="count-2">Count:</label>
+                    <input type="number" id="count-2" name="count-2" min="1">
+                </div>
+                <button type="submit">Place Orders</button>
             </form>
             <div id="order-result"></div>
-        </div>
-        <div class="section">
-            <h2>Place Another Order</h2>
-            <form id="order-form-2">
-                <label for="ticker-2">Ticker:</label>
-                <input type="text" id="ticker-2" name="ticker-2" required>
-                <label for="action-2">Action:</label>
-                <select id="action-2" name="action-2">
-                    <option value="buy">Buy</option>
-                    <option value="sell">Sell</option>
-                </select>
-                <label for="side-2">Side:</label>
-                <select id="side-2" name="side-2">
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                </select>
-                <label for="yes_price-2">Yes Price (in cents):</label>
-                <input type="number" id="yes_price-2" name="yes_price-2" min="1" max="99" required>
-                <label for="count-2">Count:</label>
-                <input type="number" id="count-2" name="count-2" min="1" required>
-                <button type="submit">Place Order</button>
-            </form>
             <div id="order-result-2"></div>
         </div>
     </div>
