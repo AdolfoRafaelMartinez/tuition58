@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <p><strong>Range:</strong> ${market.lower} to ${market.upper}</p>
                                 <p><strong>Yes Ask:</strong> ${market.yes_ask}</p>
                                 <p><strong>Yes Bid:</strong> ${market.yes_bid}</p>
+                                <p><strong>Status:</strong> ${market.status}</p>
                             </div>
                         `;
 
