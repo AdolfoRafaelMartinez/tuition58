@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const marketLi = primaryRec.closest('li');
                         if (marketLi) {
                             const yesAsk = parseInt(marketLi.dataset.ask, 10);
-                            const count = (balance && yesAsk) ? Math.floor((balance / 2) / yesAsk) : 1;
+                            const count = (balance && yesAsk) ? Math.floor((balance / 3) / yesAsk) : 1;
                             document.getElementById('ticker').value = marketLi.dataset.ticker;
                             document.getElementById('action').value = 'buy';
                             document.getElementById('side').value = 'yes';
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const marketLi = secondaryRec.closest('li');
                         if (marketLi) {
                             const yesAsk = parseInt(marketLi.dataset.ask, 10);
-                            const count = (balance && yesAsk) ? Math.floor((balance / 2) / yesAsk) : 1;
+                            const count = (balance && yesAsk) ? Math.floor((balance / 3) / yesAsk) : 1;
                             document.getElementById('ticker-2').value = marketLi.dataset.ticker;
                             document.getElementById('action-2').value = 'buy';
                             document.getElementById('side-2').value = 'yes';
