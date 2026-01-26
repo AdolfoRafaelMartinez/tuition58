@@ -26,6 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     html += `<li><strong>${market.ticker}:</strong> ${market.yes_sub_title}, lower: ${market.lower}, upper: ${market.upper}, ask: ${market.yes_ask}`;
                     if(temp_max >= market.lower && temp_max <= market.upper) {
                         html += ` <span class="buy-recommendation">buy this</span>`;
+                    } else if (
+                        ((temp_max + 1) >= market.lower && (temp_max + 1) <= market.upper) ||
+                        ((temp_max - 1) >= market.lower && (temp_max - 1) <= market.upper)
+                    ) {
+                        html += ` AND THIS`;
                     }
                     html += `</li>`;
                 }
