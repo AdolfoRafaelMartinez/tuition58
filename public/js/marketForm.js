@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const event_ticker = eventTickerInput.value;
 
             try {
-                const response = await fetch(`/api/kalshi/markets?event_ticker=${event_ticker}`);
+                const response = await fetch(`/api/kalshi/markets/${event_ticker}`);
                 const data = await response.json();
 
                 if (response.ok) {
