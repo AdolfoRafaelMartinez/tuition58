@@ -46,15 +46,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     marketResult.innerHTML = html;
 
+                    const container = document.querySelector('.container');
+                    const balance = parseInt(container.dataset.balance, 10);
+
                     const primaryRec = marketResult.querySelector('.buy-recommendation');
                     if (primaryRec) {
                         const marketLi = primaryRec.closest('li');
                         if (marketLi) {
+                            const yesAsk = parseInt(marketLi.dataset.ask, 10);
+                            const count = (balance && yesAsk) ? Math.floor((balance / 2) / yesAsk) : 1;
                             document.getElementById('ticker').value = marketLi.dataset.ticker;
                             document.getElementById('action').value = 'buy';
                             document.getElementById('side').value = 'yes';
-                            document.getElementById('yes_price').value = marketLi.dataset.ask;
-                            document.getElementById('count').value = 1;
+                            document.getElementById('yes_price').value = yesAsk;
+                            document.getElementById('count').value = count;
                         }
                     }
 
@@ -62,11 +67,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (secondaryRec) {
                         const marketLi = secondaryRec.closest('li');
                         if (marketLi) {
+                            const yesAsk = parseInt(marketLi.dataset.ask, 10);
+                            const count = (balance && yesAsk) ? Math.floor((balance / 2) / yesAsk) : 1;
                             document.getElementById('ticker-2').value = marketLi.dataset.ticker;
                             document.getElementById('action-2').value = 'buy';
                             document.getElementById('side-2').value = 'yes';
-                            document.getElementById('yes_price-2').value = marketLi.dataset.ask;
-                            document.getElementById('count-2').value = 1;
+                            document.getElementById('yes_price-2').value = yesAsk;
+                            document.getElementById('count-2').value = count;
                         }
                     }
 
