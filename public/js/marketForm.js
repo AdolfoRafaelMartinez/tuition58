@@ -14,11 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     let html = '<ul>';
-                    // The recommendation is now correctly based on the forecasted temperature
                     const forecast_temp = data.forecast_temp;
 
                     for (const market of data.markets) {
-                        html += `<li>
+                        html += `<li data-ticker="${market.ticker}" data-ask="${market.yes_ask}">
                             <div class="market-info">
                                 <p><strong>Ticker:</strong> ${market.ticker}</p>
                                 <p><strong>Range:</strong> ${market.lower} to ${market.upper}</p>
@@ -29,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         html += `<div class="market-actions">`;
                         
-                        // Only show recommendations if forecast_temp is a valid number
                         if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
                             if (forecast_temp >= market.lower && forecast_temp <= market.upper) {
                                 html += `<span class="buy-recommendation">BUY THIS</span>`;
@@ -37,39 +35,36 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ((forecast_temp + 1) >= market.lower && (forecast_temp + 1) <= market.upper) ||
                                 ((forecast_temp - 1) >= market.lower && (forecast_temp - 1) <= market.upper)
                             ) {
-                                html += `<span class="secondary-recommendation">AND THIS</span>`;
+                                html += `<span class="secondary-recommendation" style="color: red;">AND THIS</span>`;
                             }
                         }
 
-                        html += `<button class="buy-button" data-ticker="${market.ticker}" data-ask="${market.yes_ask}">Buy</button>`;
                         html += `</div></li>`;
                     }
                     html += '</ul>';
 
                     marketResult.innerHTML = html;
 
-                    // Auto-fill the first order form
                     const primaryRec = marketResult.querySelector('.buy-recommendation');
                     if (primaryRec) {
-                        const buyButton = primaryRec.closest('.market-actions').querySelector('.buy-button');
-                        if (buyButton) {
-                            document.getElementById('ticker').value = buyButton.dataset.ticker;
+                        const marketLi = primaryRec.closest('li');
+                        if (marketLi) {
+                            document.getElementById('ticker').value = marketLi.dataset.ticker;
                             document.getElementById('action').value = 'buy';
                             document.getElementById('side').value = 'yes';
-                            document.getElementById('yes_price').value = buyButton.dataset.ask;
+                            document.getElementById('yes_price').value = marketLi.dataset.ask;
                             document.getElementById('count').value = 1;
                         }
                     }
 
-                    // Auto-fill the second order form
                     const secondaryRec = marketResult.querySelector('.secondary-recommendation');
                     if (secondaryRec) {
-                        const buyButton = secondaryRec.closest('.market-actions').querySelector('.buy-button');
-                        if (buyButton) {
-                            document.getElementById('ticker-2').value = buyButton.dataset.ticker;
+                        const marketLi = secondaryRec.closest('li');
+                        if (marketLi) {
+                            document.getElementById('ticker-2').value = marketLi.dataset.ticker;
                             document.getElementById('action-2').value = 'buy';
                             document.getElementById('side-2').value = 'yes';
-                            document.getElementById('yes_price-2').value = buyButton.dataset.ask;
+                            document.getElementById('yes_price-2').value = marketLi.dataset.ask;
                             document.getElementById('count-2').value = 1;
                         }
                     }
