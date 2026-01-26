@@ -23,20 +23,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let html = '<ul>';
                 for (const market of data.markets) {
-                    html += `<li><strong>${market.ticker}:</strong> ${market.yes_sub_title}, lower: ${market.lower}, upper: ${market.upper}, ask: ${market.yes_ask}`;
+                    html += `<li>`;
+                    html += `<div class="market-info"><strong>${market.ticker}:</strong> ${market.yes_sub_title}, lower: ${market.lower}, upper: ${market.upper}, ask: ${market.yes_ask}</div>`;
+
+                    html += `<div class="market-actions">`;
                     if(temp_max >= market.lower && temp_max <= market.upper) {
-                        html += ` <span class="buy-recommendation">buy this</span>`;
+                        html += `<span class="buy-recommendation">buy this</span>`;
                     } else if (
                         ((temp_max + 1) >= market.lower && (temp_max + 1) <= market.upper) ||
                         ((temp_max - 1) >= market.lower && (temp_max - 1) <= market.upper)
                     ) {
-                        html += ` <span style="color: red;">AND THIS</span>`;
+                        html += `<span style="color: red;">AND THIS</span>`;
                     }
+                    html += `<button class="buy-button" data-ticker="${market.ticker}" data-ask="${market.yes_ask}">Buy</button>`;
+                    html += `</div>`;
+
                     html += `</li>`;
                 }
                 html += '</ul>';
 
                 marketResult.innerHTML = html;
+
+                const buyButtons = marketResult.querySelectorAll('.buy-button');
+                buyButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const ticker = e.target.dataset.ticker;
+                        const ask = e.target.dataset.ask;
+
+                        document.getElementById('ticker').value = ticker;
+                        document.getElementById('action').value = 'buy';
+                        document.getElementById('side').value = 'yes';
+                        document.getElementById('yes_price').value = ask;
+                        document.getElementById('count').value = 1;
+                    });
+                });
+
             } catch (error) {
                 marketResult.innerHTML = `<p>Error: ${error.message}</p>`;
             }
