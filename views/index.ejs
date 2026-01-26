@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+    <div id="clock"></div>
     <div class="container">
         <h1>Tuition Bot</h1>
         <div class="section">
@@ -96,5 +97,14 @@
     </div>
     <script src="/js/orderForm.js"></script>
     <script src="/js/marketForm.js"></script>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const clock = document.getElementById('clock');
+            clock.textContent = now.toLocaleString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
 </body>
 </html>
