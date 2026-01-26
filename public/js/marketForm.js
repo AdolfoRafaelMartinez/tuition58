@@ -14,29 +14,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     let html = '<ul>';
-                    const temp_max = data.temp_max;
+                    // The recommendation is now correctly based on the forecasted temperature
+                    const forecast_temp = data.forecast_temp;
 
                     for (const market of data.markets) {
                         html += `<li>
-                            <p><strong>Ticker:</strong> ${market.ticker}</p>
-                            <p><strong>Range:</strong> ${market.lower} to ${market.upper}</p>
-                            <p><strong>Yes Ask:</strong> ${market.yes_ask}</p>
-                            <p><strong>Yes Bid:</strong> ${market.yes_bid}</p>
+                            <div class="market-info">
+                                <p><strong>Ticker:</strong> ${market.ticker}</p>
+                                <p><strong>Range:</strong> ${market.lower} to ${market.upper}</p>
+                                <p><strong>Yes Ask:</strong> ${market.yes_ask}</p>
+                                <p><strong>Yes Bid:</strong> ${market.yes_bid}</p>
+                            </div>
                         `;
 
                         html += `<div class="market-actions">`;
-                        if(temp_max >= market.lower && temp_max <= market.upper) {
-                            html += `<span class="buy-recommendation">BUY THIS</span>`;
-                        } else if (
-                            ((temp_max + 1) >= market.lower && (temp_max + 1) <= market.upper) ||
-                            ((temp_max - 1) >= market.lower && (temp_max - 1) <= market.upper)
-                        ) {
-                            html += `<span class="secondary-recommendation">AND THIS</span>`;
+                        
+                        // Only show recommendations if forecast_temp is a valid number
+                        if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
+                            if (forecast_temp >= market.lower && forecast_temp <= market.upper) {
+                                html += `<span class="buy-recommendation">BUY THIS</span>`;
+                            } else if (
+                                ((forecast_temp + 1) >= market.lower && (forecast_temp + 1) <= market.upper) ||
+                                ((forecast_temp - 1) >= market.lower && (forecast_temp - 1) <= market.upper)
+                            ) {
+                                html += `<span class="secondary-recommendation">AND THIS</span>`;
+                            }
                         }
-                        html += `<button class="buy-button" data-ticker="${market.ticker}" data-ask="${market.yes_ask}">Buy</button>`;
-                        html += `</div>`;
 
-                        html += `</li>`;
+                        html += `<button class="buy-button" data-ticker="${market.ticker}" data-ask="${market.yes_ask}">Buy</button>`;
+                        html += `</div></li>`;
                     }
                     html += '</ul>';
 

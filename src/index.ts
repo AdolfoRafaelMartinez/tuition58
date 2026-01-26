@@ -11,9 +11,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = parseInt(process.env.PORT) || process.argv[3] || 8080;
 
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, '../views'));
+app.use(express.static(path.join(__dirname, '../public')));
+
 app.set('view engine', 'ejs');
-app.use(express.static(path.join(__dirname, 'public/')));
 app.use(express.json());
 
 app.get('/', async (req, res) => {
@@ -53,12 +54,28 @@ app.post('/api/kalshi/order', async (req, res) => {
 
 app.get('/api/kalshi/markets/:event_ticker', async (req, res) => {
     const event_ticker = req.params.event_ticker;
-    const result = await getKalshiMarkets(event_ticker);
-    if (result.error) {
-        res.status(500).json({ error: result.error });
-    } else {
-        res.json(result.data);
+    const marketResult = await getKalshiMarkets(event_ticker);
+    const forecastResult = await get_forecast();
+
+    if (marketResult.error) {
+        return res.status(500).json({ error: marketResult.error });
     }
+
+    // If forecast fails, we can still return market data without recommendations
+    if (forecastResult.error || !forecastResult.data) {
+        return res.json(marketResult.data);
+    }
+
+    // The forecast temperature is already a number
+    const forecast_temp = forecastResult.data.temperature;
+
+    // Combine the market data with the forecast temperature
+    const responseData = {
+        ...marketResult.data,
+        forecast_temp: forecast_temp
+    };
+
+    res.json(responseData);
 });
 
 app.get('/api', (req, res) => {
