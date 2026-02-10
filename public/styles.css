@@ -95,27 +95,21 @@ button:hover {
   word-wrap: break-word;
 }
 
-.market-rows-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+.market-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
 }
 
-.market-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 0.5rem;
-    padding: 0.5rem;
-    background-color: #fff;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    align-items: center;
-}
-
-.market-row span {
+.market-table th, .market-table td {
     border: 1px solid #ccc;
-    padding: 2px 5px;
-    border-radius: 3px;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+.market-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
 }
 
 .buy-recommendation {
@@ -124,10 +118,12 @@ button:hover {
     font-size: 1.2em;
     text-transform: uppercase;
     text-align: center;
+    display: block;
 }
 
 .secondary-recommendation {
     text-align: center;
+    display: block;
 }
 
 pre {

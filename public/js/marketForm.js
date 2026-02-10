@@ -13,17 +13,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    let html = '<div class="market-rows-container">';
+                    let html = `
+                        <table class="market-table">
+                            <thead>
+                                <tr>
+                                    <th>Ticker</th>
+                                    <th>Range</th>
+                                    <th>Yes Ask</th>
+                                    <th>Yes Bid</th>
+                                    <th>Status</th>
+                                    <th>Recommendation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
                     const forecast_temp = data.forecast_temp;
 
                     for (const market of data.markets) {
-                        html += `<div class="market-row" data-ticker="${market.ticker}" data-ask="${market.yes_ask}">`;
-                        html += `<span>${market.ticker}</span>`;
-                        html += `<span>${market.lower} to ${market.upper}</span>`;
-                        html += `<span>${market.yes_ask}</span>`;
-                        html += `<span>${market.yes_bid}</span>`;
-                        html += `<span>${market.status}</span>`;
+                        html += `<tr data-ticker="${market.ticker}" data-ask="${market.yes_ask}">`;
+                        html += `<td>${market.ticker}</td>`;
+                        html += `<td>${market.lower} to ${market.upper}</td>`;
+                        html += `<td>${market.yes_ask}</td>`;
+                        html += `<td>${market.yes_bid}</td>`;
+                        html += `<td>${market.status}</td>`;
 
+                        html += `<td>`;
                         if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
                             if (forecast_temp >= market.lower && forecast_temp <= market.upper) {
                                 html += `<span class="buy-recommendation">BUY THIS</span>`;
@@ -34,10 +48,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                 html += `<span class="secondary-recommendation" style="color: red;">AND THIS</span>`;
                             }
                         }
+                        html += `</td>`;
 
-                        html += `</div>`;
+                        html += `</tr>`;
                     }
-                    html += '</div>';
+                    html += `
+                            </tbody>
+                        </table>
+                    `;
 
                     marketResult.innerHTML = html;
 
@@ -46,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const primaryRec = marketResult.querySelector('.buy-recommendation');
                     if (primaryRec) {
-                        const marketRow = primaryRec.closest('.market-row');
+                        const marketRow = primaryRec.closest('tr');
                         if (marketRow) {
                             const yesAsk = parseInt(marketRow.dataset.ask, 10);
                             const count = (balance && yesAsk) ? Math.floor((balance / 3) / yesAsk) : 1;
@@ -60,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const secondaryRec = marketResult.querySelector('.secondary-recommendation');
                     if (secondaryRec) {
-                        const marketRow = secondaryRec.closest('.market-row');
+                        const marketRow = secondaryRec.closest('tr');
                         if (marketRow) {
                             const yesAsk = parseInt(marketRow.dataset.ask, 10);
                             const count = (balance && yesAsk) ? Math.floor((balance / 3) / yesAsk) : 1;
