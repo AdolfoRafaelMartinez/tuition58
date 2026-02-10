@@ -113,7 +113,6 @@ button:hover {
 
 .market-info {
     flex-grow: 1;
-    margin-bottom: 5px;
 }
 
 .market-actions {
@@ -152,4 +151,5 @@ pre {
 
 .market-info p {
     margin: 0;
+    line-height: 1.2;
 }
