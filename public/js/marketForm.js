@@ -19,11 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     for (const market of data.markets) {
                         html += `<li data-ticker="${market.ticker}" data-ask="${market.yes_ask}">
                             <div class="market-info-compact">
-                                <strong>Ticker:</strong> ${market.ticker} | 
-                                <strong>Range:</strong> ${market.lower} to ${market.upper} | 
-                                <strong>Yes Ask:</strong> ${market.yes_ask} | 
-                                <strong>Yes Bid:</strong> ${market.yes_bid} | 
-                                <strong>Status:</strong> ${market.status}
+                                <strong>Ticker:</strong> <span class="market-value">${market.ticker}</span> | 
+                                <strong>Range:</strong> <span class="market-value">${market.lower} to ${market.upper}</span> | 
+                                <strong>Yes Ask:</strong> <span class="market-value">${market.yes_ask}</span> | 
+                                <strong>Yes Bid:</strong> <span class="market-value">${market.yes_bid}</span> | 
+                                <strong>Status:</strong> <span class="market-value">${market.status}</span>
                             </div>
                         `;
 
