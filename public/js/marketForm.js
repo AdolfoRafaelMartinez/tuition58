@@ -40,12 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         html += `<td>`;
                         if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
                             if (forecast_temp >= market.lower && forecast_temp <= market.upper) {
-                                html += `<span class="buy-recommendation">BUY THIS</span>`;
+                                html += `<span class="buy-recommendation">buy</span>`;
                             } else if (
                                 ((forecast_temp + 1) >= market.lower && (forecast_temp + 1) <= market.upper) ||
                                 ((forecast_temp - 1) >= market.lower && (forecast_temp - 1) <= market.upper)
                             ) {
-                                html += `<span class="secondary-recommendation" style="color: red;">AND THIS</span>`;
+                                html += `<span class="secondary-recommendation" style="color: red;">and this</span>`;
                             }
                         }
                         html += `</td>`;
