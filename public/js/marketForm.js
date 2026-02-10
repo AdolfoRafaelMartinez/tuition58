@@ -13,22 +13,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    let html = '<ul>';
+                    let html = '<div class="market-rows-container">';
                     const forecast_temp = data.forecast_temp;
 
                     for (const market of data.markets) {
-                        html += `<li data-ticker="${market.ticker}" data-ask="${market.yes_ask}">
-                            <div class="market-info-compact">
-                                <strong>Ticker:</strong> <span class="market-value">${market.ticker}</span> | 
-                                <strong>Range:</strong> <span class="market-value">${market.lower} to ${market.upper}</span> | 
-                                <strong>Yes Ask:</strong> <span class="market-value">${market.yes_ask}</span> | 
-                                <strong>Yes Bid:</strong> <span class="market-value">${market.yes_bid}</span> | 
-                                <strong>Status:</strong> <span class="market-value">${market.status}</span>
-                            </div>
-                        `;
+                        html += `<div class="market-row" data-ticker="${market.ticker}" data-ask="${market.yes_ask}">`;
+                        html += `<span>${market.ticker}</span>`;
+                        html += `<span>${market.lower} to ${market.upper}</span>`;
+                        html += `<span>${market.yes_ask}</span>`;
+                        html += `<span>${market.yes_bid}</span>`;
+                        html += `<span>${market.status}</span>`;
 
-                        html += `<div class="market-actions">`;
-                        
                         if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
                             if (forecast_temp >= market.lower && forecast_temp <= market.upper) {
                                 html += `<span class="buy-recommendation">BUY THIS</span>`;
@@ -40,9 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
 
-                        html += `</div></li>`;
+                        html += `</div>`;
                     }
-                    html += '</ul>';
+                    html += '</div>';
 
                     marketResult.innerHTML = html;
 
@@ -51,11 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const primaryRec = marketResult.querySelector('.buy-recommendation');
                     if (primaryRec) {
-                        const marketLi = primaryRec.closest('li');
-                        if (marketLi) {
-                            const yesAsk = parseInt(marketLi.dataset.ask, 10);
+                        const marketRow = primaryRec.closest('.market-row');
+                        if (marketRow) {
+                            const yesAsk = parseInt(marketRow.dataset.ask, 10);
                             const count = (balance && yesAsk) ? Math.floor((balance / 3) / yesAsk) : 1;
-                            document.getElementById('ticker').value = marketLi.dataset.ticker;
+                            document.getElementById('ticker').value = marketRow.dataset.ticker;
                             document.getElementById('action').value = 'buy';
                             document.getElementById('side').value = 'yes';
                             document.getElementById('yes_price').value = yesAsk;
@@ -65,11 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const secondaryRec = marketResult.querySelector('.secondary-recommendation');
                     if (secondaryRec) {
-                        const marketLi = secondaryRec.closest('li');
-                        if (marketLi) {
-                            const yesAsk = parseInt(marketLi.dataset.ask, 10);
+                        const marketRow = secondaryRec.closest('.market-row');
+                        if (marketRow) {
+                            const yesAsk = parseInt(marketRow.dataset.ask, 10);
                             const count = (balance && yesAsk) ? Math.floor((balance / 3) / yesAsk) : 1;
-                            document.getElementById('ticker-2').value = marketLi.dataset.ticker;
+                            document.getElementById('ticker-2').value = marketRow.dataset.ticker;
                             document.getElementById('action-2').value = 'buy';
                             document.getElementById('side-2').value = 'yes';
                             document.getElementById('yes_price-2').value = yesAsk;

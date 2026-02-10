@@ -12,7 +12,7 @@ body {
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  max-width: 600px;
+  max-width: 800px;
   margin: auto;
 }
 
@@ -30,204 +30,7 @@ h1 {
   padding: 1.5rem;
   margin-top: 1.5rem;
   border-radius: 8px;
-  text-.market-value {
-  border: 1px solid #ccc;
-  padding: 2px 5px;
-  border-radius: 3px;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-align: left;
+  text-align: left;
 }
 
 .section h2 {
@@ -292,30 +95,27 @@ button:hover {
   word-wrap: break-word;
 }
 
-#market-result ul {
-    list-style-type: none;
-    padding-left: 0;
+.market-rows-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-#market-result li {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    margin-bottom: 0.5rem;
+.market-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.5rem;
     padding: 0.5rem;
     background-color: #fff;
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.market-info {
-    flex-grow: 1;
-}
-
-.market-actions {
-    display: flex;
     align-items: center;
-    gap: 1rem;
+}
+
+.market-row span {
+    border: 1px solid #ccc;
+    padding: 2px 5px;
+    border-radius: 3px;
 }
 
 .buy-recommendation {
@@ -323,6 +123,11 @@ button:hover {
     font-weight: bold;
     font-size: 1.2em;
     text-transform: uppercase;
+    text-align: center;
+}
+
+.secondary-recommendation {
+    text-align: center;
 }
 
 pre {
@@ -344,9 +149,4 @@ pre {
 
 .glow-animation {
   animation: glow 1.5s ease-in-out;
-}
-
-.market-info p {
-    margin: 0;
-    line-height: 1.2;
 }
