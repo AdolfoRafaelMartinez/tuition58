@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ((forecast_temp - 1) >= market.lower && (forecast_temp - 1) <= market.upper)
                             ) {
                                if (market.yes_ask <= 70) {
-                                html += `<span class="secondary-recommendation" style="color: red;">and this</span>`;
+                                html += `<span class="secondary-recommendation" style="color: red;">BUY THIS</span>`;
                                 }
                             }
                         }
