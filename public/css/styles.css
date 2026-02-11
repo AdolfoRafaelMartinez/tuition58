@@ -157,3 +157,9 @@ pre {
 .glow-animation {
   animation: glow 1.5s ease-in-out;
 }
+
+.citation {
+    color: gray;
+    font-style: italic;
+    font-size: 0.8em;
+}

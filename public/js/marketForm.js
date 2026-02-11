@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         html += `<td>`;
                         if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
                             if (forecast_temp >= market.lower && forecast_temp <= market.upper && market.yes_ask <= 70) {
-                                html += `<span class="buy-recommendation">buy</span>`;
+                                html += `<span class="buy-recommendation">BUY THIS</span>`;
                             } else if (
                                 ((forecast_temp + 1) >= market.lower && (forecast_temp + 1) <= market.upper) ||
                                 ((forecast_temp - 1) >= market.lower && (forecast_temp - 1) <= market.upper)
@@ -59,6 +59,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         </table>
                     `;
 
+                    if (data.market_source_url) {
+                        html += `<p class="citation">Market data from: <a href="${data.market_source_url}" target="_blank">${data.market_source_url}</a></p>`;
+                    }
+                    if (data.forecast_source) {
+                         html += `<p class="citation">Forecast data from: ${data.forecast_source}</p>`;
+                    }
+
                     marketResult.innerHTML = html;
 
                     const container = document.querySelector('.container');
@@ -71,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const yesAsk = parseInt(marketRow.dataset.ask, 10);
                             const count = (balance && yesAsk) ? Math.floor((balance / 3) / yesAsk) : 1;
                             document.getElementById('ticker').value = marketRow.dataset.ticker;
-                            document.getElementById('action').value = 'buy';
+                            document.getElementById('action').value = 'BUY THIS';
                             document.getElementById('side').value = 'yes';
                             document.getElementById('yes_price').value = yesAsk;
                             document.getElementById('count').value = count;
@@ -85,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const yesAsk = parseInt(marketRow.dataset.ask, 10);
                             const count = (balance && yesAsk) ? Math.floor((balance / 3) / yesAsk) : 1;
                             document.getElementById('ticker-2').value = marketRow.dataset.ticker;
-                            document.getElementById('action-2').value = 'buy';
+                            document.getElementById('action-2').value = 'BUY THIS';
                             document.getElementById('side-2').value = 'yes';
                             document.getElementById('yes_price-2').value = yesAsk;
                             document.getElementById('count-2').value = count;
