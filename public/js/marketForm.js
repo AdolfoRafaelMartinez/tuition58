@@ -41,16 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
                         const temp_in_primary_range = forecast_temp >= market.lower && forecast_temp <= market.upper;
                         const temp_in_secondary_range = ((forecast_temp + 1) >= market.lower && (forecast_temp + 1) <= market.upper) || ((forecast_temp - 1) >= market.lower && (forecast_temp - 1) <= market.upper);
-                        const price_is_good = market.yes_ask <= 70;
 
-                        if ((temp_in_primary_range || temp_in_secondary_range) && price_is_good) {
+                        if (temp_in_primary_range || temp_in_secondary_range) {
                             if (temp_in_primary_range) {
                                 html += `<span class="buy-recommendation">BUY THIS</span>`;
                             } else {
                                 html += `<span class="secondary-recommendation" style="color: red;">BUY THIS</span>`;
                             }
-                        } else if ((temp_in_primary_range || temp_in_secondary_range) || price_is_good) {
-                            html += `<span>less than minimum</span>`;
                         }
                     }
                     html += `</td>`;
