@@ -2,6 +2,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const combinedOrderForm = document.getElementById('combined-order-form');
     const orderResult1 = document.getElementById('order-result');
     const orderResult2 = document.getElementById('order-result-2');
+    const positionsResult = document.getElementById('positions-result');
+
+    async function loadPositions() {
+        try {
+            const response = await fetch('/api/kalshi/positions');
+            const result = await response.json();
+
+            if (response.ok) {
+                positionsResult.innerHTML = `<p>Positions loaded successfully!</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } else {
+                positionsResult.innerHTML = `<p>Error loading positions:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+            }
+        } catch (error) {
+            positionsResult.innerHTML = `<p>Error: ${error.message}</p>`;
+        }
+    }
 
     if (combinedOrderForm) {
         combinedOrderForm.addEventListener('submit', async (event) => {
@@ -68,4 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    loadPositions();
 });

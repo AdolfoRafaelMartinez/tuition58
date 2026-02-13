@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import { get_forecast } from "./services/forecast.js";
 import { get_observed } from "./services/observed.js";
-import { getKalshiBalance, placeKalshiOrder, getKalshiMarkets } from "./services/kalshi.js";
+import { getKalshiBalance, placeKalshiOrder, getKalshiMarkets, getKalshiPositions } from "./services/kalshi.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -76,6 +76,15 @@ app.get('/api/kalshi/markets/:event_ticker', async (req, res) => {
     };
 
     res.json(responseData);
+});
+
+app.get('/api/kalshi/positions', async (req, res) => {
+    const positions = await getKalshiPositions();
+    if (positions.error) {
+        res.status(500).json({ error: positions.error });
+    } else {
+        res.json(positions.data);
+    }
 });
 
 app.get('/api', (req, res) => {
