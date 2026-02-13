@@ -10,7 +10,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (response.ok) {
-                positionsResult.innerHTML = `<p>Positions loaded successfully!</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                if (result && Array.isArray(result.positions)) {
+                    const filteredPositions = result.positions.filter(
+                        p => p.event_exposure !== 0 || p.market_exposure !== 0
+                    );
+
+                    if (filteredPositions.length > 0) {
+                        positionsResult.innerHTML = `<p>Your Positions:</p><pre>${JSON.stringify(filteredPositions, null, 2)}</pre>`;
+                    } else {
+                        positionsResult.innerHTML = `<p>You have no positions with non-zero exposure.</p>`;
+                    }
+                } else {
+                    positionsResult.innerHTML = `<p>Could not find a 'positions' array in the response.</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                }
             } else {
                 positionsResult.innerHTML = `<p>Error loading positions:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
             }
