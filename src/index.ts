@@ -21,7 +21,7 @@ app.get('/', async (req, res) => {
   const forecast = await get_forecast();
   const observed = await get_observed();
   const kalshi = await getKalshiBalance();
-  res.render('index', { weather: forecast.data, cliWeather: cliWeather, kalshi: kalshi.data });
+  res.render('index', { weather: forecast.data, observed: observed, kalshi: kalshi.data });
 });
 
 app.get('/api/forecast', async (req, res) => {

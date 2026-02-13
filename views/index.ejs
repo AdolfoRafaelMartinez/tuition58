@@ -10,7 +10,6 @@
     <div class="container" data-balance="<%= kalshi ? kalshi.balance : 0 %>">
         <h1>Tuition Bot</h1>
         <div id="clock"></div>
-        <div id="generated-ticker"></div>
         <div class="section">
             <h2>Forecast</h2>
             <% if (weather) { %>
@@ -22,11 +21,11 @@
         </div>
         <div class="section">
             <h2>Observed</h2>
-            <% if (cliWeather && cliWeather.observation_max) { %>
-                <p><%= cliWeather.observation_max %> at <%= cliWeather.observation_when %></p>
-                <p>Reported at <%= cliWeather.report_when %></p>
-            <% } else if (cliWeather && cliWeather.error) { %>
-                <p><%= cliWeather.error %></p>
+            <% if (observed && observed.observation_max) { %>
+                <p><%= observed.observation_max %> at <%= observed.observation_when %></p>
+                <p>Reported at <%= observed.report_when %></p>
+            <% } else if (observed && observed.error) { %>
+                <p><%= observed.error %></p>
             <% } else { %>
                 <p>Maximum temperature data not available.</p>
             <% } %>
@@ -115,9 +114,6 @@
             const day = String(now.getDate()).padStart(2, '0');
             const dateString = `${year}${month}${day}`;
             const ticker = `KXHIGHAUS-${dateString}`;
-            
-            document.getElementById('generated-ticker').textContent = `Today's Ticker: ${ticker}`;
-            
             const eventTickerInput = document.getElementById('event-ticker');
             if (eventTickerInput) {
                 eventTickerInput.value = ticker;
