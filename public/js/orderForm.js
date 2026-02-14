@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const positions = [...event_positions, ...market_positions];
 
                     const filteredPositions = positions.filter(
-                        p => p.event_exposure !== 0 || p.market_exposure !== 0
+                        p => p.event_exposure == 1 || p.market_exposure == 1
                     );
 
                     if (filteredPositions.length > 0) {
