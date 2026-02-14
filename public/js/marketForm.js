@@ -49,11 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const temp_in_secondary_range = ((forecast_temp + 1) >= market.lower && (forecast_temp + 1) <= market.upper) || ((forecast_temp - 1) >= market.lower && (forecast_temp - 1) <= market.upper);
 
                         if (temp_in_primary_range || temp_in_secondary_range) {
-                            if (temp_in_primary_range) {
-                                html += `<span class="buy-recommendation">BUY THIS</span>`;
-                            } else {
-                                html += `<span class="secondary-recommendation" style="color: red;">BUY THIS</span>`;
-                            }
+                            html += `<span class="buy-recommendation" style="color: green;">BUY</span>`;
                         }
                     }
                     html += `</td>`;
@@ -73,50 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 marketResult.innerHTML = html;
-
-                const container = document.querySelector('.container');
-                const balance = parseInt(container.dataset.balance, 10);
-
-                const recommendations = marketResult.querySelectorAll('.buy-recommendation, .secondary-recommendation');
-
-                if (recommendations.length > 0) {
-                    const marketRow1 = recommendations[0].closest('tr');
-                    if (marketRow1) {
-                        const yesAsk1 = parseInt(marketRow1.dataset.ask, 10);
-                        const count1 = (balance && yesAsk1) ? Math.floor((balance / 3) / yesAsk1) : 1;
-                        document.getElementById('ticker').value = marketRow1.dataset.ticker;
-                        document.getElementById('action').value = 'BUY THIS';
-                        document.getElementById('side').value = 'yes';
-                        document.getElementById('yes_price').value = yesAsk1;
-                        document.getElementById('count').value = count1;
-                    }
-                } else {
-                    document.getElementById('ticker').value = '';
-                    document.getElementById('action').value = '';
-                    document.getElementById('side').value = 'yes';
-                    document.getElementById('yes_price').value = '';
-                    document.getElementById('count').value = '';
-                }
-
-
-                if (recommendations.length > 1) {
-                    const marketRow2 = recommendations[1].closest('tr');
-                    if (marketRow2) {
-                        const yesAsk2 = parseInt(marketRow2.dataset.ask, 10);
-                        const count2 = (balance && yesAsk2) ? Math.floor((balance / 3) / yesAsk2) : 1;
-                        document.getElementById('ticker-2').value = marketRow2.dataset.ticker;
-                        document.getElementById('action-2').value = 'BUY THIS';
-                        document.getElementById('side-2').value = 'yes';
-                        document.getElementById('yes_price-2').value = yesAsk2;
-                        document.getElementById('count-2').value = count2;
-                    }
-                } else {
-                    document.getElementById('ticker-2').value = '';
-                    document.getElementById('action-2').value = '';
-                    document.getElementById('side-2').value = 'yes';
-                    document.getElementById('yes_price-2').value = '';
-                    document.getElementById('count-2').value = '';
-                }
 
             } else {
                 marketResult.innerHTML = `<p>Error: ${data.error}</p>`;
