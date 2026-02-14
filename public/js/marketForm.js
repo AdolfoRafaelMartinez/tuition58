@@ -34,16 +34,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
 
                 const positionsWithExposure = positions.filter(p => p.ticker && ((p.market_exposure && p.market_exposure !== 0) || (p.event_exposure && p.event_exposure !== 0)));
+                let totalDisplayedExposure = 0;
 
                 if (positionsWithExposure.length > 0) {
                     positionsWithExposure.forEach(p => {
-                        const exposure = p.market_exposure || p.event_exposure || 0;
+                        const exposure = parseFloat(p.market_exposure || p.event_exposure || 0);
+                        totalDisplayedExposure += exposure;
                         const yesBid = marketData[p.ticker] ? marketData[p.ticker].yes_bid : 'N/A';
                         tableHtml += `
                             <tr>
                                 <td>${p.ticker}</td>
                                 <td>${p.position}</td>
-                                <td>${exposure}</td>
+                                <td>${exposure.toFixed(2)}</td>
                                 <td>${yesBid}</td>
                                 <td>${p.resting_orders_count}</td>
                                 <td>${p.fees_paid}</td>
@@ -55,7 +57,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     tableHtml += '<tr><td colspan="7">No positions with non-zero exposure to display.</td></tr>';
                 }
                 
-                tableHtml += `</tbody></table>`;
+                tableHtml += `</tbody>`;
+
+                if (positionsWithExposure.length > 0) {
+                    tableHtml += `
+                        <tfoot>
+                            <tr>
+                                <td colspan="2"><strong>Total Exposure</strong></td>
+                                <td><strong>${totalDisplayedExposure.toFixed(2)}</strong></td>
+                                <td colspan="4"></td>
+                            </tr>
+                        </tfoot>
+                    `;
+                }
+
+                tableHtml += `</table>`;
                 positionsResult.innerHTML = tableHtml;
             } else {
                 positionsResult.innerHTML = `<p>Error: ${positionsData.error}</p>`;
@@ -72,17 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
         orderFormsContainer.innerHTML = ''; // Clear previous forms
 
         try {
-            const allPositions = await fetchAndDisplayPositions(); // Refresh positions and get them.
-
-            const existingPositions = new Set();
-            if (allPositions.length > 0) {
-                allPositions.forEach(p => {
-                    if (p.event_exposure > 0 || p.market_exposure > 0) {
-                        existingPositions.add(p.ticker);
-                    }
-                });
-            }
-
             const marketsResponse = await fetch(`/api/kalshi/markets/${event_ticker}`);
             const marketsData = await marketsResponse.json();
 
@@ -90,7 +95,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 marketsData.markets.forEach(market => {
                     marketData[market.ticker] = market;
                 });
-                await fetchAndDisplayPositions(); // Re-render positions table with yes_bid data
+
+                const allPositions = await fetchAndDisplayPositions();
+
+                const existingPositions = new Set();
+                if (allPositions.length > 0) {
+                    allPositions.forEach(p => {
+                        const exposure = parseFloat(p.market_exposure || p.event_exposure || 0);
+                        if (exposure > 0) {
+                            existingPositions.add(p.ticker);
+                        }
+                    });
+                }
+
+                let highestBidMarket = null;
+                if (marketsData.markets && marketsData.markets.length > 0) {
+                    highestBidMarket = marketsData.markets.reduce((max, market) => max.yes_bid > market.yes_bid ? max : market, marketsData.markets[0]);
+                }
+
+                if (highestBidMarket) {
+                    const position = allPositions.find(p => p.ticker === highestBidMarket.ticker);
+                    const contracts = position ? position.position : 0;
+
+                    let highestBidSection = document.getElementById('highest-bid-section');
+                    if (!highestBidSection) {
+                        highestBidSection = document.createElement('div');
+                        highestBidSection.id = 'highest-bid-section';
+                        highestBidSection.className = 'section';
+                        container.appendChild(highestBidSection);
+                    }
+
+                    highestBidSection.innerHTML = `
+                        <h2>Featured Market</h2>
+                        <p>Market with the highest 'Yes' bid:</p>
+                        <table class="market-table">
+                            <thead>
+                                <tr>
+                                    <th>Ticker</th>
+                                    <th>Yes Bid</th>
+                                    <th>Contracts</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>${highestBidMarket.ticker}</td>
+                                    <td>${highestBidMarket.yes_bid}</td>
+                                    <td>${contracts}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+                }
 
                 let tableHtml = `
                     <table class="market-table">
@@ -124,14 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     tableHtml += `<tr><td>${market.ticker}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${market.yes_ask}</td><td>${market.yes_bid}</td><td>${market.status}</td><td class="recommendation-cell"><span class="recommendation ${recommendation.toLowerCase()}-recommendation">${recommendation}</span></td></tr>`;
 
                     const hasPosition = existingPositions.has(market.ticker);
-                    let createOrderForm = false;
-                    if (recommendation === 'BUY' && !hasPosition) {
-                        createOrderForm = true;
-                    } else if (recommendation === 'SELL' && hasPosition) {
-                        createOrderForm = true;
-                    }
-
-                    if (createOrderForm) {
+                    if ((recommendation === 'BUY' && !hasPosition) || (recommendation === 'SELL' && hasPosition)) {
                         ordersToCreate.push({ market, recommendation });
                     }
                 });
@@ -151,18 +199,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         const action = recommendation.toLowerCase();
                         const price = action === 'buy' ? market.yes_ask : market.yes_bid;
                         
-                        let costPerContract = 0;
-                        if (action === 'buy') {
-                            costPerContract = price;
-                        } else { // sell
-                            costPerContract = 100 - price;
-                        }
+                        let costPerContract = action === 'buy' ? price : 100 - price;
 
                         let count = 0;
                         if (costPerContract > 0) {
                             count = Math.floor(allocationPerOrder / costPerContract);
                         }
-                        count = Math.max(0, count); // Ensure count is not negative
+                        count = Math.max(0, count);
 
                         orderFormsHtml += `
                             <form class="order-form-dynamic" data-ticker="${market.ticker}">
