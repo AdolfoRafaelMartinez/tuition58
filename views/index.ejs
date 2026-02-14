@@ -144,8 +144,12 @@
                     eventTickerInput.value = ticker;
                 }
             <% } %>
+            // Fetch markets after ticker is generated
+            if (window.fetchAndDisplayMarkets) {
+                window.fetchAndDisplayMarkets();
+            }
         }
-        generateAndDisplayTicker();
+        document.addEventListener('DOMContentLoaded', generateAndDisplayTicker);
     </script>
 </body>
 </html>

@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     html += `<td>${market.yes_bid}</td>`;
                     html += `<td>${market.status}</td>`;
 
-                    html += `<td>`;
+                    html += `<td class="recommendation-cell">`;
                     if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
                         if(market.lower == undefined) {
                             market.lower = -1000;
@@ -49,8 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         const temp_in_secondary_range = ((forecast_temp + 1) >= market.lower && (forecast_temp + 1) <= market.upper) || ((forecast_temp - 1) >= market.lower && (forecast_temp - 1) <= market.upper);
 
                         if (temp_in_primary_range || temp_in_secondary_range) {
-                            html += `<span class="buy-recommendation" style="color: green;">BUY</span>`;
+                            html += `<span class="recommendation buy-recommendation">BUY</span>`;
+                        } else {
+                            html += `<span class="recommendation sell-recommendation">SELL</span>`;
                         }
+                    } else {
+                        html += `<span class="recommendation sell-recommendation">SELL</span>`;
                     }
                     html += `</td>`;
 
@@ -80,13 +84,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Expose the function to the global scope
+    window.fetchAndDisplayMarkets = fetchAndDisplayMarkets;
+
     if (marketForm) {
         marketForm.addEventListener('submit', (event) => {
             event.preventDefault();
             fetchAndDisplayMarkets();
         });
-
-        // Automatically fetch data when the page loads
-        fetchAndDisplayMarkets();
     }
 });

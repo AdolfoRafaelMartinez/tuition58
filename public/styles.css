@@ -127,20 +127,6 @@ button:hover {
     gap: 1rem;
 }
 
-.buy-recommendation {
-    color: #e74c3c;
-    font-weight: bold;
-    font-size: 1.2em;
-    text-transform: uppercase;
-}
-
-.secondary-recommendation {
-    color: #f39c12; /* Amber color for distinction */
-    font-weight: bold;
-    font-size: 1.1em;
-    text-transform: uppercase;
-}
-
 #order-result, #order-result-2, #market-result {
     margin-top: 15px;
     padding: 10px;
@@ -246,16 +232,22 @@ button:hover {
     font-weight: bold;
 }
 
-.buy-recommendation {
-    color: #e74c3c;
+/* Appended Styles for Recommendations */
+.market-table .recommendation-cell {
+    text-align: center;
+}
+
+.recommendation {
     font-weight: bold;
     font-size: 1.2em;
     text-transform: uppercase;
-    text-align: center;
     display: block;
 }
 
-.secondary-recommendation {
-    text-align: center;
-    display: block;
+.buy-recommendation {
+    color: green;
+}
+
+.sell-recommendation {
+    color: red;
 }
