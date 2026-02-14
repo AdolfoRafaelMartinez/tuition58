@@ -1,11 +1,70 @@
 document.addEventListener('DOMContentLoaded', () => {
     const marketForm = document.getElementById('market-form');
     const marketResult = document.getElementById('market-result');
+    const positionsResult = document.getElementById('positions-result');
     const eventTickerInput = document.getElementById('event-ticker');
     const submitButton = marketForm.querySelector('button[type="submit"]');
     const orderFormsContainer = document.getElementById('order-forms-container');
     const placeAllOrdersButton = document.getElementById('place-all-orders');
     const container = document.querySelector('.container');
+
+    const fetchAndDisplayPositions = async () => {
+        let positions = [];
+        try {
+            const positionsResponse = await fetch('/api/kalshi/positions');
+            const positionsData = await positionsResponse.json();
+
+            if (positionsResponse.ok) {
+                positions = [...(positionsData.event_positions || []), ...(positionsData.market_positions || [])];
+                let tableHtml = `
+                    <table class="market-table">
+                        <thead>
+                            <tr>
+                                <th>Ticker</th>
+                                <th>Contracts</th>
+                                <th>Exposure</th>
+                                <th>Resting Orders</th>
+                                <th>Fees Paid</th>
+                                <th>Realized PNL</th>
+                                <th>Total Traded</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                const positionsWithExposure = positions.filter(p => p.ticker && ((p.market_exposure && p.market_exposure !== 0) || (p.event_exposure && p.event_exposure !== 0)));
+
+                if (positionsWithExposure.length > 0) {
+                    positionsWithExposure.forEach(p => {
+                        const exposure = p.market_exposure || p.event_exposure || 0;
+                        tableHtml += `
+                            <tr>
+                                <td>${p.ticker}</td>
+                                <td>${p.position}</td>
+                                <td>${exposure}</td>
+                                <td>${p.resting_orders_count}</td>
+                                <td>${p.fees_paid}</td>
+                                <td>${p.realized_pnl}</td>
+                                <td>${p.total_traded}</td>
+                                <td>${new Date(p.last_updated_ts).toLocaleString()}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tableHtml += '<tr><td colspan="8">No positions with non-zero exposure to display.</td></tr>';
+                }
+                
+                tableHtml += `</tbody></table>`;
+                positionsResult.innerHTML = tableHtml;
+            } else {
+                positionsResult.innerHTML = `<p>Error: ${positionsData.error}</p>`;
+            }
+        } catch (error) {
+            positionsResult.innerHTML = `<p>Error fetching positions: ${error.message}</p>`;
+        }
+        return positions;
+    };
 
     const fetchAndDisplayMarkets = async () => {
         const event_ticker = eventTickerInput.value;
@@ -13,12 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
         orderFormsContainer.innerHTML = ''; // Clear previous forms
 
         try {
-            const positionsResponse = await fetch('/api/kalshi/positions');
-            const positionsResult = await positionsResponse.json();
+            const allPositions = await fetchAndDisplayPositions(); // Refresh positions and get them.
+
             const existingPositions = new Set();
-            if (positionsResponse.ok) {
-                const positions = [...(positionsResult.event_positions || []), ...(positionsResult.market_positions || [])];
-                positions.forEach(p => {
+            if (allPositions.length > 0) {
+                allPositions.forEach(p => {
                     if (p.event_exposure > 0 || p.market_exposure > 0) {
                         existingPositions.add(p.ticker);
                     }
@@ -141,4 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchAndDisplayMarkets();
         });
     }
+
+    // Initial load of positions
+    fetchAndDisplayPositions();
 });
