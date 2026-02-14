@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const orderFormsContainer = document.getElementById('order-forms-container');
     const placeAllOrdersButton = document.getElementById('place-all-orders');
     const container = document.querySelector('.container');
+    let marketData = {};
 
     const fetchAndDisplayPositions = async () => {
         let positions = [];
@@ -23,10 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Ticker</th>
                                 <th>Contracts</th>
                                 <th>Exposure</th>
+                                <th>Yes Bid</th>
                                 <th>Resting Orders</th>
                                 <th>Fees Paid</th>
-                                <th>Realized PNL</th>
-                                <th>Total Traded</th>
                                 <th>Last Updated</th>
                             </tr>
                         </thead>
@@ -38,21 +38,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (positionsWithExposure.length > 0) {
                     positionsWithExposure.forEach(p => {
                         const exposure = p.market_exposure || p.event_exposure || 0;
+                        const yesBid = marketData[p.ticker] ? marketData[p.ticker].yes_bid : 'N/A';
                         tableHtml += `
                             <tr>
                                 <td>${p.ticker}</td>
                                 <td>${p.position}</td>
                                 <td>${exposure}</td>
+                                <td>${yesBid}</td>
                                 <td>${p.resting_orders_count}</td>
                                 <td>${p.fees_paid}</td>
-                                <td>${p.realized_pnl}</td>
-                                <td>${p.total_traded}</td>
                                 <td>${new Date(p.last_updated_ts).toLocaleString()}</td>
                             </tr>
                         `;
                     });
                 } else {
-                    tableHtml += '<tr><td colspan="8">No positions with non-zero exposure to display.</td></tr>';
+                    tableHtml += '<tr><td colspan="7">No positions with non-zero exposure to display.</td></tr>';
                 }
                 
                 tableHtml += `</tbody></table>`;
@@ -87,6 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const marketsData = await marketsResponse.json();
 
             if (marketsResponse.ok) {
+                marketsData.markets.forEach(market => {
+                    marketData[market.ticker] = market;
+                });
+                await fetchAndDisplayPositions(); // Re-render positions table with yes_bid data
+
                 let tableHtml = `
                     <table class="market-table">
                         <thead>
