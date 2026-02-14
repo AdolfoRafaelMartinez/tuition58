@@ -15,28 +15,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (filteredPositions.length > 0) {
                     let tableHtml = `
                         <p>Your Positions:</p>
-                        <table class="positions-table">
+                        <table class="market-table">
                             <thead>
                                 <tr>
                                     <th>Ticker</th>
                                     <th>Exposure</th>
-                                    <th>Avg. Price</th>
-                                    <th>Value</th>
                                 </tr>
                             </thead>
                             <tbody>
                     `;
                     filteredPositions.forEach(p => {
                         const exposure = p.market_exposure || p.event_exposure || 0;
-                        const avgPrice = p.avg_price ? `$${(p.avg_price / 100).toFixed(2)}` : 'N/A';
-                        const value = p.market_exposure_value || p.total_exposure_value; // Handle both market and event position values
-                        const valueFormatted = value ? `$${(value / 100).toFixed(2)}` : 'N/A';
                         tableHtml += `
                             <tr>
                                 <td>${p.ticker}</td>
                                 <td>${exposure}</td>
-                                <td>${avgPrice}</td>
-                                <td>${valueFormatted}</td>
                             </tr>
                         `;
                     });
