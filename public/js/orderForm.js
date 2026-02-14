@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     tableHtml += '</tbody></table>';
                     positionsResult.innerHTML = tableHtml;
                 } else {
-                    positionsResult.innerHTML = `<p>You have no positions with non-zero exposure.</p>`;
+                    positionsResult.innerHTML = `<p>You have no exposure.</p>`;
                 }
             } else {
                 positionsResult.innerHTML = `<p>Error loading positions:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
