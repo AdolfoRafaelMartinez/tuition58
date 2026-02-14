@@ -39,6 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     html += `<td>`;
                     if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
+                        if(market.lower == undefined) {
+                            market.lower = -1000;
+                        }
+                        if(market.upper == undefined) {
+                            market.lower = 1000;
+                        }
                         const temp_in_primary_range = forecast_temp >= market.lower && forecast_temp <= market.upper;
                         const temp_in_secondary_range = ((forecast_temp + 1) >= market.lower && (forecast_temp + 1) <= market.upper) || ((forecast_temp - 1) >= market.lower && (forecast_temp - 1) <= market.upper);
 
