@@ -11,9 +11,40 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 const positions = [...(result.event_positions || []), ...(result.market_positions || [])];
                 const filteredPositions = positions.filter(p => p.event_exposure > 0 || p.market_exposure > 0);
-                positionsResult.innerHTML = filteredPositions.length > 0 ? 
-                    `<p>Your Positions:</p><pre>${JSON.stringify(filteredPositions, null, 2)}</pre>` : 
-                    `<p>You have no exposure.</p>`;
+
+                if (filteredPositions.length > 0) {
+                    let tableHtml = `
+                        <p>Your Positions:</p>
+                        <table class="positions-table">
+                            <thead>
+                                <tr>
+                                    <th>Ticker</th>
+                                    <th>Exposure</th>
+                                    <th>Avg. Price</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    filteredPositions.forEach(p => {
+                        const exposure = p.market_exposure || p.event_exposure || 0;
+                        const avgPrice = p.avg_price ? `$${(p.avg_price / 100).toFixed(2)}` : 'N/A';
+                        const value = p.market_exposure_value || p.total_exposure_value; // Handle both market and event position values
+                        const valueFormatted = value ? `$${(value / 100).toFixed(2)}` : 'N/A';
+                        tableHtml += `
+                            <tr>
+                                <td>${p.ticker}</td>
+                                <td>${exposure}</td>
+                                <td>${avgPrice}</td>
+                                <td>${valueFormatted}</td>
+                            </tr>
+                        `;
+                    });
+                    tableHtml += '</tbody></table>';
+                    positionsResult.innerHTML = tableHtml;
+                } else {
+                    positionsResult.innerHTML = `<p>You have no positions with non-zero exposure.</p>`;
+                }
             } else {
                 positionsResult.innerHTML = `<p>Error loading positions:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
             }
