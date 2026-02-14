@@ -49,13 +49,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 marketsData.markets.forEach(market => {
                     let recommendation = "SELL";
                     if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
-                        const temp_in_primary_range = forecast_temp >= (market.lower || -1000) && forecast_temp <= (market.upper || 1000);
-                        if (temp_in_primary_range) {
+                        const lower = market.lower === undefined ? -1000 : market.lower;
+                        const upper = market.upper === undefined ? 1000 : market.upper;
+                        const temp_in_primary_range = forecast_temp >= lower && forecast_temp <= upper;
+                        const temp_in_secondary_range = ((forecast_temp + 1) >= lower && (forecast_temp + 1) <= upper) || ((forecast_temp - 1) >= lower && (forecast_temp - 1) <= upper);
+                        if (temp_in_primary_range || temp_in_secondary_range) {
                             recommendation = "BUY";
                         }
                     }
 
-                    tableHtml += `<tr><td>${market.ticker}</td><td>${market.lower} to ${market.upper}</td><td>${market.yes_ask}</td><td>${market.yes_bid}</td><td>${market.status}</td><td class="recommendation-cell"><span class="recommendation ${recommendation.toLowerCase()}-recommendation">${recommendation}</span></td></tr>`;
+                    tableHtml += `<tr><td>${market.ticker}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${market.yes_ask}</td><td>${market.yes_bid}</td><td>${market.status}</td><td class="recommendation-cell"><span class="recommendation ${recommendation.toLowerCase()}-recommendation">${recommendation}</span></td></tr>`;
 
                     const hasPosition = existingPositions.has(market.ticker);
                     let createOrderForm = false;
