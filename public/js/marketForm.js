@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (positionsResponse.ok) {
                 const positions = [...(positionsResult.event_positions || []), ...(positionsResult.market_positions || [])];
                 positions.forEach(p => {
-                    if (p.market_exposure > 0) {
+                    if (p.event_exposure > 0 || p.market_exposure > 0) {
                         existingPositions.add(p.ticker);
                     }
                 });

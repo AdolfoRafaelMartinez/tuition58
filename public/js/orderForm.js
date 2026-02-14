@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 const positions = [...(result.event_positions || []), ...(result.market_positions || [])];
-                const filteredPositions = positions.filter(p => p.event_exposure == 1 || p.market_exposure == 1);
+                const filteredPositions = positions.filter(p => p.event_exposure > 0 || p.market_exposure > 0);
                 positionsResult.innerHTML = filteredPositions.length > 0 ? 
                     `<p>Your Positions:</p><pre>${JSON.stringify(filteredPositions, null, 2)}</pre>` : 
                     `<p>You have no exposure.</p>`;
