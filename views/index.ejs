@@ -119,17 +119,31 @@
         updateClock();
 
         function generateAndDisplayTicker() {
-            const now = new Date();
-            const year = now.getFullYear().toString().slice(-2);
-            const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-            const month = months[now.getMonth()];
-            const day = String(now.getDate()).padStart(2, '0');
-            const dateString = `${year}${month}${day}`;
-            const ticker = `KXHIGHAUS-${dateString}`;
-            const eventTickerInput = document.getElementById('event-ticker');
-            if (eventTickerInput) {
-                eventTickerInput.value = ticker;
-            }
+            <% if (weather && weather.startTime) { %>
+                const forecastDate = new Date('<%= weather.startTime %>');
+                const year = forecastDate.getFullYear().toString().slice(-2);
+                const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+                const month = months[forecastDate.getMonth()];
+                const day = String(forecastDate.getDate()).padStart(2, '0');
+                const dateString = `${year}${month}${day}`;
+                const ticker = `KXHIGHAUS-${dateString}`;
+                const eventTickerInput = document.getElementById('event-ticker');
+                if (eventTickerInput) {
+                    eventTickerInput.value = ticker;
+                }
+            <% } else { %>
+                const now = new Date();
+                const year = now.getFullYear().toString().slice(-2);
+                const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+                const month = months[now.getMonth()];
+                const day = String(now.getDate()).padStart(2, '0');
+                const dateString = `${year}${month}${day}`;
+                const ticker = `KXHIGHAUS-${dateString}`;
+                const eventTickerInput = document.getElementById('event-ticker');
+                if (eventTickerInput) {
+                    eventTickerInput.value = ticker;
+                }
+            <% } %>
         }
         generateAndDisplayTicker();
     </script>
