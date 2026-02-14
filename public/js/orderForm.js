@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const filteredPositions = positions.filter(p => p.event_exposure == 1 || p.market_exposure == 1);
                 positionsResult.innerHTML = filteredPositions.length > 0 ? 
                     `<p>Your Positions:</p><pre>${JSON.stringify(filteredPositions, null, 2)}</pre>` : 
-                    `<p>You have no positions with exposure.</p>`;
+                    `<p>You have no exposure.</p>`;
             } else {
                 positionsResult.innerHTML = `<p>Error loading positions:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
             }
