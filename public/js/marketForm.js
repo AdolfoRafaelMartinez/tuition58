@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchAndDisplayPositions = async () => {
         let positions = [];
+        let totalContracts = 0;
+        let totalDisplayedExposure = 0;
+
         try {
             const positionsResponse = await fetch('/api/kalshi/positions');
             const positionsData = await positionsResponse.json();
@@ -34,12 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
 
                 const positionsWithExposure = positions.filter(p => p.ticker && ((p.market_exposure && p.market_exposure !== 0) || (p.event_exposure && p.event_exposure !== 0)));
-                let totalDisplayedExposure = 0;
 
                 if (positionsWithExposure.length > 0) {
                     positionsWithExposure.forEach(p => {
                         const exposure = parseFloat(p.market_exposure || p.event_exposure || 0);
                         totalDisplayedExposure += exposure;
+                        totalContracts += parseInt(p.position) || 0;
                         const yesBid = marketData[p.ticker] ? marketData[p.ticker].yes_bid : 'N/A';
                         tableHtml += `
                             <tr>
@@ -63,7 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     tableHtml += `
                         <tfoot>
                             <tr>
-                                <td colspan="2"><strong>Total Exposure</strong></td>
+                                <td><strong>Totals</strong></td>
+                                <td><strong>${totalContracts}</strong></td>
                                 <td><strong>${totalDisplayedExposure.toFixed(2)}</strong></td>
                                 <td colspan="4"></td>
                             </tr>
@@ -79,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             positionsResult.innerHTML = `<p>Error fetching positions: ${error.message}</p>`;
         }
-        return positions;
+        return { positions, totalContracts, totalDisplayedExposure };
     };
 
     const fetchAndDisplayMarkets = async () => {
@@ -96,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     marketData[market.ticker] = market;
                 });
 
-                const allPositions = await fetchAndDisplayPositions();
+                const { positions: allPositions, totalDisplayedExposure } = await fetchAndDisplayPositions();
 
                 const existingPositions = new Set();
                 if (allPositions.length > 0) {
@@ -113,9 +117,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     highestBidMarket = marketsData.markets.reduce((max, market) => max.yes_bid > market.yes_bid ? max : market, marketsData.markets[0]);
                 }
 
+                let featuredMarketContracts = 0;
+
                 if (highestBidMarket) {
                     const position = allPositions.find(p => p.ticker === highestBidMarket.ticker);
-                    const contracts = position ? position.position : 0;
+                    featuredMarketContracts = position ? parseInt(position.position) : 0;
 
                     let highestBidSection = document.getElementById('highest-bid-section');
                     if (!highestBidSection) {
@@ -140,11 +146,46 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <tr>
                                     <td>${highestBidMarket.ticker}</td>
                                     <td>${highestBidMarket.yes_bid}</td>
-                                    <td>${contracts}</td>
+                                    <td>${featuredMarketContracts}</td>
                                 </tr>
                             </tbody>
                         </table>
                     `;
+                }
+
+                let tuitionMoneySection = document.getElementById('tuition-money-section');
+                if (!tuitionMoneySection) {
+                    tuitionMoneySection = document.createElement('div');
+                    tuitionMoneySection.id = 'tuition-money-section';
+                    tuitionMoneySection.className = 'section';
+                    container.appendChild(tuitionMoneySection);
+                }
+                
+                if (featuredMarketContracts > 0) {
+                    const tuition = (featuredMarketContracts * 100) - totalDisplayedExposure;
+                    tuitionMoneySection.innerHTML = `
+                        <h2>Tuition Money</h2>
+                        <p>This is the calculated cost of your market positions, representing the money you've paid that you won't get back.</p>
+                        <table class="market-table">
+                            <thead>
+                                <tr>
+                                    <th>Featured Market Contracts</th>
+                                    <th>Total Exposure</th>
+                                    <th>Tuition</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>${featuredMarketContracts}</td>
+                                    <td>$${totalDisplayedExposure.toFixed(2)}</td>
+                                    <td>$${tuition.toFixed(2)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="citation">Calculated as: (Featured Market Contracts * 100) - Total Exposure</p>
+                    `;
+                } else {
+                    tuitionMoneySection.innerHTML = `<h2>Tuition Money</h2>`;
                 }
 
                 let tableHtml = `
