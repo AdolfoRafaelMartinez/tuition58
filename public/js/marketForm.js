@@ -12,10 +12,23 @@ document.addEventListener('DOMContentLoaded', () => {
         orderFormsContainer.innerHTML = ''; // Clear previous forms
 
         try {
-            const response = await fetch(`/api/kalshi/markets/${event_ticker}`);
-            const data = await response.json();
+            // First, get the current positions.
+            const positionsResponse = await fetch('/api/kalshi/positions');
+            const positionsResult = await positionsResponse.json();
+            const existingPositions = new Set();
+            if (positionsResponse.ok) {
+                const positions = [...(positionsResult.event_positions || []), ...(positionsResult.market_positions || [])];
+                positions.forEach(p => {
+                    if (p.market_exposure > 0) {
+                        existingPositions.add(p.ticker);
+                    }
+                });
+            }
 
-            if (response.ok) {
+            const marketsResponse = await fetch(`/api/kalshi/markets/${event_ticker}`);
+            const marketsData = await marketsResponse.json();
+
+            if (marketsResponse.ok) {
                 let tableHtml = `
                     <table class="market-table">
                         <thead>
@@ -30,72 +43,54 @@ document.addEventListener('DOMContentLoaded', () => {
                         </thead>
                         <tbody>
                 `;
-                const forecast_temp = data.forecast_temp;
+                const forecast_temp = marketsData.forecast_temp;
                 let orderFormsHtml = '';
 
-                data.markets.forEach((market, index) => {
-                    tableHtml += `<tr data-ticker="${market.ticker}" data-ask="${market.yes_ask}">`;
-                    tableHtml += `<td>${market.ticker}</td>`;
-                    tableHtml += `<td>${market.lower} to ${market.upper}</td>`;
-                    tableHtml += `<td>${market.yes_ask}</td>`;
-                    tableHtml += `<td>${market.yes_bid}</td>`;
-                    tableHtml += `<td>${market.status}</td>`;
-
+                marketsData.markets.forEach(market => {
                     let recommendation = "SELL";
                     if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
                         const temp_in_primary_range = forecast_temp >= (market.lower || -1000) && forecast_temp <= (market.upper || 1000);
-                        const temp_in_secondary_range = ((forecast_temp + 1) >= (market.lower || -1000) && (forecast_temp + 1) <= (market.upper || 1000)) || ((forecast_temp - 1) >= (market.lower || -1000) && (forecast_temp - 1) <= (market.upper || 1000));
-                        if (temp_in_primary_range || temp_in_secondary_range) {
+                        if (temp_in_primary_range) {
                             recommendation = "BUY";
                         }
                     }
 
-                    tableHtml += `<td class="recommendation-cell"><span class="recommendation ${recommendation.toLowerCase()}-recommendation">${recommendation}</span></td>`;
-                    tableHtml += `</tr>`;
+                    tableHtml += `<tr><td>${market.ticker}</td><td>${market.lower} to ${market.upper}</td><td>${market.yes_ask}</td><td>${market.yes_bid}</td><td>${market.status}</td><td class="recommendation-cell"><span class="recommendation ${recommendation.toLowerCase()}-recommendation">${recommendation}</span></td></tr>`;
 
-                    // Create an order form for each market
-                    const action = recommendation === 'BUY' ? 'buy' : 'sell';
-                    const side = 'yes'; // Always trading on the 'yes' side based on recommendation
-                    const price = recommendation === 'BUY' ? market.yes_ask : market.yes_bid;
+                    const hasPosition = existingPositions.has(market.ticker);
+                    let createOrderForm = false;
+                    if (recommendation === 'BUY' && !hasPosition) {
+                        createOrderForm = true;
+                    } else if (recommendation === 'SELL' && hasPosition) {
+                        createOrderForm = true;
+                    }
 
-                    orderFormsHtml += `
-                        <form class="order-form-dynamic" data-ticker="${market.ticker}">
-                            <h4>${market.ticker}</h4>
-                            <input type="hidden" name="ticker" value="${market.ticker}">
-                            <div class="form-group">
-                                <label>Action:</label>
-                                <input type="text" name="action" value="${action}" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>Side:</label>
-                                <input type="text" name="side" value="${side}" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>Price (cents):</label>
-                                <input type="number" name="yes_price" value="${price}" min="1" max="99" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Count:</label>
-                                <input type="number" name="count" min="0" placeholder="0">
-                            </div>
-                        </form>
-                    `;
+                    if (createOrderForm) {
+                        const action = recommendation.toLowerCase();
+                        const price = action === 'buy' ? market.yes_ask : market.yes_bid;
+                        orderFormsHtml += `
+                            <form class="order-form-dynamic" data-ticker="${market.ticker}">
+                                <h4>${market.ticker}</h4>
+                                <input type="hidden" name="ticker" value="${market.ticker}">
+                                <div class="form-group"><label>Action:</label><input type="text" name="action" value="${action}" readonly></div>
+                                <div class="form-group"><label>Side:</label><input type="text" name="side" value="yes" readonly></div>
+                                <div class="form-group"><label>Price (cents):</label><input type="number" name="yes_price" value="${price}" min="1" max="99" required></div>
+                                <div class="form-group"><label>Count:</label><input type="number" name="count" min="0" placeholder="0"></div>
+                            </form>
+                        `;
+                    }
                 });
 
                 tableHtml += `</tbody></table>`;
-                if (data.market_source_url) {
-                    tableHtml += `<p class="citation">Market data from: <a href="${data.market_source_url}" target="_blank">${data.market_source_url}</a></p>`;
-                }
-                if (data.forecast_source) {
-                     tableHtml += `<p class="citation">Forecast data from: ${data.forecast_source}</p>`;
-                }
+                if (marketsData.market_source_url) tableHtml += `<p class="citation">Market data from: <a href="${marketsData.market_source_url}" target="_blank">${marketsData.market_source_url}</a></p>`;
+                if (marketsData.forecast_source) tableHtml += `<p class="citation">Forecast data from: ${marketsData.forecast_source}</p>`;
 
                 marketResult.innerHTML = tableHtml;
                 orderFormsContainer.innerHTML = orderFormsHtml;
-                placeAllOrdersButton.style.display = data.markets.length > 0 ? 'block' : 'none';
+                placeAllOrdersButton.style.display = orderFormsHtml.length > 0 ? 'block' : 'none';
 
             } else {
-                marketResult.innerHTML = `<p>Error: ${data.error}</p>`;
+                marketResult.innerHTML = `<p>Error: ${marketsData.error}</p>`;
                 placeAllOrdersButton.style.display = 'none';
             }
         } catch (error) {
