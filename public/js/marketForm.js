@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="form-group"><label>Action:</label><input type="text" name="action" value="${action}" readonly></div>
                                 <div class="form-group"><label>Side:</label><input type="text" name="side" value="yes" readonly></div>
                                 <div class="form-group"><label>Price (cents):</label><input type="number" name="yes_price" value="${price}" min="1" max="99" required></div>
-                                <div class="form-group"><label>Count:</label><input type="number" name="count" min="0" placeholder="0"></div>
+                                <div class="form-group"><label>Count:</label><input type="number" name="count" value="1" min="0"></div>
                             </form>
                         `;
                     }
