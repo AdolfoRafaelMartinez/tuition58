@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import { get_forecast } from "./services/forecast.js";
 import { get_observed } from "./services/observed.js";
+import { get_current } from "./services/current.js";
 import { getKalshiBalance, placeKalshiOrder, getKalshiMarkets, getKalshiPositions } from "./services/kalshi.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -20,8 +21,9 @@ app.use(express.json());
 app.get('/', async (req, res) => {
   const forecast = await get_forecast();
   const observed = await get_observed();
+  const current = await get_current();
   const kalshi = await getKalshiBalance();
-  res.render('index', { weather: forecast.data, observed: observed, kalshi: kalshi.data });
+  res.render('index', { weather: forecast.data, observed: observed, current: current, kalshi: kalshi.data });
 });
 
 app.get('/api/forecast', async (req, res) => {
