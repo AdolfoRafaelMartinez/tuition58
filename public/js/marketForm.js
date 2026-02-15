@@ -117,11 +117,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     highestBidMarket = marketsData.markets.reduce((max, market) => max.yes_bid > market.yes_bid ? max : market, marketsData.markets[0]);
                 }
 
-                let featuredMarketContracts = 0;
+                let favoriteMarketContracts = 0;
 
                 if (highestBidMarket) {
                     const position = allPositions.find(p => p.ticker === highestBidMarket.ticker);
-                    featuredMarketContracts = position ? parseInt(position.position) : 0;
+                    favoriteMarketContracts = position ? parseInt(position.position) : 0;
 
                     let highestBidSection = document.getElementById('highest-bid-section');
                     if (!highestBidSection) {
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     highestBidSection.innerHTML = `
-                        <h2>Featured Market</h2>
+                        <h2>Favorite Market</h2>
                         <p>Market with the highest 'Yes' bid:</p>
                         <table class="market-table">
                             <thead>
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <tr>
                                     <td>${highestBidMarket.ticker}</td>
                                     <td>${highestBidMarket.yes_bid}</td>
-                                    <td>${featuredMarketContracts}</td>
+                                    <td>${favoriteMarketContracts}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -161,16 +161,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     container.appendChild(tuitionMoneySection);
                 }
                 
-                if (featuredMarketContracts > 0) {
-                    const tuition = (featuredMarketContracts * 100) - totalDisplayedExposure;
-                    const gain = featuredMarketContracts / totalDisplayedExposure;
+                if (favoriteMarketContracts > 0) {
+                    const tuition = (favoriteMarketContracts * 100) - totalDisplayedExposure;
+                    const gain = favoriteMarketContracts / totalDisplayedExposure;
                     tuitionMoneySection.innerHTML = `
                         <h2>Tuition Money</h2>
-                        <p>This is the calculated cost of your market positions, representing the money you've paid that you won't get back.</p>
+                        <p>This is the calculated cost of your market positions, representing the money you\'ve paid that you won\'t get back.</p>
                         <table class="market-table">
                             <thead>
                                 <tr>
-                                    <th>Featured Market Contracts</th>
+                                    <th>Favorite Market Contracts</th>
                                     <th>Total Exposure</th>
                                     <th>Tuition</th>
                                     <th>Gain</th>
@@ -178,15 +178,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>${featuredMarketContracts}</td>
+                                    <td>${favoriteMarketContracts}</td>
                                     <td>$${totalDisplayedExposure.toFixed(2)}</td>
                                     <td>$${tuition.toFixed(2)}</td>
-                                    <td>${featuredMarketContracts*100-totalDisplayedExposure}</td>
+                                    <td>${favoriteMarketContracts*100-totalDisplayedExposure}</td>
                                 </tr>
                             </tbody>
                         </table>
-                        <p class="citation">Gain calculated as: Featured Market Contracts / Total Exposure</p>
-                        <p class="citation">Tuition calculated as: (Featured Market Contracts * 100) - Total Exposure</p>
+                        <p class="citation">Gain calculated as: Favorite Market Contracts / Total Exposure</p>
+                        <p class="citation">Tuition calculated as: (Favorite Market Contracts * 100) - Total Exposure</p>
                     `;
                 } else {
                     tuitionMoneySection.innerHTML = `<h2>Tuition Money</h2>`;
@@ -209,6 +209,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const forecast_temp = marketsData.forecast_temp;
                 const ordersToCreate = [];
 
+                let highestAskMarket = null;
+                if (marketsData.markets && marketsData.markets.length > 0) {
+                    highestAskMarket = marketsData.markets.reduce((max, market) => max.yes_ask > market.yes_ask ? max : market, marketsData.markets[0]);
+                }
+
                 marketsData.markets.forEach(market => {
                     let recommendation = "SELL";
                     if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
@@ -221,11 +226,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
 
-                    tableHtml += `<tr><td>${market.ticker}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${market.yes_ask}</td><td>${market.yes_bid}</td><td>${market.status}</td><td class="recommendation-cell"><span class="recommendation ${recommendation.toLowerCase()}-recommendation">${recommendation}</span></td></tr>`;
+                    let displayRecommendation = recommendation;
+                    if (highestAskMarket && market.ticker === highestAskMarket.ticker) {
+                        displayRecommendation = "BUY";
+                    }
+
+                    tableHtml += `<tr><td>${market.ticker}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${market.yes_ask}</td><td>${market.yes_bid}</td><td>${market.status}</td><td class="recommendation-cell"><span class="recommendation ${displayRecommendation.toLowerCase()}-recommendation">${displayRecommendation}</span></td></tr>`;
 
                     const hasPosition = existingPositions.has(market.ticker);
-                    if ((recommendation === 'BUY' && !hasPosition) || (recommendation === 'SELL' && hasPosition)) {
-                        ordersToCreate.push({ market, recommendation });
+                    if ((displayRecommendation === 'BUY' && !hasPosition) || (displayRecommendation === 'SELL' && hasPosition)) {
+                        ordersToCreate.push({ market, recommendation: displayRecommendation });
                     }
                 });
 
