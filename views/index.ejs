@@ -22,7 +22,7 @@
             <h2>Forecast</h2>
             <% if (weather) { %>
                 <p><strong><%= weather.name %>:</strong> <%= weather.temperature %>°<%= weather.temperatureUnit %></p>
-                <p><strong>Start Time:</strong> <%= new Date(weather.startTime).toLocaleString() %></p>
+                <p><strong>Start Time:</strong> <%= new Date(weather.startTime).toUTCString() %></p>
             <% } else { %>
                 <p>Weather data not available.</p>
             <% } %>
