@@ -163,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (featuredMarketContracts > 0) {
                     const tuition = (featuredMarketContracts * 100) - totalDisplayedExposure;
+                    const gain = featuredMarketContracts / totalDisplayedExposure;
                     tuitionMoneySection.innerHTML = `
                         <h2>Tuition Money</h2>
                         <p>This is the calculated cost of your market positions, representing the money you've paid that you won't get back.</p>
@@ -172,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <th>Featured Market Contracts</th>
                                     <th>Total Exposure</th>
                                     <th>Tuition</th>
+                                    <th>Gain</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -179,10 +181,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <td>${featuredMarketContracts}</td>
                                     <td>$${totalDisplayedExposure.toFixed(2)}</td>
                                     <td>$${tuition.toFixed(2)}</td>
+                                    <td>${featuredMarketContracts*100-totalDisplayedExposure}</td>
                                 </tr>
                             </tbody>
                         </table>
-                        <p class="citation">Calculated as: (Featured Market Contracts * 100) - Total Exposure</p>
+                        <p class="citation">Gain calculated as: Featured Market Contracts / Total Exposure</p>
+                        <p class="citation">Tuition calculated as: (Featured Market Contracts * 100) - Total Exposure</p>
                     `;
                 } else {
                     tuitionMoneySection.innerHTML = `<h2>Tuition Money</h2>`;
