@@ -9,7 +9,7 @@
 <body>
     <div class="container" data-balance="<%= kalshi ? kalshi.balance : 0 %>">
         <h1>Tuition Bot</h1>
-        <div id="clock"></div>
+        <div id="generated-time">Data generated at: <%= generatedAt.toLocaleString() %></div>
         <div class="section">
             <h2>Current Temperature</h2>
             <% if (current && current.temperature) { %>
@@ -22,20 +22,9 @@
             <h2>Forecast</h2>
             <% if (weather) { %>
                 <p><strong><%= weather.name %>:</strong> <%= weather.temperature %>°<%= weather.temperatureUnit %></p>
-                <p><strong>Start Time:</strong> <%= new Date(weather.startTime).toUTCString() %></p>
+                <p><strong>for</strong> <%= new Date(weather.startTime).toDateString() %></p>
             <% } else { %>
                 <p>Weather data not available.</p>
-            <% } %>
-        </div>
-        <div class="section">
-            <h2>Observed</h2>
-            <% if (observed && observed.observation_max) { %>
-                <p><%= observed.observation_max %> at <%= observed.observation_when %></p>
-                <p>Reported at <%= observed.report_when %></p>
-            <% } else if (observed && observed.error) { %>
-                <p><%= observed.error %></p>
-            <% } else { %>
-                <p>Maximum temperature data not available.</p>
             <% } %>
         </div>
         <div class="section">
@@ -69,14 +58,6 @@
     <script src="/js/orderForm.js"></script>
     <script src="/js/marketForm.js"></script>
     <script>
-        function updateClock() {
-            const now = new Date();
-            const clock = document.getElementById('clock');
-            clock.textContent = now.toLocaleString();
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
         function generateAndDisplayTicker() {
             <% if (weather && weather.startTime) { %>
                 const forecastDate = new Date('<%= weather.startTime %>');
