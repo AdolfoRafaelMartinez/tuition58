@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
                         const lower = market.lower === undefined ? -1000 : market.lower;
                         const upper = market.upper === undefined ? 1000 : market.upper;
-                        const temp_in_primary_range = forecast_temp == lower;
+                        const temp_in_primary_range = forecast_temp == lower || forecast_temp == upper;
                         if (temp_in_primary_range) {
                             recommendation = "BUY";
                         }
