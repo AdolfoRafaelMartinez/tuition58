@@ -13,9 +13,9 @@
         <div class="section">
             <h2>Current Temperature</h2>
             <% if (current && current.temperature) { %>
-                <p><strong>Temperature:</strong> <%= (current.temperature * 9/5 + 32).toFixed(2) %>°F</p>
+                <p><strong>Temperature:</strong> <span id="current-temp"><%= (current.temperature * 9/5 + 32).toFixed(2) %></span>°F</p>
             <% } else { %>
-                <p>Current temperature not available.</p>
+                <p id="current-unavailable">Current temperature not available.</p>
             <% } %>
         </div>
         <div class="section">

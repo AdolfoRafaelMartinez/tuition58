@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <tbody>
                 `;
 
-                const positionsWithExposure = positions.filter(p => p.ticker && ((p.market_exposure && p.market_exposure !== 0) || (p.event_exposure && p.event_exposure !== 0)));
+                const positionsWithExposure = positions.filter(p => p && p.ticker && String(p.ticker).trim() !== '' && ((p.market_exposure && p.market_exposure !== 0) || (p.event_exposure && p.event_exposure !== 0)));
 
                 if (positionsWithExposure.length > 0) {
                     positionsWithExposure.forEach(p => {
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (allPositions.length > 0) {
                     allPositions.forEach(p => {
                         const exposure = parseFloat(p.market_exposure || p.event_exposure || 0);
-                        if (exposure > 0) {
+                        if (exposure > 0 && p && p.ticker && String(p.ticker).trim() !== '') {
                             existingPositions.add(p.ticker);
                         }
                     });

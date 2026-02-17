@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const forecastDate = document.getElementById('forecast-date');
     const forecastUnavailable = document.getElementById('forecast-unavailable');
     const eventTickerInput = document.getElementById('event-ticker');
+    const currentTemp = document.getElementById('current-temp');
+    const currentUnavailable = document.getElementById('current-unavailable');
 
     function readLocationFromUrl() {
         const params = new URLSearchParams(window.location.search);
@@ -47,6 +49,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Optionally trigger market fetch if that function exists
                 if (window.fetchAndDisplayMarkets) window.fetchAndDisplayMarkets();
+            }
+
+            // fetch current temperature
+            const currentResp = await fetch(`/api/current?location=${encodeURIComponent(location)}`);
+            if (currentResp.ok) {
+                const currentData = await currentResp.json();
+                if (currentData.temperature != null) {
+                    if (currentUnavailable) currentUnavailable.style.display = 'none';
+                    if (currentTemp) {
+                        currentTemp.style.display = 'inline';
+                        currentTemp.textContent = ((currentData.temperature * 9/5) + 32).toFixed(2);
+                    }
+                } else {
+                    if (currentTemp) currentTemp.style.display = 'none';
+                    if (currentUnavailable) currentUnavailable.style.display = 'block';
+                }
+            } else {
+                console.error('Failed to fetch current temperature');
             }
         } catch (err) {
             console.error('Error fetching forecast:', err);

@@ -43,6 +43,16 @@ app.get('/api/forecast', async (req, res) => {
     }
 });
 
+app.get('/api/current', async (req, res) => {
+    const reqLocation = typeof req.query.location === 'string' ? req.query.location.toLowerCase() : undefined;
+    const current = await get_current(reqLocation === 'centralpark' ? 'centralpark' : 'bergstrom');
+    if (current.error) {
+        res.status(500).json({ error: current.error });
+    } else {
+        res.json({ temperature: current.temperature });
+    }
+});
+
 app.get('/api/observed', async (req, res) => {
     const cliWeather = await get_observed();
     if (cliWeather.error) {
