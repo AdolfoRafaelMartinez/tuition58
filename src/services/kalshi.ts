@@ -160,7 +160,7 @@ export async function placeKalshiOrder(orderParams: any) {
         const { ticker, action, side, yes_price, count } = orderParams;
 
         const kalshiOrder: any = {
-            ticker,
+            Ticker: ticker,
             side,
             count,
             action,

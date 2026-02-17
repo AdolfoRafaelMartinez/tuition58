@@ -174,6 +174,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         const orderData = Object.fromEntries(formData.entries());
                         orderData.count = count;
                         orderData.yes_price = parseInt(orderData.yes_price, 10);
+                        // Ensure ticker is preserved
+                        if (!orderData.ticker) {
+                            orderData.ticker = form.dataset.ticker;
+                        }
                         proposedOrders.push(orderData);
                     }
                 }
