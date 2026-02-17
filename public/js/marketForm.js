@@ -144,24 +144,33 @@ document.addEventListener('DOMContentLoaded', () => {
                         </thead>
                         <tbody>
                 `;
+                const currentTempElement = document.getElementById('current-temp');
+                const currentTemp = currentTempElement ? parseFloat(currentTempElement.textContent) : null;
                 const forecast_temp = marketsData.forecast_temp;
+                
+                // Use whichever is greater: forecast_temp or current temperature
+                let greatest_temp; 
+                if (currentTemp !== null && forecast_temp !== undefined && !isNaN(forecast_temp) && !isNaN(currentTemp)) {
+                    greatest_temp = Math.trunc(Math.max(forecast_temp, currentTemp));
+                }
+                
                 const ordersToCreate = [];
 
                 marketsData.markets.forEach(market => {
                     let recommendation = "SELL";
-                    if (forecast_temp !== undefined && !isNaN(forecast_temp)) {
+                    if (greatest_temp !== undefined && !isNaN(greatest_temp)) {
                         const lower = market.lower === undefined ? -1000 : market.lower;
                         const upper = market.upper === undefined ? 1000 : market.upper;
                         let in_range;
-                        in_range = forecast_temp == lower || forecast_temp == upper;
+                        in_range = greatest_temp == lower || greatest_temp == upper;
                         if (in_range) {
                             recommendation = "BUY";
                         }
-                        in_range = forecast_temp - 1 == lower || forecast_temp - 1 == upper;
+                        in_range = greatest_temp - 1 == lower || greatest_temp - 1 == upper;
                         if (in_range) {
                             recommendation = "BUY";
                         }
-                        in_range = forecast_temp + 1 == lower || forecast_temp + 1 == upper;
+                        in_range = greatest_temp + 1 == lower || greatest_temp + 1 == upper;
                         if (in_range) {
                             recommendation = "BUY";
                         }
