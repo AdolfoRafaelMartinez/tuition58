@@ -248,3 +248,17 @@ button:hover {
 .sell-recommendation {
     color: red;
 }
+
+/* Delete button styles */
+.delete-form, .delete-order {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: inherit;
+    padding: 5px;
+}
+
+.delete-form:hover, .delete-order:hover {
+    background: none !important;
+    opacity: 0.7;
+}

@@ -201,11 +201,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         count = Math.max(0, count);
 
                         orderFormsHtml += `
-                            <form class="order-form-dynamic" data-ticker="${market.ticker}">
+                            <form class="order-form-dynamic" data-ticker="${market.ticker}" style="position: relative; padding-top: 20px;">
+                                <button type="button" class="delete-form" title="Delete Order" style="position: absolute; top: 0; right: 0;">🗑️</button>
                                 <h4>${market.ticker}</h4>
-                                <input type="hidden" name="ticker" value="${market.ticker}">
-                                <div class="form-group"><label>Action:</label><input type="text" name="action" value="${action}" readonly></div>
-                                <div class="form-group"><label>Side:</label><input type="text" name="side" value="yes" readonly></div>
+                                <div class="form-group"><label>Action:</label><select name="action">
+                                    <option value="buy" ${action === 'buy' ? 'selected' : ''}>Buy</option>
+                                    <option value="sell" ${action === 'sell' ? 'selected' : ''}>Sell</option>
+                                </select></div>
+                                <div class="form-group"><label>Side:</label><select name="side">
+                                    <option value="yes" selected>Yes</option>
+                                    <option value="no">No</option>
+                                </select></div>
                                 <div class="form-group"><label>Price (cents):</label><input type="number" name="yes_price" value="${price}" min="1" max="99" required></div>
                                 <div class="form-group"><label>Count:</label><input type="number" name="count" value="${count}" min="0"></div>
                             </form>
@@ -219,6 +225,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 marketResult.innerHTML = tableHtml;
                 orderFormsContainer.innerHTML = orderFormsHtml;
                 placeAllOrdersButton.style.display = orderFormsHtml.length > 0 ? 'block' : 'none';
+
+                // Attach delete listeners for order forms
+                const deleteFormButtons = orderFormsContainer.querySelectorAll('.delete-form');
+                deleteFormButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        button.closest('form').remove();
+                        // Hide button if no forms left
+                        if (orderFormsContainer.querySelectorAll('.order-form-dynamic').length === 0) {
+                            placeAllOrdersButton.style.display = 'none';
+                        }
+                    });
+                });
 
             } else {
                 marketResult.innerHTML = `<p>Error: ${marketsData.error}</p>`;
