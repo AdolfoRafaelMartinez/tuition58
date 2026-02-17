@@ -92,7 +92,17 @@ document.addEventListener('DOMContentLoaded', () => {
         orderFormsContainer.innerHTML = ''; // Clear previous forms
 
         try {
-            const marketsResponse = await fetch(`/api/kalshi/markets/${event_ticker}`);
+            // include currently selected forecast location so server returns matching forecast_temp
+            let location = 'bergstrom';
+            const locSelect = document.getElementById('location-select');
+            if (locSelect && locSelect.value) {
+                location = locSelect.value;
+            } else {
+                const params = new URLSearchParams(window.location.search);
+                const p = params.get('location');
+                if (p) location = p.toLowerCase();
+            }
+            const marketsResponse = await fetch(`/api/kalshi/markets/${encodeURIComponent(event_ticker)}?location=${encodeURIComponent(location)}`);
             const marketsData = await marketsResponse.json();
 
             if (marketsResponse.ok) {
@@ -112,47 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                let highestBidMarket = null;
-                if (marketsData.markets && marketsData.markets.length > 0) {
-                    highestBidMarket = marketsData.markets.reduce((max, market) => max.yes_bid > market.yes_bid ? max : market, marketsData.markets[0]);
-                }
-
-                let favoriteMarketContracts = 0;
-
-                if (highestBidMarket) {
-                    const position = allPositions.find(p => p.ticker === highestBidMarket.ticker);
-                    favoriteMarketContracts = position ? parseInt(position.position) : 0;
-
-                    let highestBidSection = document.getElementById('highest-bid-section');
-                    if (!highestBidSection) {
-                        highestBidSection = document.createElement('div');
-                        highestBidSection.id = 'highest-bid-section';
-                        highestBidSection.className = 'section';
-                        container.appendChild(highestBidSection);
-                    }
-
-                    highestBidSection.innerHTML = `
-                        <h2>Favorite Market</h2>
-                        <p>Market with the highest 'Yes' bid:</p>
-                        <table class="market-table">
-                            <thead>
-                                <tr>
-                                    <th>Ticker</th>
-                                    <th>Yes Bid</th>
-                                    <th>Contracts</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>${highestBidMarket.ticker}</td>
-                                    <td>${highestBidMarket.yes_bid}</td>
-                                    <td>${favoriteMarketContracts}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `;
-                }
-
                 let tuitionMoneySection = document.getElementById('tuition-money-section');
                 if (!tuitionMoneySection) {
                     tuitionMoneySection = document.createElement('div');
@@ -160,37 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     tuitionMoneySection.className = 'section';
                     container.appendChild(tuitionMoneySection);
                 }
-                
-                // if (favoriteMarketContracts > 0) {
-                //     const tuition = (favoriteMarketContracts * 100) - totalDisplayedExposure;
-                //     const gain = favoriteMarketContracts / totalDisplayedExposure;
-                //     tuitionMoneySection.innerHTML = `
-                //         <h2>Tuition Money</h2>
-                //         <p>This is the calculated cost of your market positions, representing the money you\'ve paid that you won\'t get back.</p>
-                //         <table class="market-table">
-                //             <thead>
-                //                 <tr>
-                //                     <th>Favorite Market Contracts</th>
-                //                     <th>Total Exposure</th>
-                //                     <th>Tuition</th>
-                //                     <th>Gain</th>
-                //                 </tr>
-                //             </thead>
-                //             <tbody>
-                //                 <tr>
-                //                     <td>${favoriteMarketContracts}</td>
-                //                     <td>$${totalDisplayedExposure.toFixed(2)}</td>
-                //                     <td>$${tuition.toFixed(2)}</td>
-                //                     <td>${favoriteMarketContracts*100-totalDisplayedExposure}</td>
-                //                 </tr>
-                //             </tbody>
-                //         </table>
-                //         <p class="citation">Gain calculated as: Favorite Market Contracts / Total Exposure</p>
-                //         <p class="citation">Tuition calculated as: (Favorite Market Contracts * 100) - Total Exposure</p>
-                //     `;
-                // } else {
-                //     tuitionMoneySection.innerHTML = `<h2>Tuition Money</h2>`;
-                // }
 
                 let tableHtml = `
                     <table class="market-table">
