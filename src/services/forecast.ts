@@ -2,9 +2,17 @@
 import fetch from 'node-fetch';
 import { Forecast, WeatherResult } from '../models/weather.js';
 
-export async function get_forecast(): Promise<WeatherResult> {
+export type ForecastLocation = 'bergstrom' | 'centralpark';
+
+export async function get_forecast(location: ForecastLocation = 'bergstrom'): Promise<WeatherResult> {
     try {
-        const response = await fetch('https://api.weather.gov/gridpoints/EWX/156,91/forecast');
+        const urlMap: Record<ForecastLocation, string> = {
+            bergstrom: 'https://api.weather.gov/gridpoints/EWX/156,91/forecast',
+            centralpark: 'https://api.weather.gov/gridpoints/OKX/33,37/forecast',
+        };
+
+        const endpoint = urlMap[location] || urlMap.bergstrom;
+        const response = await fetch(endpoint);
         if (!response.ok) {
             return { data: null, error: `Failed to fetch weather data. Status: ${response.status}` };
         }

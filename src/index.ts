@@ -19,7 +19,8 @@ app.set('view engine', 'ejs');
 app.use(express.json());
 
 app.get('/', async (req, res) => {
-  const forecast = await get_forecast();
+    const reqLocation = typeof req.query.location === 'string' ? req.query.location.toLowerCase() : undefined;
+    const forecast = await get_forecast(reqLocation === 'centralpark' ? 'centralpark' : 'bergstrom');
   const observed = await get_observed();
   const current = await get_current();
   const kalshi = await getKalshiBalance();
@@ -33,7 +34,8 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/api/forecast', async (req, res) => {
-    const forecast = await get_forecast();
+    const reqLocation = typeof req.query.location === 'string' ? req.query.location.toLowerCase() : undefined;
+    const forecast = await get_forecast(reqLocation === 'centralpark' ? 'centralpark' : 'bergstrom');
     if (forecast.error) {
         res.status(500).json({ error: forecast.error });
     } else {
@@ -63,7 +65,8 @@ app.post('/api/kalshi/order', async (req, res) => {
 app.get('/api/kalshi/markets/:event_ticker', async (req, res) => {
     const event_ticker = req.params.event_ticker;
     const marketResult = await getKalshiMarkets(event_ticker);
-    const forecastResult = await get_forecast();
+    const reqLocation = typeof req.query.location === 'string' ? req.query.location.toLowerCase() : undefined;
+    const forecastResult = await get_forecast(reqLocation === 'centralpark' ? 'centralpark' : 'bergstrom');
 
     if (marketResult.error) {
         return res.status(500).json({ error: marketResult.error });
