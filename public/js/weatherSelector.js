@@ -66,6 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (eventTickerInput) {
             const prefix = initialLoc === 'centralpark' ? 'KXHIGHNY' : 'KXHIGHAUS';
             eventTickerInput.value = generateTickerFromDate(new Date(), prefix);
+            // trigger market update immediately
+            if (typeof window.fetchAndDisplayMarkets === 'function') {
+                window.fetchAndDisplayMarkets();
+            } else {
+                const form = document.getElementById('market-form');
+                if (form && typeof form.requestSubmit === 'function') form.requestSubmit();
+            }
         }
         fetchAndUpdate(initialLoc);
     }
@@ -81,6 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (eventTickerInput) {
                 const prefix = v === 'centralpark' ? 'KXHIGHNY' : 'KXHIGHAUS';
                 eventTickerInput.value = generateTickerFromDate(new Date(), prefix);
+                // submit the market form (or call the fetch function) so the market table updates now
+                if (typeof window.fetchAndDisplayMarkets === 'function') {
+                    window.fetchAndDisplayMarkets();
+                } else {
+                    const form = document.getElementById('market-form');
+                    if (form && typeof form.requestSubmit === 'function') form.requestSubmit();
+                    else if (form) form.dispatchEvent(new Event('submit', { cancelable: true }));
+                }
             }
             fetchAndUpdate(v);
         });
