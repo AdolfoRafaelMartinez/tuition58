@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Yes Ask</th>
                                 <th>Yes Bid</th>
                                 <th>Status</th>
+                                <th>Contracts Held</th>
                                 <th>Recommendation</th>
                             </tr>
                         </thead>
@@ -157,16 +158,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const ordersToCreate = [];
 
+                // Create a map of ticker to contract count for quick lookup
+                const contractsByTicker = {};
+                if (allPositions.length > 0) {
+                    allPositions.forEach(p => {
+                        if (p && p.ticker && String(p.ticker).trim() !== '') {
+                            contractsByTicker[p.ticker] = parseInt(p.position) || 0;
+                        }
+                    });
+                }
+
                 marketsData.markets.forEach(market => {
                     // Recommend BUY only for the topMarket (highest yes_ask), SELL otherwise
                     let recommendation = (topMarket && market.ticker === topMarket.ticker) ? 'BUY' : 'SELL';
                     let displayRecommendation = recommendation;
 
                     const hasPosition = existingPositions.has(market.ticker);
+                    const contractsHeld = contractsByTicker[market.ticker] || 0;
                     // Render recommendation as a button that proposes a one-contract order at last yes_ask
                     const recAction = displayRecommendation.toLowerCase();
                     const recBtnHtml = `<button class="rec-propose recommendation ${recAction}-recommendation" data-ticker="${market.ticker}" data-action="${recAction}" data-price="${market.yes_ask}" type="button" style="padding:6px 8px;border-radius:4px;border:none;cursor:pointer;">${displayRecommendation}</button>`;
-                    tableHtml += `<tr><td>${market.ticker}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${market.yes_ask}</td><td>${market.yes_bid}</td><td>${market.status}</td><td class="recommendation-cell">${recBtnHtml}</td></tr>`;
+                    tableHtml += `<tr><td>${market.ticker}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${market.yes_ask}</td><td>${market.yes_bid}</td><td>${market.status}</td><td>${contractsHeld}</td><td class="recommendation-cell">${recBtnHtml}</td></tr>`;
                     // Only create orders for the top market if it's not already held
                     if (recommendation === 'BUY' && !hasPosition) {
                         ordersToCreate.push({ market, recommendation: displayRecommendation });
