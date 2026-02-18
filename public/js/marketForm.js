@@ -188,6 +188,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 tableHtml += `</tbody></table>`;
 
+                // Determine market with greatest yes_ask and show it above the table
+                let topMarket = null;
+                let maxYesAsk = -Infinity;
+                (marketsData.markets || []).forEach(m => {
+                    // handle yes_ask as number or numeric string
+                    const yesAsk = typeof m.yes_ask === 'number' ? m.yes_ask : parseFloat(m.yes_ask);
+                    if (!isNaN(yesAsk) && yesAsk > maxYesAsk) {
+                        maxYesAsk = yesAsk;
+                        topMarket = m;
+                    }
+                });
+
+                if (topMarket) {
+                    // show only the ticker per user request
+                    tableHtml = `<div class="top-market" style="padding:8px; margin-bottom:8px;">
+                                    <strong>Top Yes Ask:</strong> ${topMarket.ticker}
+                                 </div>` + tableHtml;
+                }
+
                 const kalshiBalance = parseFloat(container.dataset.balance) || 0;
                 const balanceToTrade = kalshiBalance / 2;
                 let orderFormsHtml = '';
