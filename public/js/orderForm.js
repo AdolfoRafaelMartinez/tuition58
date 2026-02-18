@@ -63,99 +63,75 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        let html = '<h3>Proposed Orders</h3>';
         if (proposedOrders.length === 0) {
-            html += '<p>No orders proposed.</p>';
-        } else {
-            const buyOrders = proposedOrders.filter(o => o.action === 'buy');
-            const sellOrders = proposedOrders.filter(o => o.action === 'sell');
-
-            if (buyOrders.length > 0) {
-                html += `<p>Total Buy Orders: ${buyOrders.length}, Cost: $${(totalBuyCost / 100).toFixed(2)}</p>`;
-            }
-            if (sellOrders.length > 0) {
-                html += `<p>Total Sell Orders: ${sellOrders.length}, Collateral: $${(totalSellCollateral / 100).toFixed(2)}</p>`;
-            }
-
-            html += '<ul id="proposed-orders-list">';
-            proposedOrders.forEach((order, index) => {
-                html += `
-                    <li data-index="${index}" style="position: relative; padding-right: 30px;">
-                        <div class="order-content">
-                            <select class="order-action" data-index="${index}">
-                                <option value="buy" ${order.action === 'buy' ? 'selected' : ''}>Buy</option>
-                                <option value="sell" ${order.action === 'sell' ? 'selected' : ''}>Sell</option>
-                            </select>
-                            <input type="number" class="order-count" data-index="${index}" value="${order.count}" min="1">
-                            contracts of ${order.ticker} at
-                            <input type="number" class="order-price" data-index="${index}" value="${order.yes_price}" min="1" max="99">¢
-                            <select class="order-side" data-index="${index}">
-                                <option value="yes" ${order.side === 'yes' ? 'selected' : ''}>Yes</option>
-                                <option value="no" ${order.side === 'no' ? 'selected' : ''}>No</option>
-                            </select>
-                        </div>
-                        <button class="delete-order" data-index="${index}" title="Delete Order" style="position: absolute; top: 0; right: 0;">🗑️</button>
-                    </li>
-                `;
-            });
-            html += '</ul>';
+            orderResult.innerHTML = '<p>No orders proposed.</p>';
+            return;
         }
+
+        const buyOrders = proposedOrders.filter(o => o.action === 'buy');
+        const sellOrders = proposedOrders.filter(o => o.action === 'sell');
+
+        let html = '<div id="order-summary-dialog" style="border: 1px solid #ccc; padding: 1.5rem; border-radius: 8px; text-align: center; background-color: #f9f9f9;">';
+        html += '<h3>Order Summary</h3>';
+        
+        if (buyOrders.length > 0) {
+            html += `<p><strong>Total Buy Orders:</strong> ${buyOrders.length}</p><p><strong>Cost:</strong> $${(totalBuyCost / 100).toFixed(2)}</p>`;
+        }
+        if (sellOrders.length > 0) {
+            html += `<p><strong>Total Sell Orders:</strong> ${sellOrders.length}</p><p><strong>Collateral:</strong> $${(totalSellCollateral / 100).toFixed(2)}</p>`;
+        }
+
+        html += '<div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">';
+        html += '<button id="confirm-orders" style="padding: 0.8rem 1.5rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem;">Confirm</button>';
+        html += '<button id="cancel-orders" style="padding: 0.8rem 1.5rem; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem;">Cancel</button>';
+        html += '</div>';
+        html += '</div>';
+
         orderResult.innerHTML = html;
 
-        // Attach event listeners
-        attachOrderEventListeners();
+        // Attach event listeners to buttons
+        const confirmBtn = orderResult.querySelector('#confirm-orders');
+        const cancelBtn = orderResult.querySelector('#cancel-orders');
+
+        confirmBtn.addEventListener('click', placeOrdersConfirmed);
+        cancelBtn.addEventListener('click', cancelOrders);
+    }
+
+    function cancelOrders() {
+        proposedOrders = [];
+        isReviewMode = false;
+        placeAllOrdersButton.textContent = 'Place All Orders';
+        orderResult.innerHTML = '';
+    }
+
+    async function placeOrdersConfirmed() {
+        let orderExecutionHTML = '<h3>Order Execution Results</h3>';
+        for (const orderData of proposedOrders) {
+            try {
+                const response = await fetch('/api/kalshi/order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData),
+                });
+                const result = await response.json();
+                orderExecutionHTML += response.ok ?
+                    `<p>Order for ${orderData.ticker} placed successfully!</p><pre>${JSON.stringify(result, null, 2)}</pre>` :
+                    `<p>Error for ${orderData.ticker}:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                orderExecutionHTML += `<p>Error for ${orderData.ticker}: ${error.message}</p>`;
+            }
+        }
+
+        // Reset
+        orderResult.innerHTML = orderExecutionHTML;
+        proposedOrders = [];
+        isReviewMode = false;
+        placeAllOrdersButton.textContent = 'Place All Orders';
+        loadPositions();
     }
 
     function attachOrderEventListeners() {
-        // Delete buttons
-        const deleteButtons = orderResult.querySelectorAll('.delete-order');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const index = parseInt(e.target.dataset.index, 10);
-                proposedOrders.splice(index, 1);
-                renderProposedOrders();
-            });
-        });
-
-        // Action changes
-        const actionSelects = orderResult.querySelectorAll('.order-action');
-        actionSelects.forEach(select => {
-            select.addEventListener('change', (e) => {
-                const index = parseInt(e.target.dataset.index, 10);
-                proposedOrders[index].action = e.target.value;
-                renderProposedOrders();
-            });
-        });
-
-        // Side changes
-        const sideSelects = orderResult.querySelectorAll('.order-side');
-        sideSelects.forEach(select => {
-            select.addEventListener('change', (e) => {
-                const index = parseInt(e.target.dataset.index, 10);
-                proposedOrders[index].side = e.target.value;
-                renderProposedOrders();
-            });
-        });
-
-        // Count changes
-        const countInputs = orderResult.querySelectorAll('.order-count');
-        countInputs.forEach(input => {
-            input.addEventListener('input', (e) => {
-                const index = parseInt(e.target.dataset.index, 10);
-                proposedOrders[index].count = parseInt(e.target.value, 10) || 0;
-                renderProposedOrders();
-            });
-        });
-
-        // Price changes
-        const priceInputs = orderResult.querySelectorAll('.order-price');
-        priceInputs.forEach(input => {
-            input.addEventListener('input', (e) => {
-                const index = parseInt(e.target.dataset.index, 10);
-                proposedOrders[index].yes_price = parseInt(e.target.value, 10) || 0;
-                renderProposedOrders();
-            });
-        });
+        // This function is no longer used since we've moved to a dialog pattern
     }
 
     if (placeAllOrdersButton) {
@@ -192,30 +168,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 placeAllOrdersButton.textContent = 'Confirm Place Orders';
                 renderProposedOrders();
             } else {
-                // Place the orders
-                let orderExecutionHTML = '<h3>Order Execution Results</h3>';
-                for (const orderData of proposedOrders) {
-                    try {
-                        const response = await fetch('/api/kalshi/order', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(orderData),
-                        });
-                        const result = await response.json();
-                        orderExecutionHTML += response.ok ?
-                            `<p>Order for ${orderData.ticker} placed successfully!</p><pre>${JSON.stringify(result, null, 2)}</pre>` :
-                            `<p>Error for ${orderData.ticker}:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
-                    } catch (error) {
-                        orderExecutionHTML += `<p>Error for ${orderData.ticker}: ${error.message}</p>`;
-                    }
-                }
-
-                // Reset
-                orderResult.innerHTML += orderExecutionHTML;
-                proposedOrders = [];
-                isReviewMode = false;
+                // Switch to review mode with summary dialog
+                isReviewMode = true;
                 placeAllOrdersButton.textContent = 'Place All Orders';
-                loadPositions();
+                renderProposedOrders();
             }
         });
     }
