@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 const positions = [...(result.event_positions || []), ...(result.market_positions || [])];
-                const filteredPositions = positions.filter(p => p.event_exposure > 0 || p.market_exposure > 0);
+                const filteredPositions = positions.filter(p => p && p.ticker && String(p.ticker).trim() !== '' && ((p.event_exposure && p.event_exposure > 0) || (p.market_exposure && p.market_exposure > 0)));
 
                 if (filteredPositions.length > 0) {
                     let tableHtml = `
