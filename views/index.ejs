@@ -30,7 +30,7 @@
             <div id="forecast-display">
                 <% if (weather) { %>
                     <p><strong id="forecast-name"><%= weather.name %></strong>: <span id="forecast-temp"><%= weather.temperature %></span>°<span id="forecast-unit"><%= weather.temperatureUnit %></span></p>
-                    <p><strong>for</strong> <span id="forecast-date"><%= new Date(weather.startTime).toDateString() %></span></p>
+                    <p><strong>for</strong> <span id="forecast-date"><%= new Date(weather.startTime).toLocaleString() %></span></p>
                 <% } else { %>
                     <p id="forecast-unavailable">Weather data not available.</p>
                 <% } %>

@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (forecastName) forecastName.textContent = data.name || '';
             if (forecastTemp) forecastTemp.textContent = data.temperature != null ? data.temperature : '';
             if (forecastUnit) forecastUnit.textContent = data.temperatureUnit || '';
-            if (forecastDate && data.startTime) forecastDate.textContent = new Date(data.startTime).toDateString();
+            if (forecastDate && data.startTime) forecastDate.textContent = new Date(data.startTime).toLocaleString();
 
             // update event ticker based on new forecast date
             if (eventTickerInput && data.startTime) {
