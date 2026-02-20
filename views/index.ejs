@@ -9,28 +9,30 @@
 <body>
     <div class="container" data-balance="<%= kalshi ? kalshi.balance : 0 %>">
         <h1>Tuition Bot</h1>
-        <div id="generated-time">Generated at: <%= generatedAt.toLocaleString() %></div>
-        <div class="section">
-            <h2>Current Temperature</h2>
-            <% if (current && current.temperature) { %>
-                <p><strong>Temperature:</strong> <span id="current-temp"><%= (current.temperature * 9/5 + 32).toFixed(2) %></span>°F</p>
-            <% } else { %>
-                <p id="current-unavailable">Current temperature not available.</p>
-            <% } %>
-        </div>
-        <div class="section">
-            <h2>Forecast</h2>
+        <div id="location-container">
             <label for="location-select">Location:</label>
             <select id="location-select" aria-label="Select forecast location">
                 <option value="bergstrom">Bergstrom (Austin)</option>
                 <option value="centralpark">Central Park (NYC)</option>
-                	<option value="seattle">Seattle</option>
+                <option value="seattle">Seattle</option>
             </select>
-
+        </div>
+        
+        <!-- Current temperature moved into Forecast card -->
+        <div class="section">
+            <h2>Weather</h2>
             <div id="forecast-display">
+                <div id="current-display">
+                    <% if (current && current.temperature) { %>
+                        <p><strong>Current:</strong> <span id="current-temp"><%= (current.temperature * 9/5 + 32).toFixed(2) %></span>°F</p>
+                        <div id="generated-time">Observed at: <%= generatedAt.toLocaleString() %></div>
+                    <% } else { %>
+                        <p id="current-unavailable">Current temperature not available.</p>
+                    <% } %>
+                </div>
                 <% if (weather) { %>
-                    <p><strong id="forecast-name"><%= weather.name %></strong>: <span id="forecast-temp"><%= weather.temperature %></span>°<span id="forecast-unit"><%= weather.temperatureUnit %></span></p>
-                    <p><strong>for</strong> <span id="forecast-date"><%= new Date(weather.startTime).toLocaleString() %></span></p>
+                    <p><strong id="forecast-name"><%= weather.name %>'s High</strong>: <span id="forecast-temp"><%= weather.temperature %></span>°<span id="forecast-unit"><%= weather.temperatureUnit %></span></p>
+                    <p>Generated at <span id="forecast-date"><%= new Date(weather.startTime).toLocaleString() %></span></p>
                 <% } else { %>
                     <p id="forecast-unavailable">Weather data not available.</p>
                 <% } %>
