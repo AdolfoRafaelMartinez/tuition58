@@ -1,13 +1,14 @@
 
 import fetch from 'node-fetch';
 
-export type CurrentLocation = 'bergstrom' | 'centralpark';
+export type CurrentLocation = 'bergstrom' | 'centralpark' | 'seattle';
 
 export async function get_current(location: CurrentLocation = 'bergstrom'): Promise<{ temperature: number | null; error: string | null; }> {
     try {
         const stationMap: Record<CurrentLocation, string> = {
             bergstrom: 'KAUS',
             centralpark: 'KJFK',
+            seattle: 'KSEA',
         };
 
         const station = stationMap[location] || stationMap.bergstrom;

@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // update event ticker based on new forecast date
             if (eventTickerInput && data.startTime) {
                 const forecastDateObj = new Date(data.startTime);
-                const prefix = location === 'centralpark' ? 'KXHIGHNY' : 'KXHIGHAUS';
+                const prefix = location === 'centralpark' ? 'KXHIGHNY' : (location === 'seattle' ? 'KXHIGHTSEA' : 'KXHIGHAUS');
                 eventTickerInput.value = generateTickerFromDate(forecastDateObj, prefix);
 
                 // Optionally trigger market fetch if that function exists
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         // set immediate fallback ticker using today's date and proper prefix
         if (eventTickerInput) {
-            const prefix = initialLoc === 'centralpark' ? 'KXHIGHNY' : 'KXHIGHAUS';
+            const prefix = initialLoc === 'centralpark' ? 'KXHIGHNY' : (initialLoc === 'seattle' ? 'KXHIGHTSEA' : 'KXHIGHAUS');
             eventTickerInput.value = generateTickerFromDate(new Date(), prefix);
             // trigger market update immediately
             if (typeof window.fetchAndDisplayMarkets === 'function') {
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.history.replaceState({}, '', url.toString());
             // Immediately update ticker with fallback using today's date and appropriate prefix
             if (eventTickerInput) {
-                const prefix = v === 'centralpark' ? 'KXHIGHNY' : 'KXHIGHAUS';
+                const prefix = v === 'centralpark' ? 'KXHIGHNY' : (v === 'seattle' ? 'KXHIGHTSEA' : 'KXHIGHAUS');
                 eventTickerInput.value = generateTickerFromDate(new Date(), prefix);
                 // submit the market form (or call the fetch function) so the market table updates now
                 if (typeof window.fetchAndDisplayMarkets === 'function') {

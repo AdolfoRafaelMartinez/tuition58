@@ -2,13 +2,14 @@
 import fetch from 'node-fetch';
 import { Forecast, WeatherResult } from '../models/weather.js';
 
-export type ForecastLocation = 'bergstrom' | 'centralpark';
+export type ForecastLocation = 'bergstrom' | 'centralpark' | 'seattle';
 
 export async function get_forecast(location: ForecastLocation = 'bergstrom'): Promise<WeatherResult> {
     try {
         const urlMap: Record<ForecastLocation, string> = {
             bergstrom: 'https://api.weather.gov/gridpoints/EWX/156,91/forecast',
             centralpark: 'https://api.weather.gov/gridpoints/OKX/33,37/forecast',
+            seattle: 'https://api.weather.gov/gridpoints/SEW/124,67/forecast',
         };
 
         const endpoint = urlMap[location] || urlMap.bergstrom;

@@ -20,7 +20,7 @@ app.use(express.json());
 
 app.get('/', async (req, res) => {
     const reqLocation = typeof req.query.location === 'string' ? req.query.location.toLowerCase() : undefined;
-    const forecast = await get_forecast(reqLocation === 'centralpark' ? 'centralpark' : 'bergstrom');
+    const forecast = await get_forecast((reqLocation === 'centralpark' || reqLocation === 'seattle') ? reqLocation as any : 'bergstrom');
   const observed = await get_observed();
   const current = await get_current();
   const kalshi = await getKalshiBalance();
@@ -35,7 +35,7 @@ app.get('/', async (req, res) => {
 
 app.get('/api/forecast', async (req, res) => {
     const reqLocation = typeof req.query.location === 'string' ? req.query.location.toLowerCase() : undefined;
-    const forecast = await get_forecast(reqLocation === 'centralpark' ? 'centralpark' : 'bergstrom');
+    const forecast = await get_forecast((reqLocation === 'centralpark' || reqLocation === 'seattle') ? reqLocation as any : 'bergstrom');
     if (forecast.error) {
         res.status(500).json({ error: forecast.error });
     } else {
@@ -45,7 +45,7 @@ app.get('/api/forecast', async (req, res) => {
 
 app.get('/api/current', async (req, res) => {
     const reqLocation = typeof req.query.location === 'string' ? req.query.location.toLowerCase() : undefined;
-    const current = await get_current(reqLocation === 'centralpark' ? 'centralpark' : 'bergstrom');
+    const current = await get_current((reqLocation === 'centralpark' || reqLocation === 'seattle') ? reqLocation as any : 'bergstrom');
     if (current.error) {
         res.status(500).json({ error: current.error });
     } else {
@@ -76,7 +76,7 @@ app.get('/api/kalshi/markets/:event_ticker', async (req, res) => {
     const event_ticker = req.params.event_ticker;
     const marketResult = await getKalshiMarkets(event_ticker);
     const reqLocation = typeof req.query.location === 'string' ? req.query.location.toLowerCase() : undefined;
-    const forecastResult = await get_forecast(reqLocation === 'centralpark' ? 'centralpark' : 'bergstrom');
+    const forecastResult = await get_forecast((reqLocation === 'centralpark' || reqLocation === 'seattle') ? reqLocation as any : 'bergstrom');
 
     if (marketResult.error) {
         return res.status(500).json({ error: marketResult.error });
