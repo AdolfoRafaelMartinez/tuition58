@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (count > 0) {
                         const formData = new FormData(form);
                         const orderData = Object.fromEntries(formData.entries());
-                        orderData.count = count;
+                        orderData.count = 1;
                         orderData.yes_price = parseInt(orderData.yes_price, 10);
                         // Ensure ticker is preserved
                         if (!orderData.ticker) {
