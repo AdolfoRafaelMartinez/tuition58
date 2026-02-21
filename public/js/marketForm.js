@@ -27,7 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Ticker</th>
                                 <th>Contracts</th>
                                 <th>Exposure</th>
-                                <th>Yes Bid</th>
+                                <th>Invested</th>
+                                <th>Market Value</th>
                                 <th>Resting Orders</th>
                                 <th>Fees Paid</th>
                                 <th>Last Updated</th>
@@ -43,13 +44,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         const exposure = parseFloat(p.market_exposure || p.event_exposure || 0);
                         totalDisplayedExposure += exposure;
                         totalContracts += parseInt(p.position) || 0;
-                        const yesBid = marketData[p.ticker] ? marketData[p.ticker].yes_bid : 'N/A';
+                        const contractCount = parseInt(p.position) || 0;
+                        const yesAsk = marketData[p.ticker] ? marketData[p.ticker].yes_ask : 0;
+                        const invested = contractCount * yesAsk;
+                        const marketValue = contractCount * yesAsk;
                         tableHtml += `
                             <tr>
                                 <td>${p.ticker}</td>
                                 <td>${p.position}</td>
                                 <td>${exposure.toFixed(2)}</td>
-                                <td>${yesBid}</td>
+                                <td>${invested.toFixed(2)}</td>
+                                <td>${marketValue.toFixed(2)}</td>
                                 <td>${p.resting_orders_count}</td>
                                 <td>${p.fees_paid}</td>
                                 <td>${new Date(p.last_updated_ts).toLocaleString()}</td>
@@ -136,10 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <tr>
                                 <th>Ticker</th>
                                 <th>Range</th>
-                                <th>Yes Ask</th>
-                                <th>Yes Bid</th>
-                                <th>Status</th>
-                                <th>Contracts Held</th>
+                                <th>Ask</th>
+                                <th>Held</th>
                                 <th>Recommendation</th>
                             </tr>
                         </thead>
@@ -178,7 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Render recommendation as a button that proposes a one-contract order at last yes_ask
                     const recAction = displayRecommendation.toLowerCase();
                     const recBtnHtml = `<button class="rec-propose recommendation ${recAction}-recommendation" data-ticker="${market.ticker}" data-action="${recAction}" data-price="${market.yes_ask}" type="button" style="padding:6px 8px;border-radius:4px;border:none;cursor:pointer;">${displayRecommendation}</button>`;
-                    tableHtml += `<tr><td>${market.ticker}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${market.yes_ask}</td><td>${market.yes_bid}</td><td>${market.status}</td><td>${contractsHeld}</td><td class="recommendation-cell">${recBtnHtml}</td></tr>`;
+                    const topBadge = (topMarket && market.ticker === topMarket.ticker) ? ' <span style="color: gold; font-weight: bold;">★ Top</span>' : '';
+                    tableHtml += `<tr><td>${market.ticker}${topBadge}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${market.yes_ask}</td><td>${contractsHeld}</td><td class="recommendation-cell">${recBtnHtml}</td></tr>`;
                     // Only create orders for the top market if it's not already held
                     if (recommendation === 'BUY' && !hasPosition) {
                         ordersToCreate.push({ market, recommendation: displayRecommendation });
