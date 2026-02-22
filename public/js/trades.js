@@ -13,8 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const data = await response.json();
 
+            let html = `<h3>Trades for ${ticker}</h3>`;
+
             if (data.trades && data.trades.length > 0) {
-                let html = '<table class="market-table"><thead><tr><th>Yes Price</th><th>Count</th><th>Taker Side</th><th>Created At</th></tr></thead><tbody>';
+                html += '<table class="market-table"><thead><tr><th>Yes Price</th><th>Count</th><th>Taker Side</th><th>Created At</th></tr></thead><tbody>';
                 data.trades.forEach(trade => {
                     let createdAt = 'N/A';
                     if (trade.created_time) {
@@ -28,10 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     html += `</tr>`;
                 });
                 html += '</tbody></table>';
-                tradesResult.innerHTML = html;
             } else {
-                tradesResult.innerHTML = '<p>No trades found for this market.</p>';
+                html += '<p>No trades found for this market.</p>';
             }
+            tradesResult.innerHTML = html;
         } catch (error) {
             console.error('Error fetching trades:', error);
             tradesResult.innerHTML = `<p>Error fetching trades: ${error.message}</p>`;
