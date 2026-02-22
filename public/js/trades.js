@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const tradesResult = document.getElementById('trades-result');
 
@@ -15,11 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.trades && data.trades.length > 0) {
-                let html = '<ul>';
+                let html = '<table><thead><tr><th>Price</th><th>Count</th><th>Taker Side</th><th>Created At</th></tr></thead><tbody>';
                 data.trades.forEach(trade => {
-                    html += `<li>${new Date(trade.created_at).toLocaleString()}: ${trade.side} ${trade.count} shares at ${trade.price} cents</li>`;
+                    html += `<tr>`;
+                    html += `<td>${trade.price}</td>`;
+                    html += `<td>${trade.count}</td>`;
+                    html += `<td>${trade.taker_side}</td>`;
+                    html += `<td>${new Date(trade.created_at).toLocaleString()}</td>`;
+                    html += `</tr>`;
                 });
-                html += '</ul>';
+                html += '</tbody></table>';
                 tradesResult.innerHTML = html;
             } else {
                 tradesResult.innerHTML = '<p>No trades found for this market.</p>';
