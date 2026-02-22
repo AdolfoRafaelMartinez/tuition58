@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const ticker = 'KXHIGHAUS-26FEB22-B64.5'; // Hardcoded for now
 
         try {
-            // https://api.elections.kalshi.com/trade-api/v2/markets/trades?limit=100&ticker=KXHIGHAUS-26FEB22-B62.5
-            const response = await fetch(`https://api.elections.kalshi.com/trade-api/v2/markets/trades?limit=100&ticker=${ticker}`);
+            // Use the server-side proxy endpoint to avoid CORS issues
+            const response = await fetch(`/api/kalshi/trades/${ticker}`);
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
