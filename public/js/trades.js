@@ -2,14 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const tradesResult = document.getElementById('trades-result');
 
     async function fetchTrades() {
-        // This is the hardcoded ticker from the user prompt.
-        // A better implementation would be to dynamically find the market with the highest ask from the /markets endpoint.
-        const ticker = 'KXHIGHAUS-26FEB22-B64.5';
-        
+        const ticker = 'KXHIGHAUS-26FEB22-B64.5'; // Hardcoded for now
+
         try {
-            const response = await fetch(`https://api.elections.kalshi.com/trade-api/v2/markets/trades?limit=100&ticker=${ticker}`);
+            // Use the new server-side proxy endpoint
+            const response = await fetch(`/api/kalshi/trades/${ticker}`);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
 

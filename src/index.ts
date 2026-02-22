@@ -99,6 +99,28 @@ app.get('/api/kalshi/markets/:event_ticker', async (req, res) => {
     res.json(responseData);
 });
 
+app.get('/api/kalshi/trades/:ticker', async (req, res) => {
+    const { ticker } = req.params;
+    if (!ticker) {
+        return res.status(400).json({ error: 'Ticker is required' });
+    }
+
+    try {
+        const url = `https://api.elections.kalshi.com/trade-api/v2/markets/trades?limit=100&ticker=${ticker}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Kalshi API error: ${response.status} ${response.statusText}`, errorText);
+            return res.status(response.status).json({ error: `Failed to fetch trades from Kalshi API: ${response.statusText}` });
+        }
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('Error fetching from Kalshi API proxy:', error);
+        res.status(500).json({ error: 'Internal server error while fetching trades' });
+    }
+});
+
 app.get('/api/kalshi/positions', async (req, res) => {
     const positions = await getKalshiPositions();
     if (positions.error) {
