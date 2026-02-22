@@ -14,13 +14,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.trades && data.trades.length > 0) {
-                let html = '<table><thead><tr><th>Price</th><th>Count</th><th>Taker Side</th><th>Created At</th></tr></thead><tbody>';
+                let html = '<table class="market-table"><thead><tr><th>Price</th><th>Count</th><th>Taker Side</th><th>Created At</th></tr></thead><tbody>';
                 data.trades.forEach(trade => {
+                    let createdAt = 'N/A';
+                    if (trade.created_at) {
+                        createdAt = new Date(parseInt(trade.created_at.substring(0, 13))).toLocaleString();
+                    }
                     html += `<tr>`;
                     html += `<td>${trade.price}</td>`;
                     html += `<td>${trade.count}</td>`;
                     html += `<td>${trade.taker_side}</td>`;
-                    html += `<td>${new Date(trade.created_at).toLocaleString()}</td>`;
+                    html += `<td>${createdAt}</td>`;
                     html += `</tr>`;
                 });
                 html += '</tbody></table>';
