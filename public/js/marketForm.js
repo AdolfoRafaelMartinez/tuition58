@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <tr>
                                 <th>Ticker</th>
                                 <th>Range</th>
-                                <th>Ask</th>
+                                <th>Price</th>
                                 <th>Held</th>
                                 <th>Recommendation</th>
                             </tr>
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const recAction = displayRecommendation.toLowerCase();
                     const recBtnHtml = `<button class="rec-propose recommendation ${recAction}-recommendation" data-ticker="${market.ticker}" data-action="${recAction}" data-price="${market.yes_ask}" type="button" style="padding:6px 8px;border-radius:4px;border:none;cursor:pointer;">${displayRecommendation}</button>`;
                     const topBadge = (topMarket && market.ticker === topMarket.ticker) ? ' <span style="color: gold; font-weight: bold;">★ Top</span>' : '';
-                    tableHtml += `<tr><td>${market.ticker}${topBadge}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${market.yes_ask}</td><td>${contractsHeld}</td><td class="recommendation-cell">${recBtnHtml}</td></tr>`;
+                    tableHtml += `<tr><td>${market.ticker}${topBadge}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${market.last_price}</td><td>${contractsHeld}</td><td class="recommendation-cell">${recBtnHtml}</td></tr>`;
                     // Only create orders for the top market if it's not already held
                     if (recommendation === 'BUY' && !hasPosition) {
                         ordersToCreate.push({ market, recommendation: displayRecommendation });
