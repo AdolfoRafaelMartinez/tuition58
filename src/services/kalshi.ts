@@ -43,7 +43,6 @@ export async function getKalshiBalance(): Promise<KalshiBalanceResult> {
         const baseUrl = 'https://api.elections.kalshi.com'
         const url_path = '/trade-api/v2/portfolio/balance';
 
-        // Strip query parameters from path before signing
         const pathWithoutQuery = url_path.split('?')[0];
         const msgString = timestampStr + method + pathWithoutQuery;
         const sig = signPssText(privateKeyPem, msgString);
@@ -58,9 +57,15 @@ export async function getKalshiBalance(): Promise<KalshiBalanceResult> {
         const responseData = await response.json();
         
         if (responseData && typeof responseData.balance === 'number') {
+            const positions = await getKalshiPositions();
+            let portfolioValue = 0;
+            if (positions && positions.data && positions.data.user_positions) {
+                portfolioValue = positions.data.user_positions.reduce((acc, position) => acc + (position.position * position.market_price), 0);
+            }
             return {
                 data: {
-                    balance: responseData.balance
+                    balance: responseData.balance,
+                    portfolio_value: portfolioValue
                 },
                 error: null,
             };
