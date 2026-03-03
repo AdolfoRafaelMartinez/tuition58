@@ -19,28 +19,11 @@ app.set('view engine', 'ejs');
 app.use(express.json());
 
 app.get('/', async (req, res) => {
-    const reqLocation = typeof req.query.location === 'string' ? req.query.location.toLowerCase() : undefined;
-    const forecast = await get_forecast((reqLocation === 'centralpark' || reqLocation === 'seattle') ? reqLocation as any : 'bergstrom');
-  const observed = await get_observed();
-  const current = await get_current();
-  const kalshi = await getKalshiBalance();
-    const positions = await getKalshiPositions();
-    
-    let portfolioValue = 0;
-    if (positions.data && positions.data.user_positions) {
-        portfolioValue = positions.data.user_positions.reduce((total, position) => {
-            return total + (position.position * position.market_price);
-        }, 0);
-    }
-
-  res.render('index', { 
-    weather: forecast.data, 
-    observed: observed, 
-    current: current, 
-    kalshi: kalshi.data,
-    portfolioValue: portfolioValue,
-    generatedAt: new Date()
-  });
+    const kalshi = await getKalshiBalance();
+    res.render('index', {
+        kalshi: kalshi.data,
+        generatedAt: new Date()
+    });
 });
 
 app.get('/api/forecast', async (req, res) => {

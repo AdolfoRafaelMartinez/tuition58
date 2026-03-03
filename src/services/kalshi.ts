@@ -56,16 +56,11 @@ export async function getKalshiBalance(): Promise<KalshiBalanceResult> {
         const response = await fetch(baseUrl + url_path, { headers });
         const responseData = await response.json();
         
-        if (responseData && typeof responseData.balance === 'number') {
-            const positions = await getKalshiPositions();
-            let portfolioValue = 0;
-            if (positions && positions.data && positions.data.user_positions) {
-                portfolioValue = positions.data.user_positions.reduce((acc, position) => acc + (position.position * position.market_price), 0);
-            }
+        if (responseData) {
             return {
                 data: {
                     balance: responseData.balance,
-                    portfolio_value: portfolioValue
+                    portfolio_value: responseData.portfolio_value
                 },
                 error: null,
             };
