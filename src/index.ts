@@ -24,11 +24,21 @@ app.get('/', async (req, res) => {
   const observed = await get_observed();
   const current = await get_current();
   const kalshi = await getKalshiBalance();
+    const positions = await getKalshiPositions();
+    
+    let portfolioValue = 0;
+    if (positions.data && positions.data.user_positions) {
+        portfolioValue = positions.data.user_positions.reduce((total, position) => {
+            return total + (position.position * position.market_price);
+        }, 0);
+    }
+
   res.render('index', { 
     weather: forecast.data, 
     observed: observed, 
     current: current, 
     kalshi: kalshi.data,
+    portfolioValue: portfolioValue,
     generatedAt: new Date()
   });
 });
