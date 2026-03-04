@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const placeAllOrdersButton = document.getElementById('place-all-orders');
     const container = document.querySelector('.container');
     let marketData = {};
+    let oldMarketData = {};
 
     const fetchAndDisplayPositions = async () => {
         let positions = [];
@@ -96,6 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.disabled = true;
         orderFormsContainer.innerHTML = ''; // Clear previous forms
 
+        oldMarketData = { ...marketData };
+        marketData = {};
+
         try {
             // include currently selected forecast location so server returns matching forecast_temp
             let location = 'bergstrom';
@@ -141,7 +145,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             <tr>
                                 <th>Ticker</th>
                                 <th>Range</th>
+                                <th>Old Price</th>
                                 <th>Price</th>
+                                <th>Delta</th>
                                 <th>Held</th>
                                 <th>Recommendation</th>
                             </tr>
@@ -178,11 +184,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const hasPosition = existingPositions.has(market.ticker);
                     const contractsHeld = contractsByTicker[market.ticker] || 0;
+                    const oldPrice = oldMarketData[market.ticker] ? oldMarketData[market.ticker].last_price : 'N/A';
+                    const newPrice = market.last_price;
+                    const delta = (oldPrice !== 'N/A' && newPrice !== 'N/A') ? newPrice - oldPrice : 'N/A';
+
                     // Render recommendation as a button that proposes a one-contract order at last yes_ask
                     const recAction = displayRecommendation.toLowerCase();
                     const recBtnHtml = `<button class="rec-propose recommendation ${recAction}-recommendation" data-ticker="${market.ticker}" data-action="${recAction}" data-price="${market.yes_ask}" type="button" style="padding:6px 8px;border-radius:4px;border:none;cursor:pointer;">${displayRecommendation}</button>`;
                     const topBadge = (topMarket && market.ticker === topMarket.ticker) ? ' <span style="color: gold; font-weight: bold;">★ Top</span>' : '';
-                    tableHtml += `<tr><td>${market.ticker}${topBadge}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${market.last_price}</td><td>${contractsHeld}</td><td class="recommendation-cell">${recBtnHtml}</td></tr>`;
+                    tableHtml += `<tr><td>${market.ticker}${topBadge}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${oldPrice}</td><td>${newPrice}</td><td>${delta}</td><td>${contractsHeld}</td><td class="recommendation-cell">${recBtnHtml}</td></tr>`;
                     // Only create orders for the top market if it's not already held
                     if (recommendation === 'BUY' && !hasPosition) {
                         ordersToCreate.push({ market, recommendation: displayRecommendation });
@@ -315,4 +325,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial load of positions
     fetchAndDisplayPositions();
+    fetchAndDisplayMarkets();
 });
