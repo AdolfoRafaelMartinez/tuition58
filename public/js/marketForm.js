@@ -154,16 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         </thead>
                         <tbody>
                 `;
-                // Determine market with greatest yes_ask (recommend only that market)
-                let topMarket = null;
-                let maxYesAsk = -Infinity;
-                (marketsData.markets || []).forEach(m => {
-                    const yesAsk = typeof m.yes_ask === 'number' ? m.yes_ask : parseFloat(m.yes_ask);
-                    if (!isNaN(yesAsk) && yesAsk > maxYesAsk) {
-                        maxYesAsk = yesAsk;
-                        topMarket = m;
-                    }
-                });
 
                 const ordersToCreate = [];
 
@@ -178,22 +168,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 marketsData.markets.forEach(market => {
-                    // Recommend BUY only for the topMarket (highest yes_ask), SELL otherwise
-                    let recommendation = (topMarket && market.ticker === topMarket.ticker) ? 'BUY' : 'SELL';
-                    let displayRecommendation = recommendation;
-
-                    const hasPosition = existingPositions.has(market.ticker);
-                    const contractsHeld = contractsByTicker[market.ticker] || 0;
                     const oldPrice = oldMarketData[market.ticker] ? oldMarketData[market.ticker].last_price : 'N/A';
                     const newPrice = market.last_price;
                     const delta = (oldPrice !== 'N/A' && newPrice !== 'N/A') ? newPrice - oldPrice : 'N/A';
 
-                    // Render recommendation as a button that proposes a one-contract order at last yes_ask
+                    let recommendation = (delta !== 'N/A' && delta > 3) ? 'BUY' : 'SELL';
+                    let displayRecommendation = recommendation;
+
+                    const hasPosition = existingPositions.has(market.ticker);
+                    const contractsHeld = contractsByTicker[market.ticker] || 0;
+
                     const recAction = displayRecommendation.toLowerCase();
                     const recBtnHtml = `<button class="rec-propose recommendation ${recAction}-recommendation" data-ticker="${market.ticker}" data-action="${recAction}" data-price="${market.yes_ask}" type="button" style="padding:6px 8px;border-radius:4px;border:none;cursor:pointer;">${displayRecommendation}</button>`;
-                    const topBadge = (topMarket && market.ticker === topMarket.ticker) ? ' <span style="color: gold; font-weight: bold;">★ Top</span>' : '';
-                    tableHtml += `<tr><td>${market.ticker}${topBadge}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${oldPrice}</td><td>${newPrice}</td><td>${delta}</td><td>${contractsHeld}</td><td class="recommendation-cell">${recBtnHtml}</td></tr>`;
-                    // Only create orders for the top market if it's not already held
+                    tableHtml += `<tr><td>${market.ticker}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${oldPrice}</td><td>${newPrice}</td><td>${delta}</td><td>${contractsHeld}</td><td class="recommendation-cell">${recBtnHtml}</td></tr>`;
+
                     if (recommendation === 'BUY' && !hasPosition) {
                         ordersToCreate.push({ market, recommendation: displayRecommendation });
                     }
@@ -201,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 tableHtml += `</tbody></table>`;
 
-                // (No top-market banner — recommendations use the single highest yes_ask market)
                 const kalshiBalance = parseFloat(container.dataset.balance) || 0;
                 const balanceToTrade = kalshiBalance / 2;
                 let orderFormsHtml = '';
@@ -248,17 +235,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 marketResult.innerHTML = tableHtml;
                 orderFormsContainer.innerHTML = orderFormsHtml;
 
-                // Attach handlers so clicking a recommendation button creates/updates a one-contract proposed order
                 const recButtons = marketResult.querySelectorAll('.rec-propose');
                 recButtons.forEach(btn => {
                     btn.addEventListener('click', () => {
                         const ticker = btn.dataset.ticker;
-                        const action = btn.dataset.action; // 'buy' or 'sell'
+                        const action = btn.dataset.action;
                         const price = parseInt(btn.dataset.price, 10) || 0;
 
                         const existingForm = orderFormsContainer.querySelector(`[data-ticker="${ticker}"]`);
                         if (existingForm) {
-                            // update existing form to requested action, price, and ensure count >= 1
                             const actionSelect = existingForm.querySelector('select[name="action"]');
                             if (actionSelect) actionSelect.value = action;
                             const priceInput = existingForm.querySelector('input[name="yes_price"]');
@@ -266,14 +251,28 @@ document.addEventListener('DOMContentLoaded', () => {
                             const countInput = existingForm.querySelector('input[name="count"]');
                             if (countInput) countInput.value = Math.max(1, parseInt(countInput.value || '0', 10));
                         } else {
-                            // create new one-contract form for this market
-                            const formHtml = `\n                                <form class="order-form-dynamic" data-ticker="${ticker}" style="position: relative; padding-top: 20px;">\n                                    <button type="button" class="delete-form" title="Delete Order" style="position: absolute; top: 0; right: 0;">🗑️</button>\n                                    <h4>${ticker}</h4>\n                                    <input type="hidden" name="ticker" value="${ticker}">\n                                    <div class="form-group"><label>Action:</label><select name="action">\n                                        <option value="buy" ${action === 'buy' ? 'selected' : ''}>Buy</option>\n                                        <option value="sell" ${action === 'sell' ? 'selected' : ''}>Sell</option>\n                                    </select></div>\n                                    <div class="form-group"><label>Side:</label><select name="side">\n                                        <option value="yes" selected>Yes</option>\n                                        <option value="no">No</option>\n                                    </select></div>\n                                    <div class="form-group"><label>Price (cents):</label><input type="number" name="yes_price" value="${price}" min="1" max="99" required></div>\n                                    <div class="form-group"><label>Count:</label><input type="number" name="count" value="1" min="0"></div>\n                                </form>\n                            `;
+                            const formHtml = `
+                                <form class="order-form-dynamic" data-ticker="${ticker}" style="position: relative; padding-top: 20px;">
+                                    <button type="button" class="delete-form" title="Delete Order" style="position: absolute; top: 0; right: 0;">🗑️</button>
+                                    <h4>${ticker}</h4>
+                                    <input type="hidden" name="ticker" value="${ticker}">
+                                    <div class="form-group"><label>Action:</label><select name="action">
+                                        <option value="buy" ${action === 'buy' ? 'selected' : ''}>Buy</option>
+                                        <option value="sell" ${action === 'sell' ? 'selected' : ''}>Sell</option>
+                                    </select></div>
+                                    <div class="form-group"><label>Side:</label><select name="side">
+                                        <option value="yes" selected>Yes</option>
+                                        <option value="no">No</option>
+                                    </select></div>
+                                    <div class="form-group"><label>Price (cents):</label><input type="number" name="yes_price" value="${price}" min="1" max="99" required></div>
+                                    <div class="form-group"><label>Count:</label><input type="number" name="count" value="1" min="0"></div>
+                                </form>
+                            `;
 
                             orderFormsContainer.insertAdjacentHTML('beforeend', formHtml);
                             placeAllOrdersButton.style.display = 'block';
 
-                            // attach delete listener for the new form
-                            const newDelete = orderFormsContainer.querySelector('[data-ticker="' + ticker + '"] .delete-form');
+                            const newDelete = orderFormsContainer.querySelector(`[data-ticker="${ticker}"] .delete-form');
                             if (newDelete) {
                                 newDelete.addEventListener('click', () => {
                                     newDelete.closest('form').remove();
@@ -285,22 +284,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                 });
-                // (propose buttons removed)
+
                 placeAllOrdersButton.style.display = orderFormsHtml.length > 0 ? 'block' : 'none';
 
-                // Attach delete listeners for order forms
                 const deleteFormButtons = orderFormsContainer.querySelectorAll('.delete-form');
                 deleteFormButtons.forEach(button => {
                     button.addEventListener('click', () => {
                         button.closest('form').remove();
-                        // Hide button if no forms left
                         if (orderFormsContainer.querySelectorAll('.order-form-dynamic').length === 0) {
                             placeAllOrdersButton.style.display = 'none';
                         }
                     });
                 });
-
-                // (propose-top-market removed)
 
             } else {
                 marketResult.innerHTML = `<p>Error: ${marketsData.error}</p>`;
@@ -323,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initial load of positions
     fetchAndDisplayPositions();
     fetchAndDisplayMarkets();
 });
