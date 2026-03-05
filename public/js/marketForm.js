@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('.container');
     let marketData = {};
     let oldMarketData = {};
+    let marketPriceHistory = {};
+    let charts = {};
 
     const fetchAndDisplayPositions = async () => {
         let positions = [];
@@ -101,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
         marketData = {};
 
         try {
-            // include currently selected forecast location so server returns matching forecast_temp
             let location = 'bergstrom';
             const locSelect = document.getElementById('location-select');
             if (locSelect && locSelect.value) {
@@ -115,8 +116,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const marketsData = await marketsResponse.json();
 
             if (marketsResponse.ok) {
+                const now = new Date();
                 marketsData.markets.forEach(market => {
                     marketData[market.ticker] = market;
+                    if (!marketPriceHistory[market.ticker]) {
+                        marketPriceHistory[market.ticker] = [];
+                    }
+                    marketPriceHistory[market.ticker].push({ time: now, price: market.last_price });
+                    if (marketPriceHistory[market.ticker].length > 20) {
+                        marketPriceHistory[market.ticker].shift();
+                    }
                 });
 
                 const { positions: allPositions, totalDisplayedExposure } = await fetchAndDisplayPositions();
@@ -131,21 +140,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                let tuitionMoneySection = document.getElementById('tuition-money-section');
-                if (!tuitionMoneySection) {
-                    tuitionMoneySection = document.createElement('div');
-                    tuitionMoneySection.id = 'tuition-money-section';
-                    tuitionMoneySection.className = 'section';
-                    container.appendChild(tuitionMoneySection);
-                }
-
                 let timerDisplay = document.getElementById('timer-display');
                 if (!timerDisplay) {
                     timerDisplay = document.createElement('div');
                     timerDisplay.id = 'timer-display';
                     marketResult.before(timerDisplay);
                 }
-                const now = new Date();
                 timerDisplay.textContent = `Last execution: ${now.toLocaleTimeString()}`;
 
                 let tableHtml = `
@@ -154,9 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <tr>
                                 <th>Ticker</th>
                                 <th>Range</th>
-                                <th>Old Price</th>
                                 <th>Price</th>
-                                <th>Delta</th>
+                                <th>Chart</th>
                                 <th>Held</th>
                                 <th>Recommendation</th>
                             </tr>
@@ -164,155 +163,59 @@ document.addEventListener('DOMContentLoaded', () => {
                         <tbody>
                 `;
 
-                const ordersToCreate = [];
-
-                // Create a map of ticker to contract count for quick lookup
-                const contractsByTicker = {};
-                if (allPositions.length > 0) {
-                    allPositions.forEach(p => {
-                        if (p && p.ticker && String(p.ticker).trim() !== '') {
-                            contractsByTicker[p.ticker] = parseInt(p.position) || 0;
-                        }
-                    });
-                }
-
                 marketsData.markets.forEach(market => {
-                    const oldPrice = oldMarketData[market.ticker] ? oldMarketData[market.ticker].last_price : 'N/A';
-                    const newPrice = market.last_price;
-                    const delta = (oldPrice !== 'N/A' && newPrice !== 'N/A') ? newPrice - oldPrice : 'N/A';
+                    const contractsHeld = allPositions.find(p => p.ticker === market.ticker)?.position || 0;
+                    const recommendation = 'SELL'; // Simplified
+                    const recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_ask}" type="button">SELL</button>`;
 
-                    let recommendation = (delta !== 'N/A' && delta > 3) ? 'BUY' : 'SELL';
-                    let displayRecommendation = recommendation;
-
-                    const hasPosition = existingPositions.has(market.ticker);
-                    const contractsHeld = contractsByTicker[market.ticker] || 0;
-
-                    const recAction = displayRecommendation.toLowerCase();
-                    const recBtnHtml = `<button class="rec-propose recommendation ${recAction}-recommendation" data-ticker="${market.ticker}" data-action="${recAction}" data-price="${market.yes_ask}" type="button" style="padding:6px 8px;border-radius:4px;border:none;cursor:pointer;">${displayRecommendation}</button>`;
-                    tableHtml += `<tr><td>${market.ticker}</td><td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td><td>${oldPrice}</td><td>${newPrice}</td><td>${delta}</td><td>${contractsHeld}</td><td class="recommendation-cell">${recBtnHtml}</td></tr>`;
-
-                    if (recommendation === 'BUY' && !hasPosition) {
-                        ordersToCreate.push({ market, recommendation: displayRecommendation });
-                    }
+                    tableHtml += `
+                        <tr>
+                            <td>${market.ticker}</td>
+                            <td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td>
+                            <td>${market.last_price}</td>
+                            <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
+                            <td>${contractsHeld}</td>
+                            <td class="recommendation-cell">${recBtnHtml}</td>
+                        </tr>
+                    `;
                 });
 
                 tableHtml += `</tbody></table>`;
-
-                const kalshiBalance = parseFloat(container.dataset.balance) || 0;
-                const balanceToTrade = kalshiBalance / 2;
-                let orderFormsHtml = '';
-                const numberOfOrders = ordersToCreate.length;
-
-                if (numberOfOrders > 0) {
-                    const allocationPerOrder = balanceToTrade / numberOfOrders;
-
-                    ordersToCreate.forEach(orderInfo => {
-                        const { market, recommendation } = orderInfo;
-                        const action = recommendation.toLowerCase();
-                        const price = action === 'buy' ? market.yes_ask : market.yes_bid;
-                        
-                        let costPerContract = action === 'buy' ? price : 100 - price;
-
-                        let count = 0;
-                        if (costPerContract > 0) {
-                            count = Math.floor(allocationPerOrder / costPerContract);
-                        }
-                        count = Math.max(0, count);
-
-                        orderFormsHtml += `
-                            <form class="order-form-dynamic" data-ticker="${market.ticker}" style="position: relative; padding-top: 20px;">
-                                <button type="button" class="delete-form" title="Delete Order" style="position: absolute; top: 0; right: 0;">🗑️</button>
-                                <h4>${market.ticker}</h4>
-                                <div class="form-group"><label>Action:</label><select name="action">
-                                    <option value="buy" ${action === 'buy' ? 'selected' : ''}>Buy</option>
-                                    <option value="sell" ${action === 'sell' ? 'selected' : ''}>Sell</option>
-                                </select></div>
-                                <div class="form-group"><label>Side:</label><select name="side">
-                                    <option value="yes" selected>Yes</option>
-                                    <option value="no">No</option>
-                                </select></div>
-                                <div class="form-group"><label>Price (cents):</label><input type="number" name="yes_price" value="${price}" min="1" max="99" required></div>
-                                <div class="form-group"><label>Count:</label><input type="number" name="count" value="${count}" min="0"></div>
-                            </form>
-                        `;
-                    });
-                }
-
-                if (marketsData.market_source_url) tableHtml += `<p class="citation">Market data from: <a href="${marketsData.market_source_url}" target="_blank">${marketsData.market_source_url}</a></p>`;
-                if (marketsData.forecast_source) tableHtml += `<p class="citation">Forecast data from: ${marketsData.forecast_source}</p>`;
-
                 marketResult.innerHTML = tableHtml;
-                orderFormsContainer.innerHTML = orderFormsHtml;
 
-                const recButtons = marketResult.querySelectorAll('.rec-propose');
-                recButtons.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const ticker = btn.dataset.ticker;
-                        const action = btn.dataset.action;
-                        const price = parseInt(btn.dataset.price, 10) || 0;
-
-                        const existingForm = orderFormsContainer.querySelector(`[data-ticker="${ticker}"]`);
-                        if (existingForm) {
-                            const actionSelect = existingForm.querySelector('select[name="action"]');
-                            if (actionSelect) actionSelect.value = action;
-                            const priceInput = existingForm.querySelector('input[name="yes_price"]');
-                            if (priceInput) priceInput.value = price;
-                            const countInput = existingForm.querySelector('input[name="count"]');
-                            if (countInput) countInput.value = Math.max(1, parseInt(countInput.value || '0', 10));
-                        } else {
-                            const formHtml = `
-                                <form class="order-form-dynamic" data-ticker="${ticker}" style="position: relative; padding-top: 20px;">
-                                    <button type="button" class="delete-form" title="Delete Order" style="position: absolute; top: 0; right: 0;">🗑️</button>
-                                    <h4>${ticker}</h4>
-                                    <input type="hidden" name="ticker" value="${ticker}">
-                                    <div class="form-group"><label>Action:</label><select name="action">
-                                        <option value="buy" ${action === 'buy' ? 'selected' : ''}>Buy</option>
-                                        <option value="sell" ${action === 'sell' ? 'selected' : ''}>Sell</option>
-                                    </select></div>
-                                    <div class="form-group"><label>Side:</label><select name="side">
-                                        <option value="yes" selected>Yes</option>
-                                        <option value="no">No</option>
-                                    </select></div>
-                                    <div class="form-group"><label>Price (cents):</label><input type="number" name="yes_price" value="${price}" min="1" max="99" required></div>
-                                    <div class="form-group"><label>Count:</label><input type="number" name="count" value="1" min="0"></div>
-                                </form>
-                            `;
-
-                            orderFormsContainer.insertAdjacentHTML('beforeend', formHtml);
-                            placeAllOrdersButton.style.display = 'block';
-
-                            const newDelete = orderFormsContainer.querySelector(`[data-ticker="${ticker}"] .delete-form`);
-                            if (newDelete) {
-                                newDelete.addEventListener('click', () => {
-                                    newDelete.closest('form').remove();
-                                    if (orderFormsContainer.querySelectorAll('.order-form-dynamic').length === 0) {
-                                        placeAllOrdersButton.style.display = 'none';
-                                    }
-                                });
-                            }
-                        }
-                    });
-                });
-
-                placeAllOrdersButton.style.display = orderFormsHtml.length > 0 ? 'block' : 'none';
-
-                const deleteFormButtons = orderFormsContainer.querySelectorAll('.delete-form');
-                deleteFormButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        button.closest('form').remove();
-                        if (orderFormsContainer.querySelectorAll('.order-form-dynamic').length === 0) {
-                            placeAllOrdersButton.style.display = 'none';
+                marketsData.markets.forEach(market => {
+                    const ctx = document.getElementById(`chart-${market.ticker}`).getContext('2d');
+                    if (charts[market.ticker]) {
+                        charts[market.ticker].destroy();
+                    }
+                    charts[market.ticker] = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: marketPriceHistory[market.ticker].map(p => p.time.toLocaleTimeString()),
+                            datasets: [{
+                                label: 'Price',
+                                data: marketPriceHistory[market.ticker].map(p => p.price),
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1,
+                                fill: false,
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                x: { display: false },
+                                y: { display: false }
+                            },
+                            plugins: { legend: { display: false } }
                         }
                     });
                 });
 
             } else {
                 marketResult.innerHTML = `<p>Error: ${marketsData.error}</p>`;
-                placeAllOrdersButton.style.display = 'none';
             }
         } catch (error) {
             marketResult.innerHTML = `<p>Error: ${error.message}</p>`;
-            placeAllOrdersButton.style.display = 'none';
         } finally {
             submitButton.disabled = false;
         }
@@ -328,7 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetchAndDisplayPositions();
-
-    setInterval(fetchAndDisplayMarkets, 5000);
+    setInterval(fetchAndDisplayMarkets, 60000);
     fetchAndDisplayMarkets();
 });

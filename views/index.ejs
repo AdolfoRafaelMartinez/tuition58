@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalshi Trade Bot</title>
     <link rel="stylesheet" href="/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container" data-balance="<%= kalshi ? kalshi.balance : 0 %>">
@@ -30,9 +31,6 @@
                 <input type="text" id="event-ticker" name="event-ticker" value="KXHIGHAUS-26MAR05" required>
                 <button type="submit">Get Markets</button>
             </form>
-            <div class="section">
-                <div id="timer-display"></div>
-            </div>
             <div id="market-result"></div>
         </div>
         <div class="section">
@@ -49,6 +47,29 @@
     <script src="/js/weatherSelector.js"></script>
     <script src="/js/orderForm.js"></script>
     <script src="/js/marketForm.js"></script>
-    <script src="/js/limits.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/api/kalshi/limits')
+                .then(response => response.json())
+                .then(data => {
+                    const limitsResult = document.getElementById('limits-result');
+                    if (data.account_limits) {
+                        const limits = data.account_limits;
+                        const limitsHtml = `
+                            <p><strong>Max Open Position Volume:</strong> ${limits.max_open_position_volume}</p>
+                            <p><strong>Max Total Position Volume:</strong> ${limits.max_total_position_volume}</p>
+                        `;
+                        limitsResult.innerHTML = limitsHtml;
+                    } else {
+                        limitsResult.innerHTML = '<p>Account limit data not available.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching account limits:', error);
+                    const limitsResult = document.getElementById('limits-result');
+                    limitsResult.innerHTML = '<p>Error fetching account limit data.</p>';
+                });
+        });
+    </script>
 </body>
 </html>
