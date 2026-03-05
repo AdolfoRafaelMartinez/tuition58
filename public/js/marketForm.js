@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const placeAllOrdersButton = document.getElementById('place-all-orders');
     const container = document.querySelector('.container');
     let marketData = {};
-    let oldMarketData = {};
     let marketPriceHistory = {};
     let charts = {};
 
@@ -99,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.disabled = true;
         orderFormsContainer.innerHTML = ''; // Clear previous forms
 
-        oldMarketData = { ...marketData };
         marketData = {};
 
         try {
@@ -156,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Range</th>
                                 <th>Price</th>
                                 <th>Chart</th>
+                                <th>Delta</th>
                                 <th>Held</th>
                                 <th>Recommendation</th>
                             </tr>
@@ -167,6 +166,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const contractsHeld = allPositions.find(p => p.ticker === market.ticker)?.position || 0;
                     const recommendation = 'SELL'; // Simplified
                     const recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_ask}" type="button">SELL</button>`;
+                    
+                    const history = marketPriceHistory[market.ticker];
+                    let priceChange = 0;
+                    if (history && history.length > 1) {
+                        const previousPrice = history[history.length - 2].price;
+                        priceChange = market.last_price - previousPrice;
+                    }
+
+                    const priceChangeDisplay = priceChange.toFixed(2);
+                    const priceChangeClass = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
 
                     tableHtml += `
                         <tr>
@@ -174,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td>
                             <td>${market.last_price}</td>
                             <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
+                            <td class="${priceChangeClass}">${priceChangeDisplay}</td>
                             <td>${contractsHeld}</td>
                             <td class="recommendation-cell">${recBtnHtml}</td>
                         </tr>

@@ -295,3 +295,15 @@ button:hover {
 .recommendation.sell-recommendation {
     color: red !important;
 }
+
+.positive {
+    color: green;
+}
+
+.negative {
+    color: red;
+}
+
+.neutral {
+    color: gray;
+}
