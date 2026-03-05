@@ -1,9 +1,6 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from 'url';
-import { get_forecast } from "./services/forecast.js";
-import { get_observed } from "./services/observed.js";
-import { get_current } from "./services/current.js";
 import { getKalshiBalance, placeKalshiOrder, getKalshiMarkets, getKalshiPositions, getKalshiLimits } from "./services/kalshi.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -26,35 +23,6 @@ app.get('/', async (req, res) => {
     });
 });
 
-app.get('/api/forecast', async (req, res) => {
-    const reqLocation = typeof req.query.location === 'string' ? req.query.location.toLowerCase() : undefined;
-    const forecast = await get_forecast((reqLocation === 'centralpark' || reqLocation === 'seattle') ? reqLocation as any : 'bergstrom');
-    if (forecast.error) {
-        res.status(500).json({ error: forecast.error });
-    } else {
-        res.json(forecast.data);
-    }
-});
-
-app.get('/api/current', async (req, res) => {
-    const reqLocation = typeof req.query.location === 'string' ? req.query.location.toLowerCase() : undefined;
-    const current = await get_current((reqLocation === 'centralpark' || reqLocation === 'seattle') ? reqLocation as any : 'bergstrom');
-    if (current.error) {
-        res.status(500).json({ error: current.error });
-    } else {
-        res.json({ temperature: current.temperature });
-    }
-});
-
-app.get('/api/observed', async (req, res) => {
-    const cliWeather = await get_observed();
-    if (cliWeather.error) {
-        res.status(500).json({ error: cliWeather.error });
-    } else {
-        res.json(cliWeather);
-    }
-});
-
 app.post('/api/kalshi/order', async (req, res) => {
     const orderParams = req.body;
     const result = await placeKalshiOrder(orderParams);
@@ -68,25 +36,14 @@ app.post('/api/kalshi/order', async (req, res) => {
 app.get('/api/kalshi/markets/:event_ticker', async (req, res) => {
     const event_ticker = req.params.event_ticker;
     const marketResult = await getKalshiMarkets(event_ticker);
-    const reqLocation = typeof req.query.location === 'string' ? req.query.location.toLowerCase() : undefined;
-    const forecastResult = await get_forecast((reqLocation === 'centralpark' || reqLocation === 'seattle') ? reqLocation as any : 'bergstrom');
 
     if (marketResult.error) {
         return res.status(500).json({ error: marketResult.error });
     }
 
-    // If forecast fails, we can still return market data without recommendations
-    if (forecastResult.error || !forecastResult.data) {
-        return res.json(marketResult.data);
-    }
-
-    // The forecast temperature is already a number
-    const forecast_temp = forecastResult.data.temperature;
-
     // Combine the market data with the forecast temperature
     const responseData = {
-        ...marketResult.data,
-        forecast_temp: forecast_temp
+        ...marketResult.data
     };
 
     res.json(responseData);
