@@ -139,6 +139,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     container.appendChild(tuitionMoneySection);
                 }
 
+                let timerDisplay = document.getElementById('timer-display');
+                if (!timerDisplay) {
+                    timerDisplay = document.createElement('div');
+                    timerDisplay.id = 'timer-display';
+                    marketResult.before(timerDisplay);
+                }
+                const now = new Date();
+                timerDisplay.textContent = `Last execution: ${now.toLocaleTimeString()}`;
+
                 let tableHtml = `
                     <table class="market-table">
                         <thead>
@@ -319,5 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetchAndDisplayPositions();
+
+    setInterval(fetchAndDisplayMarkets, 5000);
     fetchAndDisplayMarkets();
 });
