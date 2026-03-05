@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             orderFormsContainer.insertAdjacentHTML('beforeend', formHtml);
                             placeAllOrdersButton.style.display = 'block';
 
-                            const newDelete = orderFormsContainer.querySelector(`[data-ticker="${ticker}"] .delete-form');
+                            const newDelete = orderFormsContainer.querySelector(`[data-ticker="${ticker}"] .delete-form`);
                             if (newDelete) {
                                 newDelete.addEventListener('click', () => {
                                     newDelete.closest('form').remove();

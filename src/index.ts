@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import { get_forecast } from "./services/forecast.js";
 import { get_observed } from "./services/observed.js";
 import { get_current } from "./services/current.js";
-import { getKalshiBalance, placeKalshiOrder, getKalshiMarkets, getKalshiPositions } from "./services/kalshi.js";
+import { getKalshiBalance, placeKalshiOrder, getKalshiMarkets, getKalshiPositions, getKalshiLimits } from "./services/kalshi.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,6 +98,15 @@ app.get('/api/kalshi/positions', async (req, res) => {
         res.status(500).json({ error: positions.error });
     } else {
         res.json(positions.data);
+    }
+});
+
+app.get('/api/kalshi/limits', async (req, res) => {
+    const limits = await getKalshiLimits();
+    if (limits.error) {
+        res.status(500).json({ error: limits.error });
+    } else {
+        res.json(limits.data);
     }
 });
 
