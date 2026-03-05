@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = parseInt(process.env.PORT) || process.argv[3] || 8080;
+const port = parseInt(process.env.PORT) || process.argv[3] || 3000;
 
 app.set('views', path.join(__dirname, '../views'));
 app.use(express.static(path.join(__dirname, '../public')));
