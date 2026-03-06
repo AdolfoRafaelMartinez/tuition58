@@ -356,7 +356,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         earnedCell.textContent = soldPrice - displayPrice;
                     }
                 } else if (action === 'sell') {
-                    soldPrices[ticker] = displayPricen                    const soldCell = row.querySelector('.sold-price');
+                    soldPrices[ticker] = displayPrice;
+                    const soldCell = row.querySelector('.sold-price');
                     if (soldCell) soldCell.textContent = displayPrice;
                     const boughtPrice = boughtPrices[ticker];
                     if (boughtPrice !== undefined && earnedCell) {
