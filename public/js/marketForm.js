@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     timerDisplay.id = 'timer-display';
                     marketResult.before(timerDisplay);
                 }
-                timerDisplay.textContent = `Last execution: ${now.toLocaleTimeString()}`;
+                timerDisplay.textContent = `Last execution: ${now.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'})}`;
 
                 let tableHtml = `
                     <table class="market-table">
@@ -246,6 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetchAndDisplayPositions();
-    setInterval(fetchAndDisplayMarkets, 5000);
+    setInterval(fetchAndDisplayMarkets, 60000);
     fetchAndDisplayMarkets();
 });
