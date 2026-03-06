@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     timerDisplay.id = 'timer-display';
                     marketResult.before(timerDisplay);
                 }
-                timerDisplay.textContent = `${now.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', second: '2-digit'})}`;
+                timerDisplay.textContent = `Last execution: ${now.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', second: '2-digit'})}`;
 
                 let tableHtml = `
                     <table class="market-table">
@@ -272,35 +272,38 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     marketResult.addEventListener('click', (event) => {
-        if (event.target.classList.contains('rec-propose')) {
-            const button = event.target;
+        const button = event.target.closest('.rec-propose');
+        if (button) {
             const ticker = button.dataset.ticker;
             const action = button.dataset.action;
-            const price = parseInt(button.dataset.price, 10);
+            const orderPrice = parseInt(button.dataset.price, 10);
     
             const row = button.closest('tr');
             if (row) {
+                const priceCell = row.cells[2];
+                const displayPrice = parseInt(priceCell.textContent, 10);
+
                 const earnedCell = row.querySelector('.earned-value');
                 if (action === 'buy') {
-                    boughtPrices[ticker] = price;
+                    boughtPrices[ticker] = displayPrice;
                     const boughtCell = row.querySelector('.bought-price');
-                    if (boughtCell) boughtCell.textContent = price;
+                    if (boughtCell) boughtCell.textContent = displayPrice;
                     const soldPrice = soldPrices[ticker];
                     if (soldPrice !== undefined && earnedCell) {
-                        earnedCell.textContent = soldPrice - price;
+                        earnedCell.textContent = soldPrice - displayPrice;
                     }
                 } else if (action === 'sell') {
-                    soldPrices[ticker] = price;
+                    soldPrices[ticker] = displayPrice;
                     const soldCell = row.querySelector('.sold-price');
-                    if (soldCell) soldCell.textContent = price;
+                    if (soldCell) soldCell.textContent = displayPrice;
                     const boughtPrice = boughtPrices[ticker];
                     if (boughtPrice !== undefined && earnedCell) {
-                        earnedCell.textContent = price - boughtPrice;
+                        earnedCell.textContent = displayPrice - boughtPrice;
                     }
                 }
             }
     
-            createOrderForm(ticker, action, price);
+            createOrderForm(ticker, action, orderPrice);
         }
     });
 
