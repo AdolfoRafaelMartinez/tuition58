@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let boughtPrices = {}; 
     let soldPrices = {}; 
     let lastRecommendations = {};
+    let accumulatedEarnings = {};
 
     const fetchAndDisplayPositions = async () => {
         let positions = [];
@@ -200,12 +201,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
                     const boughtPrice = boughtPrices[market.ticker] !== undefined ? boughtPrices[market.ticker] : '';
                     const soldPrice = soldPrices[market.ticker] !== undefined ? soldPrices[market.ticker] : '';
-                    let earned = '';
+                    
                     if (boughtPrice !== '' && soldPrice !== '') {
-                        earned = soldPrice - boughtPrice;
+                        const tradeProfit = soldPrice - boughtPrice;
+                        if (accumulatedEarnings[market.ticker] === undefined) {
+                            accumulatedEarnings[market.ticker] = 0;
+                        }
+                        accumulatedEarnings[market.ticker] += tradeProfit;
                         delete boughtPrices[market.ticker]; 
                         delete soldPrices[market.ticker];
                     }
+                    const earned = accumulatedEarnings[market.ticker] !== undefined ? accumulatedEarnings[market.ticker] : '';
 
                     tableHtml += `
                         <tr>
@@ -223,7 +229,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                 });
 
-                tableHtml += `</tbody></table>`;
+                tableHtml += `</tbody>`;
+
+                let totalAccumulatedEarned = 0;
+                Object.values(accumulatedEarnings).forEach(earning => {
+                    totalAccumulatedEarned += earning;
+                });
+
+                if (Object.keys(accumulatedEarnings).length > 0) {
+                     tableHtml += `
+                        <tfoot>
+                            <tr>
+                                <td colspan="7"><strong>Total Earned</strong></td>
+                                <td class="earned-value"><strong>${totalAccumulatedEarned}</strong></td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                    `;
+                }
+
+                tableHtml += `</table>`;
                 marketResult.innerHTML = tableHtml;
 
                 if (ordersWereAutoCreated) {
