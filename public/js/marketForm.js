@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitButton = marketForm.querySelector('button[type="submit"]');
     const orderFormsContainer = document.getElementById('order-forms-container');
     const placeAllOrdersButton = document.getElementById('place-all-orders');
+    const clearAllOrdersButton = document.getElementById('clear-all-orders');
     const container = document.querySelector('.container');
     let marketData = {};
     let marketPriceHistory = {};
@@ -323,6 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         orderFormsContainer.insertAdjacentHTML('beforeend', formHtml);
         placeAllOrdersButton.style.display = 'block';
+        clearAllOrdersButton.style.display = 'block';
     };
 
     marketResult.addEventListener('click', (event) => {
@@ -370,6 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (orderFormsContainer.children.length === 0) {
                 placeAllOrdersButton.style.display = 'none';
+                clearAllOrdersButton.style.display = 'none';
             }
         }
     });
@@ -384,6 +387,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetchAndDisplayPositions();
-    setInterval(fetchAndDisplayMarkets, 10000);
+    setInterval(fetchAndDisplayMarkets, 60000);
     fetchAndDisplayMarkets();
 });

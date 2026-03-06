@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const orderResult = document.getElementById('order-result');
     const positionsResult = document.getElementById('positions-result');
     const placeAllOrdersButton = document.getElementById('place-all-orders');
+    const clearAllOrdersButton = document.getElementById('clear-all-orders');
+    const orderFormsContainer = document.getElementById('order-forms-container');
 
     let proposedOrders = [];
     let isReviewMode = false;
@@ -173,6 +175,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 placeAllOrdersButton.textContent = 'Place All Orders';
                 renderProposedOrders();
             }
+        });
+    }
+
+    if (clearAllOrdersButton) {
+        clearAllOrdersButton.addEventListener('click', () => {
+            orderFormsContainer.innerHTML = '';
+            proposedOrders = [];
+            isReviewMode = false;
+            placeAllOrdersButton.style.display = 'none';
+            orderResult.innerHTML = '';
         });
     }
 
