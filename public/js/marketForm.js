@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_bid}" type="button">SELL</button>`;
                     }
 
-                    const priceChangeDisplay = priceChange.toFixed(2);
+                    const priceChangeDisplay = Math.round(priceChange);
                     const priceChangeClass = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
                     const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
 
@@ -212,7 +212,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 borderColor: 'rgba(75, 192, 192, 1)',
                                 borderWidth: 1,
                                 fill: false,
-                                tension: 0.1
+                                tension: 0.1,
+                                pointRadius: 0
                             }]
                         },
                         options: {
