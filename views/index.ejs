@@ -9,10 +9,7 @@
 </head>
 <body>
     <div class="container" data-balance="<%= kalshi ? kalshi.balance : 0 %>">
-        <h1>Tuition Bot</h1>
-        
         <div class="section">
-            <h2>Kalshi</h2>
             <% if (kalshi) { %>
                 <p><strong>Cash Balance:</strong> <%= kalshi.balance %>&cent;</p>
                 <p><strong>Portfolio Value:</strong> <%= kalshi.portfolio_value %>&cent;</p>
@@ -21,15 +18,13 @@
             <% } %>
         </div>
         <div class="section">
-            <h2>Positions</h2>
             <div id="positions-result"></div>
         </div>
         <div class="section">
-            <h2>Get Open Markets</h2>
             <form id="market-form">
                 <label for="event-ticker">Event Ticker:</label>
                 <input type="text" id="event-ticker" name="event-ticker" value="KXHIGHAUS-26MAR06" required>
-                <button type="submit">Get Markets</button>
+                <button type="submit">Get</button>
             </form>
             <div id="market-result"></div>
         </div>

@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let marketData = {};
     let marketPriceHistory = {};
     let charts = {};
-    let boughtPrices = {}; // Store the price at which a buy was initiated
+    let boughtPrices = {}; 
+    let soldPrices = {}; 
 
     const fetchAndDisplayPositions = async () => {
         let positions = [];
@@ -145,6 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Chart</th>
                                 <th>Delta</th>
                                 <th>Bought</th>
+                                <th>Sold</th>
+                                <th>Earned</th>
                                 <th>Held</th>
                                 <th>Recommendation</th>
                             </tr>
@@ -171,7 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const priceChangeDisplay = Math.abs(Math.round(priceChange));
                     const priceChangeClass = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
                     const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
-                    const boughtPrice = boughtPrices[market.ticker] !== undefined ? boughtPrices[market.ticker] : market.yes_ask;
+                    const boughtPrice = boughtPrices[market.ticker] !== undefined ? boughtPrices[market.ticker] : '';
+                    const soldPrice = soldPrices[market.ticker] !== undefined ? soldPrices[market.ticker] : '';
+                    const earned = (boughtPrice !== '' && soldPrice !== '') ? soldPrice - boughtPrice : '';
 
                     tableHtml += `
                         <tr>
@@ -180,7 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${market.last_price}</td>
                             <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
                             <td class="${priceChangeClass}">${priceChangeIcon} ${priceChangeDisplay}</td>
-                            <td>${boughtPrice}</td>
+                            <td class="bought-price">${boughtPrice}</td>
+                            <td class="sold-price">${soldPrice}</td>
+                            <td class="earned-value">${earned}</td>
                             <td>${contractsHeld}</td>
                             <td class="recommendation-cell">${recBtnHtml}</td>
                         </tr>
@@ -243,8 +250,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const createOrderForm = (ticker, action, price) => {
         const formId = `order-form-${Date.now()}`;
-        const side = 'yes'; // Recommendations are for the 'yes' side
-        const contracts = 1; // Default to 1 contract
+        const side = 'yes';
+        const contracts = 1;
 
         const formHtml = `
             <div class="order-form" id="${formId}">
@@ -270,18 +277,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const ticker = button.dataset.ticker;
             const action = button.dataset.action;
             const price = parseInt(button.dataset.price, 10);
-
-            boughtPrices[ticker] = price;
-
-            // Update the cell immediately for feedback
+    
             const row = button.closest('tr');
             if (row) {
-                const boughtCell = row.cells[5]; // 6th column (index 5)
-                if (boughtCell) {
-                    boughtCell.textContent = price;
+                const earnedCell = row.querySelector('.earned-value');
+                if (action === 'buy') {
+                    boughtPrices[ticker] = price;
+                    const boughtCell = row.querySelector('.bought-price');
+                    if (boughtCell) boughtCell.textContent = price;
+                    const soldPrice = soldPrices[ticker];
+                    if (soldPrice !== undefined && earnedCell) {
+                        earnedCell.textContent = soldPrice - price;
+                    }
+                } else if (action === 'sell') {
+                    soldPrices[ticker] = price;
+                    const soldCell = row.querySelector('.sold-price');
+                    if (soldCell) soldCell.textContent = price;
+                    const boughtPrice = boughtPrices[ticker];
+                    if (boughtPrice !== undefined && earnedCell) {
+                        earnedCell.textContent = price - boughtPrice;
+                    }
                 }
             }
-
+    
             createOrderForm(ticker, action, price);
         }
     });
