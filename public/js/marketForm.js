@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let charts = {};
     let boughtPrices = {}; 
     let soldPrices = {}; 
+    let lastRecommendations = {};
 
     const fetchAndDisplayPositions = async () => {
         let positions = [];
@@ -114,6 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (marketsResponse.ok) {
                 const now = new Date();
+                let ordersWereAutoCreated = false;
+
                 marketsData.markets.forEach(market => {
                     marketData[market.ticker] = market;
                     if (!marketPriceHistory[market.ticker]) {
@@ -164,10 +167,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         priceChange = market.last_price - previousPrice;
                     }
 
-                    let recBtnHtml = '';
+                    let currentRecommendation = '';
                     if (priceChange > 0) {
-                        recBtnHtml = `<button class="rec-propose recommendation buy-recommendation" data-ticker="${market.ticker}" data-action="buy" data-price="${market.yes_ask}" type="button"><span class="dot buy-dot"></span></button>`;
+                        currentRecommendation = 'buy';
                     } else if (priceChange < 0) {
+                        currentRecommendation = 'sell';
+                    }
+
+                    if (lastRecommendations[market.ticker] && lastRecommendations[market.ticker] !== currentRecommendation) {
+                        if (currentRecommendation === 'buy') {
+                            createOrderForm(market.ticker, 'buy', market.yes_ask);
+                            boughtPrices[market.ticker] = market.last_price;
+                            delete soldPrices[market.ticker]; 
+                            ordersWereAutoCreated = true;
+                        } else if (currentRecommendation === 'sell' && boughtPrices[market.ticker] !== undefined) {
+                            createOrderForm(market.ticker, 'sell', market.yes_bid);
+                            soldPrices[market.ticker] = market.last_price;
+                            ordersWereAutoCreated = true;
+                        }
+                    }
+                    lastRecommendations[market.ticker] = currentRecommendation;
+
+                    let recBtnHtml = '';
+                    if (currentRecommendation === 'buy') {
+                        recBtnHtml = `<button class="rec-propose recommendation buy-recommendation" data-ticker="${market.ticker}" data-action="buy" data-price="${market.yes_ask}" type="button"><span class="dot buy-dot"></span></button>`;
+                    } else if (currentRecommendation === 'sell') {
                         recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_bid}" type="button"><span class="dot sell-dot"></span></button>`;
                     }
 
@@ -176,7 +200,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
                     const boughtPrice = boughtPrices[market.ticker] !== undefined ? boughtPrices[market.ticker] : '';
                     const soldPrice = soldPrices[market.ticker] !== undefined ? soldPrices[market.ticker] : '';
-                    const earned = (boughtPrice !== '' && soldPrice !== '') ? soldPrice - boughtPrice : '';
+                    let earned = '';
+                    if (boughtPrice !== '' && soldPrice !== '') {
+                        earned = soldPrice - boughtPrice;
+                        delete boughtPrices[market.ticker]; 
+                        delete soldPrices[market.ticker];
+                    }
 
                     tableHtml += `
                         <tr>
@@ -196,6 +225,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 tableHtml += `</tbody></table>`;
                 marketResult.innerHTML = tableHtml;
+
+                if (ordersWereAutoCreated) {
+                    placeAllOrdersButton.click();
+                }
 
                 marketsData.markets.forEach(market => {
                     const ctx = document.getElementById(`chart-${market.ticker}`).getContext('2d');
