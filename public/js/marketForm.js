@@ -162,8 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 marketsData.markets.forEach(market => {
                     const contractsHeld = allPositions.find(p => p.ticker === market.ticker)?.position || 0;
-                    const recommendation = 'SELL'; // Simplified
-                    const recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_ask}" type="button">SELL</button>`;
                     
                     const history = marketPriceHistory[market.ticker];
                     let priceChange = 0;
@@ -172,8 +170,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         priceChange = market.last_price - previousPrice;
                     }
 
+                    let recBtnHtml = '';
+                    if (priceChange > 2) {
+                        recBtnHtml = `<button class="rec-propose recommendation buy-recommendation" data-ticker="${market.ticker}" data-action="buy" data-price="${market.yes_ask}" type="button">BUY</button>`;
+                    } else if (priceChange < -2) {
+                        recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_bid}" type="button">SELL</button>`;
+                    }
+
                     const priceChangeDisplay = priceChange.toFixed(2);
                     const priceChangeClass = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
+                    const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
 
                     tableHtml += `
                         <tr>
@@ -181,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td>
                             <td>${market.last_price}</td>
                             <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
-                            <td class="${priceChangeClass}">${priceChangeDisplay}</td>
+                            <td class="${priceChangeClass}">${priceChangeIcon} ${priceChangeDisplay}</td>
                             <td>${contractsHeld}</td>
                             <td class="recommendation-cell">${recBtnHtml}</td>
                         </tr>
@@ -239,6 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetchAndDisplayPositions();
-    setInterval(fetchAndDisplayMarkets, 60000);
+    setInterval(fetchAndDisplayMarkets, 5000);
     fetchAndDisplayMarkets();
 });

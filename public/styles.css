@@ -307,3 +307,11 @@ button:hover {
 .neutral {
     color: gray;
 }
+
+.triangle-up {
+    color: green;
+}
+
+.triangle-down {
+    color: red;
+}
