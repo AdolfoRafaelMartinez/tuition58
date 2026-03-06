@@ -216,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             }]
                         },
                         options: {
+                            responsive: false,
                             scales: {
                                 x: { display: false },
                                 y: { display: false }
