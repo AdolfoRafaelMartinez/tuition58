@@ -129,6 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
         proposedOrders = [];
         isReviewMode = false;
         placeAllOrdersButton.textContent = 'Place All Orders';
+        placeAllOrdersButton.style.display = 'none';
+        clearAllOrdersButton.style.display = 'none';
+        orderFormsContainer.innerHTML = '';
         loadPositions();
     }
 
@@ -140,23 +143,24 @@ document.addEventListener('DOMContentLoaded', () => {
         placeAllOrdersButton.addEventListener('click', async () => {
             if (!isReviewMode) {
                 // Collect orders from forms
-                const forms = document.querySelectorAll('.order-form-dynamic');
+                const forms = document.querySelectorAll('.order-form');
                 proposedOrders = [];
 
                 for (const form of forms) {
-                    const countInput = form.querySelector('input[name="count"]');
-                    const count = parseInt(countInput.value, 10);
+                    const ticker = form.querySelector('input[name="ticker"]').value;
+                    const action = form.querySelector('input[name="action"]').value;
+                    const side = form.querySelector('input[name="side"]').value;
+                    const count = parseInt(form.querySelector('input[name="contracts"]').value, 10);
+                    const price = parseInt(form.querySelector('input[name="price"]').value, 10);
 
                     if (count > 0) {
-                        const formData = new FormData(form);
-                        const orderData = Object.fromEntries(formData.entries());
-                        orderData.count = 1;
-                        orderData.yes_price = parseInt(orderData.yes_price, 10);
-                        // Ensure ticker is preserved
-                        if (!orderData.ticker) {
-                            orderData.ticker = form.dataset.ticker;
-                        }
-                        proposedOrders.push(orderData);
+                        proposedOrders.push({
+                            ticker,
+                            action,
+                            side,
+                            count,
+                            yes_price: price,
+                        });
                     }
                 }
 
@@ -170,9 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 placeAllOrdersButton.textContent = 'Confirm Place Orders';
                 renderProposedOrders();
             } else {
-                // Switch to review mode with summary dialog
-                isReviewMode = true;
-                placeAllOrdersButton.textContent = 'Place All Orders';
+                // This is the "Confirm Place Orders" click
                 renderProposedOrders();
             }
         });
@@ -184,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
             proposedOrders = [];
             isReviewMode = false;
             placeAllOrdersButton.style.display = 'none';
+            clearAllOrdersButton.style.display = 'none';
             orderResult.innerHTML = '';
         });
     }
