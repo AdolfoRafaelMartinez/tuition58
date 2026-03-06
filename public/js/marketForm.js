@@ -118,6 +118,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const now = new Date();
                 let ordersWereAutoCreated = false;
 
+                const recommendationsResponse = await fetch('/api/kalshi/recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ markets: marketsData.markets, marketPriceHistory }),
+                });
+                const recommendationsData = await recommendationsResponse.json();
+                const recommendations = recommendationsData.recommendations;
+
                 marketsData.markets.forEach(market => {
                     marketData[market.ticker] = market;
                     if (!marketPriceHistory[market.ticker]) {
@@ -159,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <tbody>
                 `;
 
-                marketsData.markets.forEach(market => {
+                marketsData.markets.forEach((market, index) => {
                     const contractsHeld = allPositions.find(p => p.ticker === market.ticker)?.position || 0;
                     const history = marketPriceHistory[market.ticker];
                     let priceChange = 0;
@@ -168,12 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         priceChange = market.last_price - previousPrice;
                     }
 
-                    let currentRecommendation = '';
-                    if (priceChange > 0) {
-                        currentRecommendation = 'buy';
-                    } else if (priceChange < 0) {
-                        currentRecommendation = 'sell';
-                    }
+                    const currentRecommendation = recommendations[index];
 
                     if (lastRecommendations[market.ticker] && lastRecommendations[market.ticker] !== currentRecommendation) {
                         if (currentRecommendation === 'buy') {
@@ -351,8 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         earnedCell.textContent = soldPrice - displayPrice;
                     }
                 } else if (action === 'sell') {
-                    soldPrices[ticker] = displayPrice;
-                    const soldCell = row.querySelector('.sold-price');
+                    soldPrices[ticker] = displayPricen                    const soldCell = row.querySelector('.sold-price');
                     if (soldCell) soldCell.textContent = displayPrice;
                     const boughtPrice = boughtPrices[ticker];
                     if (boughtPrice !== undefined && earnedCell) {

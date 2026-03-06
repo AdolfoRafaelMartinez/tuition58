@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { KalshiBalanceResult } from '../models/kalshi.js';
+import { KalshiBalanceResult, Market, MarketPriceHistory, Recommendation } from '../models/kalshi.js';
 
 dotenv.config();
 
@@ -25,6 +25,43 @@ function signPssText(privateKeyPem: string, text: string): string {
     });
 
     return signature.toString('base64');
+}
+
+export function generateRecommendations(markets: Market[], marketPriceHistory: MarketPriceHistory): Recommendation[] {
+    const recommendations: Recommendation[] = [];
+    const now = new Date();
+
+    markets.forEach(market => {
+        if (!marketPriceHistory[market.ticker]) {
+            marketPriceHistory[market.ticker] = [];
+        }
+
+        const history = marketPriceHistory[market.ticker];
+        const lastHistoryPrice = history.length > 0 ? history[history.length - 1].price : -1;
+
+        if (lastHistoryPrice !== market.last_price) {
+            history.push({ time: now, price: market.last_price });
+            if (history.length > 20) {
+                history.shift(); 
+            }
+        }
+
+        let priceChange = 0;
+        if (history.length > 1) {
+            const previousPrice = history[history.length - 2].price;
+            priceChange = market.last_price - previousPrice;
+        }
+
+        let currentRecommendation: Recommendation = '';
+        if (priceChange > 0) {
+            currentRecommendation = 'buy';
+        } else if (priceChange < 0) {
+            currentRecommendation = 'sell';
+        }
+        recommendations.push(currentRecommendation);
+    });
+
+    return recommendations;
 }
 
 export async function getKalshiBalance(): Promise<KalshiBalanceResult> {
