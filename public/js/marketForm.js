@@ -121,9 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         marketPriceHistory[market.ticker] = [];
                     }
                     marketPriceHistory[market.ticker].push({ time: now, price: market.last_price });
-                    if (marketPriceHistory[market.ticker].length > 20) {
-                        marketPriceHistory[market.ticker].shift();
-                    }
+                    marketPriceHistory[market.ticker] = marketPriceHistory[market.ticker].slice(-20);
                 });
 
                 const { positions: allPositions, totalDisplayedExposure } = await fetchAndDisplayPositions();
