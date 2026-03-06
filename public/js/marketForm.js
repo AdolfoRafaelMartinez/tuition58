@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     timerDisplay.id = 'timer-display';
                     marketResult.before(timerDisplay);
                 }
-                timerDisplay.textContent = `Last execution: ${now.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', second: '2-digit'})}`;
+                timerDisplay.textContent = `${now.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', second: '2-digit'})}`;
 
                 let tableHtml = `
                     <table class="market-table">
@@ -166,9 +166,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     let recBtnHtml = '';
                     if (priceChange > 0) {
-                        recBtnHtml = `<button class="rec-propose recommendation buy-recommendation" data-ticker="${market.ticker}" data-action="buy" data-price="${market.yes_ask}" type="button">BUY</button>`;
+                        recBtnHtml = `<button class="rec-propose recommendation buy-recommendation" data-ticker="${market.ticker}" data-action="buy" data-price="${market.yes_ask}" type="button"><span class="dot buy-dot"></span></button>`;
                     } else if (priceChange < 0) {
-                        recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_bid}" type="button">SELL</button>`;
+                        recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_bid}" type="button"><span class="dot sell-dot"></span></button>`;
                     }
 
                     const priceChangeDisplay = Math.abs(Math.round(priceChange));

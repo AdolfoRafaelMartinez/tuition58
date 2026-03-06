@@ -315,3 +315,18 @@ button:hover {
 .triangle-down {
     color: red;
 }
+
+.dot {
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.buy-dot {
+  background-color: green;
+}
+
+.sell-dot {
+  background-color: red;
+}
