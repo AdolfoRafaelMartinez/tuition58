@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let marketData = {};
     let marketPriceHistory = {};
     let charts = {};
+    let boughtPrices = {}; // Store the price at which a buy was initiated
 
     const fetchAndDisplayPositions = async () => {
         let positions = [];
@@ -64,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         `;
                     });
                 } else {
-                    tableHtml += '<tr><td colspan="7">No positions with non-zero exposure to display.</td></tr>';
+                    tableHtml += '<tr><td colspan="8">No positions with non-zero exposure to display.</td></tr>';
                 }
                 
                 tableHtml += `</tbody>`;
@@ -76,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <td><strong>Totals</strong></td>
                                 <td><strong>${totalContracts}</strong></td>
                                 <td><strong>${totalDisplayedExposure.toFixed(2)}</strong></td>
-                                <td colspan="4"></td>
+                                <td colspan="5"></td>
                             </tr>
                         </tfoot>
                     `;
@@ -96,9 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchAndDisplayMarkets = async () => {
         const event_ticker = eventTickerInput.value;
         submitButton.disabled = true;
-        orderFormsContainer.innerHTML = ''; // Clear previous forms
-
-        marketData = {};
 
         try {
             let location = 'bergstrom';
@@ -120,21 +118,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!marketPriceHistory[market.ticker]) {
                         marketPriceHistory[market.ticker] = [];
                     }
-                    marketPriceHistory[market.ticker].push({ time: now, price: market.last_price });
-                    marketPriceHistory[market.ticker] = marketPriceHistory[market.ticker].slice(-20);
+                    const lastHistoryPrice = marketPriceHistory[market.ticker].length > 0 ? marketPriceHistory[market.ticker][marketPriceHistory[market.ticker].length - 1].price : -1;
+                    if (lastHistoryPrice !== market.last_price) {
+                        marketPriceHistory[market.ticker].push({ time: now, price: market.last_price });
+                        marketPriceHistory[market.ticker] = marketPriceHistory[market.ticker].slice(-20);
+                    }
                 });
 
-                const { positions: allPositions, totalDisplayedExposure } = await fetchAndDisplayPositions();
-
-                const existingPositions = new Set();
-                if (allPositions.length > 0) {
-                    allPositions.forEach(p => {
-                        const exposure = parseFloat(p.market_exposure || p.event_exposure || 0);
-                        if (exposure > 0 && p && p.ticker && String(p.ticker).trim() !== '') {
-                            existingPositions.add(p.ticker);
-                        }
-                    });
-                }
+                const { positions: allPositions } = await fetchAndDisplayPositions();
 
                 let timerDisplay = document.getElementById('timer-display');
                 if (!timerDisplay) {
@@ -142,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     timerDisplay.id = 'timer-display';
                     marketResult.before(timerDisplay);
                 }
-                timerDisplay.textContent = `Last execution: ${now.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'})}`;
+                timerDisplay.textContent = `Last execution: ${now.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', second: '2-digit'})}`;
 
                 let tableHtml = `
                     <table class="market-table">
@@ -153,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Price</th>
                                 <th>Chart</th>
                                 <th>Delta</th>
+                                <th>Bought</th>
                                 <th>Held</th>
                                 <th>Recommendation</th>
                             </tr>
@@ -162,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 marketsData.markets.forEach(market => {
                     const contractsHeld = allPositions.find(p => p.ticker === market.ticker)?.position || 0;
-                    
                     const history = marketPriceHistory[market.ticker];
                     let priceChange = 0;
                     if (history && history.length > 1) {
@@ -171,15 +162,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     let recBtnHtml = '';
-                    if (priceChange > 2) {
+                    if (priceChange > 0) {
                         recBtnHtml = `<button class="rec-propose recommendation buy-recommendation" data-ticker="${market.ticker}" data-action="buy" data-price="${market.yes_ask}" type="button">BUY</button>`;
-                    } else if (priceChange < -2) {
+                    } else if (priceChange < 0) {
                         recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_bid}" type="button">SELL</button>`;
                     }
 
-                    const priceChangeDisplay = Math.round(priceChange);
+                    const priceChangeDisplay = Math.abs(Math.round(priceChange));
                     const priceChangeClass = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
                     const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
+                    const boughtPrice = boughtPrices[market.ticker] !== undefined ? boughtPrices[market.ticker] : market.yes_ask;
 
                     tableHtml += `
                         <tr>
@@ -188,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${market.last_price}</td>
                             <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
                             <td class="${priceChangeClass}">${priceChangeIcon} ${priceChangeDisplay}</td>
+                            <td>${boughtPrice}</td>
                             <td>${contractsHeld}</td>
                             <td class="recommendation-cell">${recBtnHtml}</td>
                         </tr>
@@ -202,29 +195,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (charts[market.ticker]) {
                         charts[market.ticker].destroy();
                     }
-                    charts[market.ticker] = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: marketPriceHistory[market.ticker].map(p => p.time.toLocaleTimeString()),
-                            datasets: [{
-                                label: 'Price',
-                                data: marketPriceHistory[market.ticker].map(p => p.price),
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                borderWidth: 1,
-                                fill: false,
-                                tension: 0.1,
-                                pointRadius: 0
-                            }]
-                        },
-                        options: {
-                            responsive: false,
-                            scales: {
-                                x: { display: false },
-                                y: { display: false }
-                            },
-                            plugins: { legend: { display: false } }
+                    const history = marketPriceHistory[market.ticker];
+                    if (history && history.length > 0) {
+                        let chartLabels = history.map(p => p.time.toLocaleTimeString());
+                        let chartData = history.map(p => p.price);
+                
+                        if (chartData.length === 1) {
+                            chartLabels.push(chartLabels[0]);
+                            chartData.push(chartData[0]);
                         }
-                    });
+                
+                        charts[market.ticker] = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: chartLabels,
+                                datasets: [{
+                                    label: 'Price',
+                                    data: chartData,
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    borderWidth: 1,
+                                    fill: false,
+                                    tension: 0.1,
+                                    pointRadius: 0
+                                }]
+                            },
+                            options: {
+                                responsive: false,
+                                scales: {
+                                    x: { display: false },
+                                    y: { display: false }
+                                },
+                                plugins: { legend: { display: false } }
+                            }
+                        });
+                    }
                 });
 
             } else {
@@ -237,6 +241,64 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const createOrderForm = (ticker, action, price) => {
+        const formId = `order-form-${Date.now()}`;
+        const side = 'yes'; // Recommendations are for the 'yes' side
+        const contracts = 1; // Default to 1 contract
+
+        const formHtml = `
+            <div class="order-form" id="${formId}">
+                <div class="order-details">
+                    <strong>${action.toUpperCase()} ${ticker}</strong>
+                    <span>${contracts} contract @ ${price}¢</span>
+                </div>
+                <input type="hidden" name="ticker" value="${ticker}">
+                <input type="hidden" name="action" value="${action}">
+                <input type="hidden" name="side" value="${side}">
+                <input type="hidden" name="contracts" value="${contracts}">
+                <input type="hidden" name="price" value="${price}">
+                <button type="button" class="delete-order" data-form-id="${formId}">&#10006;</button>
+            </div>
+        `;
+        orderFormsContainer.insertAdjacentHTML('beforeend', formHtml);
+        placeAllOrdersButton.style.display = 'block';
+    };
+
+    marketResult.addEventListener('click', (event) => {
+        if (event.target.classList.contains('rec-propose')) {
+            const button = event.target;
+            const ticker = button.dataset.ticker;
+            const action = button.dataset.action;
+            const price = parseInt(button.dataset.price, 10);
+
+            boughtPrices[ticker] = price;
+
+            // Update the cell immediately for feedback
+            const row = button.closest('tr');
+            if (row) {
+                const boughtCell = row.cells[5]; // 6th column (index 5)
+                if (boughtCell) {
+                    boughtCell.textContent = price;
+                }
+            }
+
+            createOrderForm(ticker, action, price);
+        }
+    });
+
+    orderFormsContainer.addEventListener('click', (event) => {
+        if (event.target.classList.contains('delete-order')) {
+            const formId = event.target.dataset.formId;
+            const form = document.getElementById(formId);
+            if (form) {
+                form.remove();
+            }
+            if (orderFormsContainer.children.length === 0) {
+                placeAllOrdersButton.style.display = 'none';
+            }
+        }
+    });
+
     window.fetchAndDisplayMarkets = fetchAndDisplayMarkets;
 
     if (marketForm) {
@@ -247,6 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetchAndDisplayPositions();
-    setInterval(fetchAndDisplayMarkets, 60000);
+    setInterval(fetchAndDisplayMarkets, 10000);
     fetchAndDisplayMarkets();
 });
