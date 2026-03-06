@@ -102,16 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.disabled = true;
 
         try {
-            let location = 'bergstrom';
-            const locSelect = document.getElementById('location-select');
-            if (locSelect && locSelect.value) {
-                location = locSelect.value;
-            } else {
-                const params = new URLSearchParams(window.location.search);
-                const p = params.get('location');
-                if (p) location = p.toLowerCase();
-            }
-            const marketsResponse = await fetch(`/api/kalshi/markets/${encodeURIComponent(event_ticker)}?location=${encodeURIComponent(location)}`);
+            const marketsResponse = await fetch(`/api/kalshi/markets/${encodeURIComponent(event_ticker)}`);
             const marketsData = await marketsResponse.json();
 
             if (marketsResponse.ok) {
