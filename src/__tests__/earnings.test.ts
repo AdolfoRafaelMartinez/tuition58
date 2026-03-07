@@ -21,7 +21,6 @@ describe('Market Form', () => {
               <td class="bought-price"></td>
               <td class="sold-price"></td>
               <td class="earned-value"></td>
-              <td>0</td>
               <td class="recommendation-cell">
                 <button class="rec-propose recommendation buy-recommendation" data-ticker="TICKER-A" data-action="buy" data-price="50"></button>
                 <button class="rec-propose recommendation sell-recommendation" data-ticker="TICKER-A" data-action="sell" data-price="48"></button>
@@ -52,6 +51,8 @@ describe('Market Form', () => {
         if (action === 'buy') {
           boughtPrices[ticker] = displayPrice;
           boughtCell.textContent = displayPrice.toString();
+          soldPrices[ticker] = undefined; // Reset sold price
+          soldCell.textContent = ''; // Clear sold cell
         } else if (action === 'sell') {
           soldPrices[ticker] = displayPrice;
           soldCell.textContent = displayPrice.toString();
@@ -88,5 +89,19 @@ describe('Market Form', () => {
     const expectedEarnedValue = soldPrice - boughtPrice;
 
     expect(earnedCell.textContent).toBe(expectedEarnedValue.toString());
+  });
+
+  test('should set bought column on buy recommendation and sold column should be blank', () => {
+    const buyButton = document.querySelector('.buy-recommendation') as HTMLButtonElement;
+    const row = document.querySelector('tr')!;
+    const boughtCell = row.querySelector('.bought-price')!;
+    const soldCell = row.querySelector('.sold-price')!;
+
+    // Simulate a buy action
+    buyButton.click();
+
+    // Assertions
+    expect(boughtCell.textContent).toBe('50');
+    expect(soldCell.textContent).toBe('');
   });
 });

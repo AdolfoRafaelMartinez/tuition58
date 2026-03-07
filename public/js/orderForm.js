@@ -87,7 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
         proposedOrders.forEach(order => {
             const actionText = order.action.toUpperCase();
             const actionStyle = order.action === 'buy' ? 'color: green; font-weight: bold;' : 'color: red; font-weight: bold;';
-            html += `<li><span style="${actionStyle}">${actionText}</span> ${order.count} contracts of ${order.ticker} at ${order.yes_price}c</li>`;
+            const timeString = new Date(order.proposedTime).toLocaleTimeString();
+            html += `<li><span style="${actionStyle}">${actionText}</span> ${order.count} contracts of ${order.ticker} at ${order.yes_price}c - <em>Proposed at ${timeString}</em></li>`;
         });
         html += '</ul>';
 
@@ -175,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             side,
                             count,
                             yes_price: price,
+                            proposedTime: new Date(),
                         });
                     }
                 }

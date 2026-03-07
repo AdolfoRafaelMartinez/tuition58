@@ -167,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Bought</th>
                                 <th>Sold</th>
                                 <th>Earned</th>
-                                <th>Held</th>
                                 <th>Recommendation</th>
                             </tr>
                         </thead>
@@ -227,7 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td class="bought-price">${boughtPrice}</td>
                             <td class="sold-price">${soldPrice}</td>
                             <td class="earned-value">${earned}</td>
-                            <td>${contractsHeld}</td>
                             <td class="recommendation-cell">${recBtnHtml}</td>
                         </tr>
                     `;
@@ -295,12 +293,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const formId = `order-form-${Date.now()}`;
         const side = 'yes';
         const contracts = 1;
+        const timeString = new Date().toLocaleTimeString();
 
         const formHtml = `
             <div class="order-form" id="${formId}">
                 <div class="order-details">
                     <strong>${action.toUpperCase()} ${ticker}</strong>
-                    <span>${contracts} contract @ ${price}¢</span>
+                    <span>${contracts} contract @ ${price}¢ - <em>${timeString}</em></span>
                 </div>
                 <input type="hidden" name="ticker" value="${ticker}">
                 <input type="hidden" name="action" value="${action}">
