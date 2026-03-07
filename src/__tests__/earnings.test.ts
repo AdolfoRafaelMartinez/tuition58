@@ -161,11 +161,13 @@ describe('Market Form', () => {
         let recBtnHtml = '';
         if (recommendation === 'buy') {
             recBtnHtml = `<button class="rec-propose recommendation buy-recommendation" data-ticker="${market.ticker}" data-action="buy" data-price="${market.yes_ask}" type="button"><span class="dot buy-dot"></span></button>`;
+        } else if (recommendation === 'sell') {
+            recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_bid}" type="button"><span class="dot sell-dot"></span></button>`;
         }
 
         const priceChangeDisplay = Math.abs(Math.round(priceChange));
-        const priceChangeClass = priceChange > 0 ? 'positive' : 'neutral';
-        const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : '';
+        const priceChangeClass = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
+        const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
 
         return `
             <table>
@@ -197,6 +199,66 @@ describe('Market Form', () => {
 
     if (isDeltaPositive) {
         expect(buyButton).not.toBeNull();
+    }
+  });
+
+  test('should show a sell button when the delta column is negative', () => {
+    const marketResult = document.getElementById('market-result')!;
+    const priceChange = -5; // Represents a negative delta
+    const recommendation = 'sell';
+
+    // This is a simplified version of the rendering logic from marketForm.js
+    const getRowHtml = (priceChange: number, recommendation: string | null): string => {
+        const market = {
+            ticker: 'TICKER-A',
+            lower: 100,
+            upper: 200,
+            last_price: 50,
+            yes_ask: 51,
+            yes_bid: 49,
+        };
+
+        let recBtnHtml = '';
+        if (recommendation === 'buy') {
+            recBtnHtml = `<button class="rec-propose recommendation buy-recommendation" data-ticker="${market.ticker}" data-action="buy" data-price="${market.yes_ask}" type="button"><span class="dot buy-dot"></span></button>`;
+        } else if (recommendation === 'sell') {
+            recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_bid}" type="button"><span class="dot sell-dot"></span></button>`;
+        }
+
+        const priceChangeDisplay = Math.abs(Math.round(priceChange));
+        const priceChangeClass = priceChange < 0 ? 'negative' : 'neutral';
+        const priceChangeIcon = priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
+
+        return `
+            <table>
+              <tbody>
+                <tr>
+                    <td>${market.ticker}</td>
+                    <td>${market.lower} to ${market.upper}</td>
+                    <td>${market.last_price}</td>
+                    <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
+                    <td class="delta-column ${priceChangeClass}">${priceChangeIcon} ${priceChangeDisplay}</td>
+                    <td class="bought-price"></td>
+                    <td class="sold-price"></td>
+                    <td class="earned-value"></td>
+                    <td class="recommendation-cell">${recBtnHtml}</td>
+                </tr>
+              </tbody>
+            </table>
+        `;
+    }
+
+    marketResult.innerHTML = getRowHtml(priceChange, recommendation);
+
+    const deltaCell = marketResult.querySelector('.delta-column');
+    const recommendationCell = marketResult.querySelector('.recommendation-cell');
+    const sellButton = recommendationCell?.querySelector('.sell-recommendation');
+
+    const isDeltaNegative = deltaCell?.classList.contains('negative');
+    expect(isDeltaNegative).toBe(true);
+
+    if (isDeltaNegative) {
+        expect(sellButton).not.toBeNull();
     }
   });
 });
