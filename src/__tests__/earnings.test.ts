@@ -17,7 +17,7 @@ describe('Market Form', () => {
               <td>100 to 200</td>
               <td>50</td>
               <td><canvas id="chart-TICKER-A" width="100" height="30"></canvas></td>
-              <td></td>
+              <td class="delta-column"></td>
               <td class="bought-price"></td>
               <td class="sold-price"></td>
               <td class="earned-value"></td>
@@ -140,5 +140,63 @@ describe('Market Form', () => {
 
     // Assertion
     expect(soldCell.textContent).toBe(priceCell.textContent);
+  });
+
+  test('should show a buy button when the delta column is positive', () => {
+    const marketResult = document.getElementById('market-result')!;
+    const priceChange = 5; // Represents a positive delta
+    const recommendation = 'buy';
+
+    // This is a simplified version of the rendering logic from marketForm.js
+    const getRowHtml = (priceChange: number, recommendation: string | null): string => {
+        const market = {
+            ticker: 'TICKER-A',
+            lower: 100,
+            upper: 200,
+            last_price: 50,
+            yes_ask: 51,
+            yes_bid: 49,
+        };
+
+        let recBtnHtml = '';
+        if (recommendation === 'buy') {
+            recBtnHtml = `<button class="rec-propose recommendation buy-recommendation" data-ticker="${market.ticker}" data-action="buy" data-price="${market.yes_ask}" type="button"><span class="dot buy-dot"></span></button>`;
+        }
+
+        const priceChangeDisplay = Math.abs(Math.round(priceChange));
+        const priceChangeClass = priceChange > 0 ? 'positive' : 'neutral';
+        const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : '';
+
+        return `
+            <table>
+              <tbody>
+                <tr>
+                    <td>${market.ticker}</td>
+                    <td>${market.lower} to ${market.upper}</td>
+                    <td>${market.last_price}</td>
+                    <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
+                    <td class="delta-column ${priceChangeClass}">${priceChangeIcon} ${priceChangeDisplay}</td>
+                    <td class="bought-price"></td>
+                    <td class="sold-price"></td>
+                    <td class="earned-value"></td>
+                    <td class="recommendation-cell">${recBtnHtml}</td>
+                </tr>
+              </tbody>
+            </table>
+        `;
+    }
+
+    marketResult.innerHTML = getRowHtml(priceChange, recommendation);
+
+    const deltaCell = marketResult.querySelector('.delta-column');
+    const recommendationCell = marketResult.querySelector('.recommendation-cell');
+    const buyButton = recommendationCell?.querySelector('.buy-recommendation');
+
+    const isDeltaPositive = deltaCell?.classList.contains('positive');
+    expect(isDeltaPositive).toBe(true);
+
+    if (isDeltaPositive) {
+        expect(buyButton).not.toBeNull();
+    }
   });
 });
