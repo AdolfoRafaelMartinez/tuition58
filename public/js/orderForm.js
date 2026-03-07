@@ -73,15 +73,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const buyOrders = proposedOrders.filter(o => o.action === 'buy');
         const sellOrders = proposedOrders.filter(o => o.action === 'sell');
 
-        let html = '<div id="order-summary-dialog" style="border: 1px solid #ccc; padding: 1.5rem; border-radius: 8px; text-align: center; background-color: #f9f9f9;">';
-        html += '<h3>Order Summary</h3>';
+        let html = '<div id="order-summary-dialog" style="border: 1px solid #ccc; padding: 1.5rem; border-radius: 8px; text-align: left; background-color: #f9f9f9;">';
+        html += '<h3 style="text-align: center;">Order Summary</h3>';
         
         if (buyOrders.length > 0) {
-            html += `<p><strong>Total Buy Orders:</strong> ${buyOrders.length}</p><p><strong>Cost:</strong> $${(totalBuyCost / 100).toFixed(2)}</p>`;
+            html += `<p><strong style="color: green; font-weight: bold;">Total Buy Orders:</strong> ${buyOrders.length}</p><p><strong>Cost:</strong> $${(totalBuyCost / 100).toFixed(2)}</p>`;
         }
         if (sellOrders.length > 0) {
-            html += `<p><strong>Total Sell Orders:</strong> ${sellOrders.length}</p><p><strong>Collateral:</strong> $${(totalSellCollateral / 100).toFixed(2)}</p>`;
+            html += `<p><strong style="color: red; font-weight: bold;">Total Sell Orders:</strong> ${sellOrders.length}</p><p><strong>Collateral:</strong> $${(totalSellCollateral / 100).toFixed(2)}</p>`;
         }
+
+        html += '<h4>Proposed Orders:</h4><ul>';
+        proposedOrders.forEach(order => {
+            const actionText = order.action.toUpperCase();
+            const actionStyle = order.action === 'buy' ? 'color: green; font-weight: bold;' : 'color: red; font-weight: bold;';
+            html += `<li><span style="${actionStyle}">${actionText}</span> ${order.count} contracts of ${order.ticker} at ${order.yes_price}c</li>`;
+        });
+        html += '</ul>';
+
 
         html += '<div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">';
         html += '<button id="confirm-orders" style="padding: 0.8rem 1.5rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem;">Confirm</button>';
@@ -116,9 +125,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(orderData),
                 });
                 const result = await response.json();
-                orderExecutionHTML += response.ok ?
-                    `<p>Order for ${orderData.ticker} placed successfully!</p><pre>${JSON.stringify(result, null, 2)}</pre>` :
-                    `<p>Error for ${orderData.ticker}:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                const actionText = orderData.action.toUpperCase();
+                const actionStyle = orderData.action === 'buy' ? 'color: green; font-weight: bold;' : 'color: red; font-weight: bold;';
+                
+                if (response.ok) {
+                    orderExecutionHTML += `<p><span style="${actionStyle}">${actionText}</span> order for ${orderData.ticker} placed successfully!</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                } else {
+                    orderExecutionHTML += `<p>Error placing <span style="${actionStyle}">${actionText}</span> order for ${orderData.ticker}:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                }
+
             } catch (error) {
                 orderExecutionHTML += `<p>Error for ${orderData.ticker}: ${error.message}</p>`;
             }
@@ -172,6 +187,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Switch to review mode
                 isReviewMode = true;
                 placeAllOrdersButton.textContent = 'Confirm Place Orders';
+                if(clearAllOrdersButton){
+                    clearAllOrdersButton.style.display = 'block';
+                }
                 renderProposedOrders();
             } else {
                 // This is the "Confirm Place Orders" click
