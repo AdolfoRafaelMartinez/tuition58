@@ -11,5 +11,6 @@ export default {
   testPathIgnorePatterns: [
     "/node_modules/",
     "/dist/"
-  ]
+  ],
+  setupFilesAfterEnv: ['./src/jest.setup.ts']
 };

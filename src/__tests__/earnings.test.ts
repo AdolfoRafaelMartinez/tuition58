@@ -1,7 +1,4 @@
 import { JSDOM } from 'jsdom';
-import { TextEncoder, TextDecoder } from 'util';
-
-Object.assign(global, { TextDecoder, TextEncoder });
 
 describe('Market Form', () => {
   let dom: JSDOM;
