@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let charts = {};
     let boughtPrices = {}; 
     let soldPrices = {}; 
+    let earnedValues = {};
+    let accumulatedEarnings = {};
     let lastRecommendations = {};
     const refreshInterval = 60000;
     let lastExecutionTime = Date.now();
@@ -167,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Bought</th>
                                 <th>Sold</th>
                                 <th>Earned</th>
+                                <th>Accum</th>
                                 <th>Recommendation</th>
                             </tr>
                         </thead>
@@ -210,11 +213,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
                     const boughtPrice = boughtPrices[market.ticker] !== undefined ? boughtPrices[market.ticker] : '';
                     const soldPrice = soldPrices[market.ticker] !== undefined ? soldPrices[market.ticker] : '';
-                    
-                    let earned = '';
-                    if (boughtPrice !== '' && soldPrice !== '') {
-                        earned = soldPrice - boughtPrice;
-                    }
+                    const earned = earnedValues[market.ticker] !== undefined ? earnedValues[market.ticker] : '';
+                    const accumValue = accumulatedEarnings[market.ticker] !== undefined ? accumulatedEarnings[market.ticker] : 0;
+
 
                     tableHtml += `
                         <tr>
@@ -226,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td class="bought-price">${boughtPrice}</td>
                             <td class="sold-price">${soldPrice}</td>
                             <td class="earned-value">${earned}</td>
+                            <td class="accum-value">${accumValue}</td>
                             <td class="recommendation-cell">${recBtnHtml}</td>
                         </tr>
                     `;
@@ -329,20 +331,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 const earnedCell = row.querySelector('.earned-value');
                 const boughtCell = row.querySelector('.bought-price');
                 const soldCell = row.querySelector('.sold-price');
+                const accumCell = row.querySelector('.accum-value');
 
                 if (action === 'buy') {
                     boughtPrices[ticker] = displayPrice;
+                    soldPrices[ticker] = undefined;
+                    earnedValues[ticker] = undefined;
                     if (boughtCell) boughtCell.textContent = displayPrice;
+                    if (soldCell) soldCell.textContent = '';
+                    if (earnedCell) earnedCell.textContent = '';
                 } else if (action === 'sell') {
-                    soldPrices[ticker] = displayPrice;
-                    if (soldCell) soldCell.textContent = displayPrice;
-                }
+                    const boughtPrice = boughtPrices[ticker];
+                    if (boughtPrice !== undefined) {
+                        soldPrices[ticker] = displayPrice;
+                        const earnedValue = displayPrice - boughtPrice;
+                        earnedValues[ticker] = earnedValue;
 
-                const boughtPrice = boughtPrices[ticker];
-                const soldPrice = soldPrices[ticker];
+                        if (accumulatedEarnings[ticker] === undefined) {
+                            accumulatedEarnings[ticker] = 0;
+                        }
+                        accumulatedEarnings[ticker] += earnedValue;
 
-                if (boughtPrice !== undefined && soldPrice !== undefined && earnedCell) {
-                    earnedCell.textContent = soldPrice - boughtPrice;
+                        if (soldCell) soldCell.textContent = displayPrice;
+                        if (earnedCell) earnedCell.textContent = earnedValue;
+                        if (accumCell) accumCell.textContent = accumulatedEarnings[ticker];
+                    }
                 }
             }
     
