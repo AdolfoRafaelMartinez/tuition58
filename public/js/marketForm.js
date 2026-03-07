@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const currentRecommendation = recommendations[index];
 
-                    if (lastRecommendations[market.ticker] && lastRecommendations[market.ticker] !== currentRecommendation) {
+                    if (lastRecommendations[market.ticker] !== currentRecommendation) {
                         if (currentRecommendation === 'buy') {
                             createOrderForm(market.ticker, 'buy', market.yes_ask);
                             boughtPrices[market.ticker] = market.last_price;

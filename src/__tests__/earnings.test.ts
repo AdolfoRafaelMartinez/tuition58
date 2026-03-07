@@ -324,4 +324,20 @@ describe('Market Form', () => {
     expect(earnedCell.textContent).toBe('-5');
     expect(accumCell.textContent).toBe('5'); // 10 + (-5)
   });
+  test('should populate bought column with current price on buy recommendation', () => {
+    const buyButton = document.querySelector('.buy-recommendation') as HTMLButtonElement;
+    const row = document.querySelector('tr')!;
+    const priceCell = row.cells[2];
+    const boughtCell = row.querySelector('.bought-price')!;
+
+    // Set a specific market price for this test
+    const testPrice = '85';
+    priceCell.textContent = testPrice;
+
+    // Simulate a buy action
+    buyButton.click();
+
+    // Assert that the 'bought' column is populated with the price at the moment of the click
+    expect(boughtCell.textContent).toBe(testPrice);
+  });
 });
