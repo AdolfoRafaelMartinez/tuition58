@@ -1,20 +1,19 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const marketForm = document.getElementById('market-form');
-    const marketResult = document.getElementById('market-result');
-    const positionsResult = document.getElementById('positions-result');
-    const eventTickerInput = document.getElementById('event-ticker');
-    const submitButton = marketForm.querySelector('button[type="submit"]');
-    const orderFormsContainer = document.getElementById('order-forms-container');
-    const placeAllOrdersButton = document.getElementById('place-all-orders');
-    const clearAllOrdersButton = document.getElementById('clear-all-orders');
-    const container = document.querySelector('.container');
+document.addEventListener(\'DOMContentLoaded\', () => {
+    const marketForm = document.getElementById(\'market-form\');
+    const marketResult = document.getElementById(\'market-result\');
+    const positionsResult = document.getElementById(\'positions-result\');
+    const eventTickerInput = document.getElementById(\'event-ticker\');
+    const submitButton = marketForm.querySelector(\'button[type="submit"]\');
+    const orderFormsContainer = document.getElementById(\'order-forms-container\');
+    const placeAllOrdersButton = document.getElementById(\'place-all-orders\');
+    const clearAllOrdersButton = document.getElementById(\'clear-all-orders\');
+    const container = document.querySelector(\'.container\');
     let marketData = {};
     let marketPriceHistory = {};
     let charts = {};
     let boughtPrices = {}; 
     let soldPrices = {}; 
     let lastRecommendations = {};
-    let accumulatedEarnings = {};
 
     const fetchAndDisplayPositions = async () => {
         let positions = [];
@@ -22,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalDisplayedExposure = 0;
 
         try {
-            const positionsResponse = await fetch('/api/kalshi/positions');
+            const positionsResponse = await fetch(\'/api/kalshi/positions\');
             const positionsData = await positionsResponse.json();
 
             if (positionsResponse.ok) {
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <tbody>
                 `;
 
-                const positionsWithExposure = positions.filter(p => p && p.ticker && String(p.ticker).trim() !== '' && ((p.market_exposure && p.market_exposure !== 0) || (p.event_exposure && p.event_exposure !== 0)));
+                const positionsWithExposure = positions.filter(p => p && p.ticker && String(p.ticker).trim() !== \'\' && ((p.market_exposure && p.market_exposure !== 0) || (p.event_exposure && p.event_exposure !== 0)));
 
                 if (positionsWithExposure.length > 0) {
                     positionsWithExposure.forEach(p => {
@@ -69,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         `;
                     });
                 } else {
-                    tableHtml += '<tr><td colspan="8">No positions with non-zero exposure to display.</td></tr>';
+                    tableHtml += \'<tr><td colspan="8">No positions with non-zero exposure to display.</td></tr>\';
                 }
                 
                 tableHtml += `</tbody>`;
@@ -110,10 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const now = new Date();
                 let ordersWereAutoCreated = false;
 
-                const recommendationsResponse = await fetch('/api/kalshi/recommendations', {
-                    method: 'POST',
+                const recommendationsResponse = await fetch(\'/api/kalshi/recommendations\', {
+                    method: \'POST\',
                     headers: {
-                        'Content-Type': 'application/json',
+                        \'Content-Type\': \'application/json\',
                     },
                     body: JSON.stringify({ markets: marketsData.markets, marketPriceHistory }),
                 });
@@ -134,13 +133,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const { positions: allPositions } = await fetchAndDisplayPositions();
 
-                let timerDisplay = document.getElementById('timer-display');
+                let timerDisplay = document.getElementById(\'timer-display\');
                 if (!timerDisplay) {
-                    timerDisplay = document.createElement('div');
-                    timerDisplay.id = 'timer-display';
+                    timerDisplay = document.createElement(\'div\');
+                    timerDisplay.id = \'timer-display\';
                     marketResult.before(timerDisplay);
                 }
-                timerDisplay.textContent = `Last execution: ${now.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', second: '2-digit'})}`;
+                timerDisplay.textContent = `Last execution: ${now.toLocaleTimeString([], {hour: \'numeric\', minute:\'2-digit\', second: \'2-digit\'})}`;
 
                 let tableHtml = `
                     <table class="market-table">
@@ -173,47 +172,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     const currentRecommendation = recommendations[index];
 
                     if (lastRecommendations[market.ticker] && lastRecommendations[market.ticker] !== currentRecommendation) {
-                        if (currentRecommendation === 'buy') {
-                            createOrderForm(market.ticker, 'buy', market.yes_ask);
+                        if (currentRecommendation === \'buy\') {
+                            createOrderForm(market.ticker, \'buy\', market.yes_ask);
                             boughtPrices[market.ticker] = market.last_price;
                             delete soldPrices[market.ticker]; 
                             ordersWereAutoCreated = true;
-                        } else if (currentRecommendation === 'sell' && boughtPrices[market.ticker] !== undefined) {
-                            createOrderForm(market.ticker, 'sell', market.yes_bid);
+                        } else if (currentRecommendation === \'sell\' && boughtPrices[market.ticker] !== undefined) {
+                            createOrderForm(market.ticker, \'sell\', market.yes_bid);
                             soldPrices[market.ticker] = market.last_price;
                             ordersWereAutoCreated = true;
                         }
                     }
                     lastRecommendations[market.ticker] = currentRecommendation;
 
-                    let recBtnHtml = '';
-                    if (currentRecommendation === 'buy') {
+                    let recBtnHtml = \'\';
+                    if (currentRecommendation === \'buy\') {
                         recBtnHtml = `<button class="rec-propose recommendation buy-recommendation" data-ticker="${market.ticker}" data-action="buy" data-price="${market.yes_ask}" type="button"><span class="dot buy-dot"></span></button>`;
-                    } else if (currentRecommendation === 'sell') {
+                    } else if (currentRecommendation === \'sell\') {
                         recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_bid}" type="button"><span class="dot sell-dot"></span></button>`;
                     }
 
                     const priceChangeDisplay = Math.abs(Math.round(priceChange));
-                    const priceChangeClass = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
-                    const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
-                    const boughtPrice = boughtPrices[market.ticker] !== undefined ? boughtPrices[market.ticker] : '';
-                    const soldPrice = soldPrices[market.ticker] !== undefined ? soldPrices[market.ticker] : '';
+                    const priceChangeClass = priceChange > 0 ? \'positive\' : priceChange < 0 ? \'negative\' : \'neutral\';
+                    const priceChangeIcon = priceChange > 0 ? \'<span class="triangle-up">&#9650;</span>\' : priceChange < 0 ? \'<span class="triangle-down">&#9660;</span>\' : \'\';
+                    const boughtPrice = boughtPrices[market.ticker] !== undefined ? boughtPrices[market.ticker] : \'\';
+                    const soldPrice = soldPrices[market.ticker] !== undefined ? soldPrices[market.ticker] : \'\';
                     
-                    if (boughtPrice !== '' && soldPrice !== '') {
-                        const tradeProfit = soldPrice - boughtPrice;
-                        if (accumulatedEarnings[market.ticker] === undefined) {
-                            accumulatedEarnings[market.ticker] = 0;
-                        }
-                        accumulatedEarnings[market.ticker] += tradeProfit;
-                        delete boughtPrices[market.ticker]; 
-                        delete soldPrices[market.ticker];
+                    let earned = \'\';
+                    if (boughtPrice !== \'\' && soldPrice !== \'\') {
+                        earned = soldPrice - boughtPrice;
                     }
-                    const earned = accumulatedEarnings[market.ticker] !== undefined ? accumulatedEarnings[market.ticker] : '';
 
                     tableHtml += `
                         <tr>
                             <td>${market.ticker}</td>
-                            <td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td>
+                            <td>${market.lower === undefined ? \'N/A\' : market.lower} to ${market.upper === undefined ? \'N/A\' : market.upper}</td>
                             <td>${market.last_price}</td>
                             <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
                             <td class="${priceChangeClass}">${priceChangeIcon} ${priceChangeDisplay}</td>
@@ -226,26 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                 });
 
-                tableHtml += `</tbody>`;
-
-                let totalAccumulatedEarned = 0;
-                Object.values(accumulatedEarnings).forEach(earning => {
-                    totalAccumulatedEarned += earning;
-                });
-
-                if (Object.keys(accumulatedEarnings).length > 0) {
-                     tableHtml += `
-                        <tfoot>
-                            <tr>
-                                <td colspan="7"><strong>Total Earned</strong></td>
-                                <td class="earned-value"><strong>${totalAccumulatedEarned}</strong></td>
-                                <td colspan="2"></td>
-                            </tr>
-                        </tfoot>
-                    `;
-                }
-
-                tableHtml += `</table>`;
+                tableHtml += `</tbody></table>`;
                 marketResult.innerHTML = tableHtml;
 
                 if (ordersWereAutoCreated) {
@@ -253,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 marketsData.markets.forEach(market => {
-                    const ctx = document.getElementById(`chart-${market.ticker}`).getContext('2d');
+                    const ctx = document.getElementById(`chart-${market.ticker}`).getContext(\'2d\');
                     if (charts[market.ticker]) {
                         charts[market.ticker].destroy();
                     }
@@ -268,29 +242,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                 
                         charts[market.ticker] = new Chart(ctx, {
-                            type: 'line',
+                            type: \'line\',
                             data: {
                                 labels: chartLabels,
-                                datasets: [{
-                                    label: 'Price',
-                                    data: chartData,
-                                    borderColor: 'rgba(75, 192, 192, 1)',
-                                    borderWidth: 1,
-                                    fill: false,
-                                    tension: 0.1,
-                                    pointRadius: 0
-                                }]
-                            },
-                            options: {
-                                responsive: false,
-                                scales: {
-                                    x: { display: false },
-                                    y: { display: false }
-                                },
-                                plugins: { legend: { display: false } }
-                            }
+                                datasets: [{\
+                                    label: \'Price\',
+                                    data: chartData,\
+                                    borderColor: \'rgba(75, 192, 192, 1)\',\
+                                    borderWidth: 1,\
+                                    fill: false,\
+                                    tension: 0.1,\
+                                    pointRadius: 0\
+                                }]\
+                            },\
+                            options: {\
+                                responsive: false,\
+                                scales: {\
+                                    x: { display: false },\
+                                    y: { display: false }\
+                                },\
+                                plugins: { legend: { display: false } }\
+                            }\
                         });
-                    }
+                    }\
                 });
 
             } else {
@@ -304,8 +278,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const createOrderForm = (ticker, action, price) => {
-        const formId = `order-form-${Date.now()}`;
-        const side = 'yes';
+        const formId = `order-form-${Date.now()}`;\
+        const side = \'yes\';\
         const contracts = 1;
 
         const formHtml = `
@@ -322,40 +296,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button type="button" class="delete-order" data-form-id="${formId}">&#10006;</button>
             </div>
         `;
-        orderFormsContainer.insertAdjacentHTML('beforeend', formHtml);
-        placeAllOrdersButton.style.display = 'block';
-        clearAllOrdersButton.style.display = 'block';
-    };
+        orderFormsContainer.insertAdjacentHTML(\'beforeend\', formHtml);\
+        placeAllOrdersButton.style.display = \'block\';\
+        clearAllOrdersButton.style.display = \'block\';\
+    };\
 
-    marketResult.addEventListener('click', (event) => {
-        const button = event.target.closest('.rec-propose');
+    marketResult.addEventListener(\'click\', (event) => {
+        const button = event.target.closest(\'.rec-propose\');
         if (button) {
             const ticker = button.dataset.ticker;
             const action = button.dataset.action;
             const orderPrice = parseInt(button.dataset.price, 10);
     
-            const row = button.closest('tr');
+            const row = button.closest(\'tr\');
             if (row) {
                 const priceCell = row.cells[2];
                 const displayPrice = parseInt(priceCell.textContent, 10);
 
-                const earnedCell = row.querySelector('.earned-value');
-                if (action === 'buy') {
+                const earnedCell = row.querySelector(\'.earned-value\');
+                const boughtCell = row.querySelector(\'.bought-price\');
+                const soldCell = row.querySelector(\'.sold-price\');
+
+                if (action === \'buy\') {
                     boughtPrices[ticker] = displayPrice;
-                    const boughtCell = row.querySelector('.bought-price');
                     if (boughtCell) boughtCell.textContent = displayPrice;
-                    const soldPrice = soldPrices[ticker];
-                    if (soldPrice !== undefined && earnedCell) {
-                        earnedCell.textContent = soldPrice - displayPrice;
-                    }
-                } else if (action === 'sell') {
+                } else if (action === \'sell\') {
                     soldPrices[ticker] = displayPrice;
-                    const soldCell = row.querySelector('.sold-price');
                     if (soldCell) soldCell.textContent = displayPrice;
-                    const boughtPrice = boughtPrices[ticker];
-                    if (boughtPrice !== undefined && earnedCell) {
-                        earnedCell.textContent = displayPrice - boughtPrice;
-                    }
+                }
+
+                const boughtPrice = boughtPrices[ticker];
+                const soldPrice = soldPrices[ticker];
+
+                if (boughtPrice !== undefined && soldPrice !== undefined && earnedCell) {
+                    earnedCell.textContent = soldPrice - boughtPrice;
                 }
             }
     
@@ -363,24 +337,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    orderFormsContainer.addEventListener('click', (event) => {
-        if (event.target.classList.contains('delete-order')) {
+    orderFormsContainer.addEventListener(\'click\', (event) => {
+        if (event.target.classList.contains(\'delete-order\')) {
             const formId = event.target.dataset.formId;
             const form = document.getElementById(formId);
             if (form) {
                 form.remove();
             }
             if (orderFormsContainer.children.length === 0) {
-                placeAllOrdersButton.style.display = 'none';
-                clearAllOrdersButton.style.display = 'none';
+                placeAllOrdersButton.style.display = \'none\';
+                clearAllOrdersButton.style.display = \'none\';
             }
         }
     });
 
-    window.fetchAndDisplayMarkets = fetchAndDisplayMarkets;
+    window.fetchAndDisplayMarkets = fetchAndDielayMarkets;
 
     if (marketForm) {
-        marketForm.addEventListener('submit', (event) => {
+        marketForm.addEventListener(\'submit\', (event) => {
             event.preventDefault();
             fetchAndDisplayMarkets();
         });
