@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         proposedOrders.forEach(order => {
             const actionText = order.action.toUpperCase();
             const actionStyle = order.action === 'buy' ? 'color: green; font-weight: bold;' : 'color: red; font-weight: bold;';
-            const timeString = new Date(order.proposedTime).toLocaleTimeString();
+            const timeString = new Date(order.proposedTime).toLocaleString();
             html += `<li><span style="${actionStyle}">${actionText}</span> ${order.count} contracts of ${order.ticker} at ${order.yes_price}c - <em>Proposed at ${timeString}</em></li>`;
         });
         html += '</ul>';
