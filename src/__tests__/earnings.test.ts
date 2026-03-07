@@ -68,80 +68,6 @@ describe('Market Form', () => {
     });
   });
 
-  test('should calculate and display the earned value correctly after a buy and sell action', () => {
-    const buyButton = document.querySelector('.buy-recommendation') as HTMLButtonElement;
-    const sellButton = document.querySelector('.sell-recommendation') as HTMLButtonElement;
-    const row = document.querySelector('tr')!;
-    const boughtCell = row.querySelector('.bought-price')!;
-    const soldCell = row.querySelector('.sold-price')!;
-    const earnedCell = row.querySelector('.earned-value')!;
-
-    // Simulate a buy action
-    buyButton.click();
-    expect(boughtCell.textContent).toBe('50');
-
-    // Simulate a sell action
-    sellButton.click();
-    expect(soldCell.textContent).toBe('50');
-
-    const boughtPrice = parseFloat(boughtCell.textContent!);
-    const soldPrice = parseFloat(soldCell.textContent!);
-    const expectedEarnedValue = soldPrice - boughtPrice;
-
-    expect(earnedCell.textContent).toBe(expectedEarnedValue.toString());
-  });
-
-  test('should set bought column on buy recommendation and sold column should be blank', () => {
-    const buyButton = document.querySelector('.buy-recommendation') as HTMLButtonElement;
-    const row = document.querySelector('tr')!;
-    const boughtCell = row.querySelector('.bought-price')!;
-    const soldCell = row.querySelector('.sold-price')!;
-
-    // Simulate a buy action
-    buyButton.click();
-
-    // Assertions
-    expect(boughtCell.textContent).toBe('50');
-    expect(soldCell.textContent).toBe('');
-  });
-
-  test('should update earned column after a sell recommendation', () => {
-    const buyButton = document.querySelector('.buy-recommendation') as HTMLButtonElement;
-    const sellButton = document.querySelector('.sell-recommendation') as HTMLButtonElement;
-    const row = document.querySelector('tr')!;
-    const boughtCell = row.querySelector('.bought-price')!;
-    const soldCell = row.querySelector('.sold-price')!;
-    const earnedCell = row.querySelector('.earned-value')!;
-
-    // Simulate a buy action first to have a "bought" price
-    buyButton.click();
-    expect(boughtCell.textContent).toBe('50');
-    expect(soldCell.textContent).toBe(''); // sold should be blank
-
-    // Now simulate a sell action
-    sellButton.click();
-    expect(soldCell.textContent).toBe('50'); // Price is 50 in the mock DOM
-
-    const boughtPrice = parseFloat(boughtCell.textContent!);
-    const soldPrice = parseFloat(soldCell.textContent!);
-    const expectedEarnedValue = soldPrice - boughtPrice;
-
-    expect(earnedCell.textContent).toBe(expectedEarnedValue.toString());
-  });
-
-  test('should set sold column on sell recommendation', () => {
-    const sellButton = document.querySelector('.sell-recommendation') as HTMLButtonElement;
-    const row = document.querySelector('tr')!;
-    const priceCell = row.cells[2];
-    const soldCell = row.querySelector('.sold-price')!;
-
-    // Simulate a sell action
-    sellButton.click();
-
-    // Assertion
-    expect(soldCell.textContent).toBe(priceCell.textContent);
-  });
-
   test('should show a buy button when the delta column is positive', () => {
     const marketResult = document.getElementById('market-result')!;
     const priceChange = 5; // Represents a positive delta
@@ -261,7 +187,35 @@ describe('Market Form', () => {
         expect(sellButton).not.toBeNull();
     }
   });
-  test('that the value of the earned column is always the value of the sold column minus the value of the bought column', () => {
+
+  test('should set bought column on buy recommendation and sold column should be blank', () => {
+    const buyButton = document.querySelector('.buy-recommendation') as HTMLButtonElement;
+    const row = document.querySelector('tr')!;
+    const boughtCell = row.querySelector('.bought-price')!;
+    const soldCell = row.querySelector('.sold-price')!;
+
+    // Simulate a buy action
+    buyButton.click();
+
+    // Assertions
+    expect(boughtCell.textContent).toBe('50');
+    expect(soldCell.textContent).toBe('');
+  });
+
+  test('should set sold column on sell recommendation', () => {
+    const sellButton = document.querySelector('.sell-recommendation') as HTMLButtonElement;
+    const row = document.querySelector('tr')!;
+    const priceCell = row.cells[2];
+    const soldCell = row.querySelector('.sold-price')!;
+
+    // Simulate a sell action
+    sellButton.click();
+
+    // Assertion
+    expect(soldCell.textContent).toBe(priceCell.textContent);
+  });
+
+  test('should set earned column as the value of the sold column minus the value of the bought column', () => {
     const buyButton = document.querySelector('.buy-recommendation') as HTMLButtonElement;
     const sellButton = document.querySelector('.sell-recommendation') as HTMLButtonElement;
     const row = document.querySelector('tr')!;
