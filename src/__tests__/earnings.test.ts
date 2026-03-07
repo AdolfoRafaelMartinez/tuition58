@@ -261,4 +261,28 @@ describe('Market Form', () => {
         expect(sellButton).not.toBeNull();
     }
   });
+  test('that the value of the earned column is always the value of the sold column minus the value of the bought column', () => {
+    const buyButton = document.querySelector('.buy-recommendation') as HTMLButtonElement;
+    const sellButton = document.querySelector('.sell-recommendation') as HTMLButtonElement;
+    const row = document.querySelector('tr')!;
+    const priceCell = row.cells[2];
+    const boughtCell = row.querySelector('.bought-price')!;
+    const soldCell = row.querySelector('.sold-price')!;
+    const earnedCell = row.querySelector('.earned-value')!;
+
+    // Simulate a buy action with a specific price
+    priceCell.textContent = '100';
+    buyButton.click();
+
+    // Simulate a sell action with a specific price
+    priceCell.textContent = '120';
+    sellButton.click();
+
+    const boughtPrice = parseFloat(boughtCell.textContent!);
+    const soldPrice = parseFloat(soldCell.textContent!);
+    const earnedValue = parseFloat(earnedCell.textContent!);
+
+    // Assert that earned value is the difference between sold and bought prices
+    expect(earnedValue).toBe(soldPrice - boughtPrice);
+  });
 });
