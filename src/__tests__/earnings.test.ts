@@ -104,4 +104,28 @@ describe('Market Form', () => {
     expect(boughtCell.textContent).toBe('50');
     expect(soldCell.textContent).toBe('');
   });
+
+  test('should update earned column after a sell recommendation', () => {
+    const buyButton = document.querySelector('.buy-recommendation') as HTMLButtonElement;
+    const sellButton = document.querySelector('.sell-recommendation') as HTMLButtonElement;
+    const row = document.querySelector('tr')!;
+    const boughtCell = row.querySelector('.bought-price')!;
+    const soldCell = row.querySelector('.sold-price')!;
+    const earnedCell = row.querySelector('.earned-value')!;
+
+    // Simulate a buy action first to have a "bought" price
+    buyButton.click();
+    expect(boughtCell.textContent).toBe('50');
+    expect(soldCell.textContent).toBe(''); // sold should be blank
+
+    // Now simulate a sell action
+    sellButton.click();
+    expect(soldCell.textContent).toBe('50'); // Price is 50 in the mock DOM
+
+    const boughtPrice = parseFloat(boughtCell.textContent!);
+    const soldPrice = parseFloat(soldCell.textContent!);
+    const expectedEarnedValue = soldPrice - boughtPrice;
+
+    expect(earnedCell.textContent).toBe(expectedEarnedValue.toString());
+  });
 });
