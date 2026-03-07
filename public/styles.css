@@ -258,7 +258,7 @@ button:hover {
     padding: 5px;
 }
 
-.delete-form:hover, .delete-order:hover {
+.delete-form, .delete-order:hover {
     background: none !important;
     opacity: 0.7;
 }
@@ -329,4 +329,19 @@ button:hover {
 
 .sell-dot {
   background-color: red;
+}
+
+#progress-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+#progress-bar {
+    width: 0%;
+    height: 10px;
+    background-color: #4caf50;
+    border-radius: 4px;
+    transition: width 0.1s linear;
 }

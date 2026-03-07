@@ -14,6 +14,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let boughtPrices = {}; 
     let soldPrices = {}; 
     let lastRecommendations = {};
+    const refreshInterval = 60000;
+    let lastExecutionTime = Date.now();
+
+    const updateProgressBar = () => {
+        const progressBar = document.getElementById('progress-bar');
+        if (!progressBar) return;
+
+        const now = Date.now();
+        const timeElapsed = now - lastExecutionTime;
+        const percentage = Math.min((timeElapsed / refreshInterval) * 100, 100);
+        
+        progressBar.style.width = `${percentage}%`;
+    };
 
     const fetchAndDisplayPositions = async () => {
         let positions = [];
@@ -98,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const fetchAndDisplayMarkets = async () => {
+        lastExecutionTime = Date.now();
         const event_ticker = eventTickerInput.value;
         submitButton.disabled = true;
 
@@ -133,13 +147,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const { positions: allPositions } = await fetchAndDisplayPositions();
 
-                let timerDisplay = document.getElementById('timer-display');
-                if (!timerDisplay) {
-                    timerDisplay = document.createElement('div');
-                    timerDisplay.id = 'timer-display';
-                    marketResult.before(timerDisplay);
+                let progressContainer = document.getElementById('progress-container');
+                if (!progressContainer) {
+                    progressContainer = document.createElement('div');
+                    progressContainer.id = 'progress-container';
+                    progressContainer.innerHTML = '<div id="progress-bar"></div>';
+                    marketResult.before(progressContainer);
                 }
-                timerDisplay.textContent = `Last execution: ${now.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', second: '2-digit'})}`;
 
                 let tableHtml = `
                     <table class="market-table">
@@ -361,6 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetchAndDisplayPositions();
-    setInterval(fetchAndDisplayMarkets, 60000);
+    setInterval(fetchAndDisplayMarkets, refreshInterval);
+    setInterval(updateProgressBar, 100);
     fetchAndDisplayMarkets();
 });
