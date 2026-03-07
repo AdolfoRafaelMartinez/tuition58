@@ -17,5 +17,5 @@ export default {
     "/node_modules/",
     "/dist/"
   ],
-  setupFilesAfterEnv: ['./src/jest.setup.js']
+  setupFilesAfterEnv: ['./src/jest.setup.cjs']
 };
