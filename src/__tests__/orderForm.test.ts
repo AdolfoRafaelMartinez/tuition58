@@ -34,7 +34,7 @@ describe('Order Form', () => {
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ event_positions: [], market_positions: [] }),
-      })
+      } as Response)
     );
   });
 
