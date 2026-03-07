@@ -3,7 +3,15 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+    // Override the default ts-jest config to force CommonJS output for tests
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: {
+          module: 'commonjs',
+        },
+      },
+    ],
   },
   testPathIgnorePatterns: [
     "/node_modules/",

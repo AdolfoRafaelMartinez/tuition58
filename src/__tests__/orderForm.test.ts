@@ -1,11 +1,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { jest, describe, beforeEach, test, expect } from '@jest/globals';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe('Order Form', () => {
   let orderFormsContainer, placeAllOrdersButton, clearAllOrdersButton, orderResult;
