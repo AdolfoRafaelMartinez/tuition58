@@ -128,4 +128,17 @@ describe('Market Form', () => {
 
     expect(earnedCell.textContent).toBe(expectedEarnedValue.toString());
   });
+
+  test('should set sold column on sell recommendation', () => {
+    const sellButton = document.querySelector('.sell-recommendation') as HTMLButtonElement;
+    const row = document.querySelector('tr')!;
+    const priceCell = row.cells[2];
+    const soldCell = row.querySelector('.sold-price')!;
+
+    // Simulate a sell action
+    sellButton.click();
+
+    // Assertion
+    expect(soldCell.textContent).toBe(priceCell.textContent);
+  });
 });
