@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (marketsResponse.ok) {
                 const now = new Date();
-                let ordersWereAutoCreated = false;
 
                 const recommendationsResponse = await fetch('/api/kalshi/recommendations', {
                     method: 'POST',
@@ -104,13 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (lastRecommendations[market.ticker] !== currentRecommendation) {
                         if (currentRecommendation === 'buy') {
-                            createOrderForm(market.ticker, 'buy', market.yes_ask);
                             boughtPrices[market.ticker] = market.last_price;
                             delete soldPrices[market.ticker];
                             delete earnedValues[market.ticker];
-                            ordersWereAutoCreated = true;
                         } else if (currentRecommendation === 'sell' && boughtPrices[market.ticker] !== undefined) {
-                            createOrderForm(market.ticker, 'sell', market.yes_bid);
                             soldPrices[market.ticker] = market.last_price;
                             const earned = soldPrices[market.ticker] - boughtPrices[market.ticker];
                             earnedValues[market.ticker] = earned;
@@ -118,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 accumulatedEarnings[market.ticker] = 0;
                             }
                             accumulatedEarnings[market.ticker] += earned;
-                            ordersWereAutoCreated = true;
                         }
                     }
                     lastRecommendations[market.ticker] = currentRecommendation;
@@ -157,10 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 tableHtml += `</tbody></table>`;
                 marketResult.innerHTML = tableHtml;
-
-                if (ordersWereAutoCreated) {
-                    placeAllOrdersButton.click();
-                }
 
                 marketsData.markets.forEach(market => {
                     const ctx = document.getElementById(`chart-${market.ticker}`).getContext('2d');
