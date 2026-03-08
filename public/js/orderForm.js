@@ -1,55 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const orderResult = document.getElementById('order-result');
-    const positionsResult = document.getElementById('positions-result');
     const placeAllOrdersButton = document.getElementById('place-all-orders');
     const clearAllOrdersButton = document.getElementById('clear-all-orders');
     const orderFormsContainer = document.getElementById('order-forms-container');
 
     let proposedOrders = [];
     let isReviewMode = false;
-
-    async function loadPositions() {
-        try {
-            const response = await fetch('/api/kalshi/positions');
-            const result = await response.json();
-
-            if (response.ok) {
-                const positions = [...(result.event_positions || []), ...(result.market_positions || [])];
-                const filteredPositions = positions.filter(p => p && p.ticker && String(p.ticker).trim() !== '' && ((p.event_exposure && p.event_exposure > 0) || (p.market_exposure && p.market_exposure > 0)));
-
-                if (filteredPositions.length > 0) {
-                    let tableHtml = `
-                        <p>Your Positions:</p>
-                        <table class="market-table">
-                            <thead>
-                                <tr>
-                                    <th>Ticker</th>
-                                    <th>Exposure</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    `;
-                    filteredPositions.forEach(p => {
-                        const exposure = p.market_exposure || p.event_exposure || 0;
-                        tableHtml += `
-                            <tr>
-                                <td>${p.ticker}</td>
-                                <td>${exposure}</td>
-                            </tr>
-                        `;
-                    });
-                    tableHtml += '</tbody></table>';
-                    positionsResult.innerHTML = tableHtml;
-                } else {
-                    positionsResult.innerHTML = `<p>You have no exposure.</p>`;
-                }
-            } else {
-                positionsResult.innerHTML = `<p>Error loading positions:</p><pre>${JSON.stringify(result, null, 2)}</pre>`;
-            }
-        } catch (error) {
-            positionsResult.innerHTML = `<p>Error: ${error.message}</p>`;
-        }
-    }
 
     function renderProposedOrders() {
         let totalBuyCost = 0;
@@ -148,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
         placeAllOrdersButton.style.display = 'none';
         clearAllOrdersButton.style.display = 'none';
         orderFormsContainer.innerHTML = '';
-        loadPositions();
     }
 
     function attachOrderEventListeners() {
@@ -210,6 +165,4 @@ document.addEventListener('DOMContentLoaded', () => {
             orderResult.innerHTML = '';
         });
     }
-
-    loadPositions();
 });
