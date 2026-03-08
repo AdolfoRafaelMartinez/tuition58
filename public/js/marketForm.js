@@ -30,88 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBar.style.width = `${percentage}%`;
     };
 
-    const fetchAndDisplayPositions = async () => {
-        let positions = [];
-        let totalContracts = 0;
-        let totalDisplayedExposure = 0;
-
-        try {
-            const positionsResponse = await fetch('/api/kalshi/positions');
-            const positionsData = await positionsResponse.json();
-
-            if (positionsResponse.ok) {
-                positions = [...(positionsData.event_positions || []), ...(positionsData.market_positions || [])];
-                let tableHtml = `
-                    <table class="market-table">
-                        <thead>
-                            <tr>
-                                <th>Ticker</th>
-                                <th>Contracts</th>
-                                <th>Exposure</th>
-                                <th>Invested</th>
-                                <th>Market Value</th>
-                                <th>Resting Orders</th>
-                                <th>Fees Paid</th>
-                                <th>Last Updated</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-
-                const positionsWithExposure = positions.filter(p => p && p.ticker && String(p.ticker).trim() !== '' && ((p.market_exposure && p.market_exposure !== 0) || (p.event_exposure && p.event_exposure !== 0)));
-
-                if (positionsWithExposure.length > 0) {
-                    positionsWithExposure.forEach(p => {
-                        const exposure = parseFloat(p.market_exposure || p.event_exposure || 0);
-                        totalDisplayedExposure += exposure;
-                        totalContracts += parseInt(p.position) || 0;
-                        const contractCount = parseInt(p.position) || 0;
-                        const yesAsk = marketData[p.ticker] ? marketData[p.ticker].yes_ask : 0;
-                        const invested = contractCount * yesAsk;
-                        const marketValue = contractCount * yesAsk;
-                        tableHtml += `
-                            <tr>
-                                <td>${p.ticker}</td>
-                                <td>${p.position}</td>
-                                <td>${exposure.toFixed(2)}</td>
-                                <td>${invested.toFixed(2)}</td>
-                                <td>${marketValue.toFixed(2)}</td>
-                                <td>${p.resting_orders_count}</td>
-                                <td>${p.fees_paid}</td>
-                                <td>${new Date(p.last_updated_ts).toLocaleString()}</td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tableHtml += '<tr><td colspan="8">No positions with non-zero exposure to display.</td></tr>';
-                }
-                
-                tableHtml += `</tbody>`;
-
-                if (positionsWithExposure.length > 0) {
-                    tableHtml += `
-                        <tfoot>
-                            <tr>
-                                <td><strong>Totals</strong></td>
-                                <td><strong>${totalContracts}</strong></td>
-                                <td><strong>${totalDisplayedExposure.toFixed(2)}</strong></td>
-                                <td colspan="5"></td>
-                            </tr>
-                        </tfoot>
-                    `;
-                }
-
-                tableHtml += `</table>`;
-                positionsResult.innerHTML = tableHtml;
-            } else {
-                positionsResult.innerHTML = `<p>Error: ${positionsData.error}</p>`;
-            }
-        } catch (error) {
-            positionsResult.innerHTML = `<p>Error fetching positions: ${error.message}</p>`;
-        }
-        return { positions, totalContracts, totalDisplayedExposure };
-    };
-
     const fetchAndDisplayMarkets = async () => {
         lastExecutionTime = Date.now();
         const event_ticker = eventTickerInput.value;
@@ -147,8 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                const { positions: allPositions } = await fetchAndDisplayPositions();
-
                 let progressContainer = document.getElementById('progress-container');
                 if (!progressContainer) {
                     progressContainer = document.createElement('div');
@@ -177,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
 
                 marketsData.markets.forEach((market, index) => {
-                    const contractsHeld = allPositions.find(p => p.ticker === market.ticker)?.position || 0;
                     const history = marketPriceHistory[market.ticker];
                     let priceChange = 0;
                     if (history && history.length > 1) {
@@ -386,7 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    fetchAndDisplayPositions();
     setInterval(fetchAndDisplayMarkets, refreshInterval);
     setInterval(updateProgressBar, 100);
     fetchAndDisplayMarkets();
