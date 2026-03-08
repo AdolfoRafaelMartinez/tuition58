@@ -106,11 +106,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (currentRecommendation === 'buy') {
                             createOrderForm(market.ticker, 'buy', market.yes_ask);
                             boughtPrices[market.ticker] = market.last_price;
-                            delete soldPrices[market.ticker]; 
+                            delete soldPrices[market.ticker];
+                            delete earnedValues[market.ticker];
                             ordersWereAutoCreated = true;
                         } else if (currentRecommendation === 'sell' && boughtPrices[market.ticker] !== undefined) {
                             createOrderForm(market.ticker, 'sell', market.yes_bid);
                             soldPrices[market.ticker] = market.last_price;
+                            const earned = soldPrices[market.ticker] - boughtPrices[market.ticker];
+                            earnedValues[market.ticker] = earned;
+                            if (accumulatedEarnings[market.ticker] === undefined) {
+                                accumulatedEarnings[market.ticker] = 0;
+                            }
+                            accumulatedEarnings[market.ticker] += earned;
                             ordersWereAutoCreated = true;
                         }
                     }
