@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const lastHistoryPrice = marketPriceHistory[market.ticker].length > 0 ? marketPriceHistory[market.ticker][marketPriceHistory[market.ticker].length - 1].price : -1;
                     if (lastHistoryPrice !== market.last_price) {
                         marketPriceHistory[market.ticker].push({ time: now, price: market.last_price });
-                        marketPriceHistory[market.ticker] = marketPriceHistory[market.ticker].slice(-20);
+                        marketPriceHistory[market.ticker] = marketPriceHistory[market.ticker].slice(-40);
                     }
                 });
 
