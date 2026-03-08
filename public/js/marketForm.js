@@ -116,11 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     lastRecommendations[market.ticker] = currentRecommendation;
 
-                    let recBtnHtml = '';
+                    let recommendationHtml = '';
                     if (currentRecommendation === 'buy') {
-                        recBtnHtml = `<button class="rec-propose recommendation buy-recommendation" data-ticker="${market.ticker}" data-action="buy" data-price="${market.yes_ask}" type="button"><span class="dot buy-dot"></span></button>`;
+                        recommendationHtml = `<span style="color: green; font-weight: bold;">Buy</span>`;
                     } else if (currentRecommendation === 'sell') {
-                        recBtnHtml = `<button class="rec-propose recommendation sell-recommendation" data-ticker="${market.ticker}" data-action="sell" data-price="${market.yes_bid}" type="button"><span class="dot sell-dot"></span></button>`;
+                        recommendationHtml = `<span style="color: red; font-weight: bold;">Sell</span>`;
                     }
 
                     const priceChangeDisplay = Math.abs(Math.round(priceChange));
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td class="sold-price">${soldPrice}</td>
                             <td class="earned-value">${earned}</td>
                             <td class="accum-value">${accumValue}</td>
-                            <td class="recommendation-cell">${recBtnHtml}</td>
+                            <td class="recommendation-cell">${recommendationHtml}</td>
                         </tr>
                     `;
                 });
@@ -230,53 +230,6 @@ document.addEventListener('DOMContentLoaded', () => {
         placeAllOrdersButton.style.display = 'block';
         clearAllOrdersButton.style.display = 'block';
     };
-
-    marketResult.addEventListener('click', (event) => {
-        const button = event.target.closest('.rec-propose');
-        if (button) {
-            const ticker = button.dataset.ticker;
-            const action = button.dataset.action;
-            const orderPrice = parseInt(button.dataset.price, 10);
-    
-            const row = button.closest('tr');
-            if (row) {
-                const priceCell = row.cells[2];
-                const displayPrice = parseInt(priceCell.textContent, 10);
-
-                const earnedCell = row.querySelector('.earned-value');
-                const boughtCell = row.querySelector('.bought-price');
-                const soldCell = row.querySelector('.sold-price');
-                const accumCell = row.querySelector('.accum-value');
-
-                if (action === 'buy') {
-                    boughtPrices[ticker] = displayPrice;
-                    soldPrices[ticker] = undefined;
-                    earnedValues[ticker] = undefined;
-                    if (boughtCell) boughtCell.textContent = displayPrice;
-                    if (soldCell) soldCell.textContent = '';
-                    if (earnedCell) earnedCell.textContent = '';
-                } else if (action === 'sell') {
-                    const boughtPrice = boughtPrices[ticker];
-                    if (boughtPrice !== undefined) {
-                        soldPrices[ticker] = displayPrice;
-                        const earnedValue = displayPrice - boughtPrice;
-                        earnedValues[ticker] = earnedValue;
-
-                        if (accumulatedEarnings[ticker] === undefined) {
-                            accumulatedEarnings[ticker] = 0;
-                        }
-                        accumulatedEarnings[ticker] += earnedValue;
-
-                        if (soldCell) soldCell.textContent = displayPrice;
-                        if (earnedCell) earnedCell.textContent = earnedValue;
-                        if (accumCell) accumCell.textContent = accumulatedEarnings[ticker];
-                    }
-                }
-            }
-    
-            createOrderForm(ticker, action, orderPrice);
-        }
-    });
 
     orderFormsContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('delete-order')) {
