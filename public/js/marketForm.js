@@ -81,11 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Price</th>
                                 <th>Chart</th>
                                 <th>Delta</th>
+                                <th>Recommendation</th>
+                                <th>Held</th>
                                 <th>Bought</th>
                                 <th>Sold</th>
                                 <th>Earned</th>
-                                <th>Accum</th>
-                                <th>Recommendation</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const boughtPrice = boughtPrices[market.ticker] !== undefined ? boughtPrices[market.ticker] : '';
                     const soldPrice = soldPrices[market.ticker] !== undefined ? soldPrices[market.ticker] : '';
                     const earned = earnedValues[market.ticker] !== undefined ? earnedValues[market.ticker] : '';
-                    const accumValue = accumulatedEarnings[market.ticker] !== undefined ? accumulatedEarnings[market.ticker] : 0;
+                    const heldDisplay = boughtPrices[market.ticker] !== undefined ? 'Yes' : 'No';
 
 
                     tableHtml += `
@@ -141,11 +141,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${market.last_price}</td>
                             <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
                             <td class="${priceChangeClass}">${priceChangeIcon} ${priceChangeDisplay}</td>
+                            <td class="recommendation-cell">${recommendationHtml}</td>
+                            <td>${heldDisplay}</td>
                             <td class="bought-price">${boughtPrice}</td>
                             <td class="sold-price">${soldPrice}</td>
                             <td class="earned-value">${earned}</td>
-                            <td class="accum-value">${accumValue}</td>
-                            <td class="recommendation-cell">${recommendationHtml}</td>
                         </tr>
                     `;
                 });
