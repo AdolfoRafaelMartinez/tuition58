@@ -1,6 +1,6 @@
 
-import { generateRecommendations } from '../services/kalshi.js';
-import { Market, MarketPriceHistory } from '../models/kalshi.js';
+import { generateRecommendations } from '../services/kalshi';
+import { Market, MarketPriceHistory } from '../models/kalshi';
 
 describe('generateRecommendations', () => {
   it('should return "buy" recommendation for price increase', () => {
