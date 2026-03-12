@@ -14,8 +14,9 @@ describe('generateRecommendations', () => {
 
     const marketPriceHistory: MarketPriceHistory = {
       'TEST-TICKER': [
-        { time: new Date(Date.now() - 10000), price: 50 },
-        { time: new Date(Date.now() - 5000), price: 52 },
+            { time: new Date(Date.now() - 15000), price: 50 },
+            { time: new Date(Date.now() - 10000), price: 51 },
+            { time: new Date(Date.now() - 5000), price: 52 },
       ],
     };
 
@@ -34,8 +35,9 @@ describe('generateRecommendations', () => {
 
     const marketPriceHistory: MarketPriceHistory = {
       'TEST-TICKER': [
-        { time: new Date(Date.now() - 10000), price: 52 },
-        { time: new Date(Date.now() - 5000), price: 50 },
+            { time: new Date(Date.now() - 15000), price: 52 },
+            { time: new Date(Date.now() - 10000), price: 51 },
+            { time: new Date(Date.now() - 5000), price: 50 },
       ],
     };
 

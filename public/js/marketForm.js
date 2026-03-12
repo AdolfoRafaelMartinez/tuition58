@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <tr>
                             <td>${market.ticker}</td>
                             <td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td>
-                            <td>${market.last_price}</td>
+                            <td>${market.last_price_dollars * 100}</td>
                             <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
                             <td class="${priceChangeClass}">${priceChangeIcon} ${priceChangeDisplay}</td>
                             <td class="recommendation-cell">${recommendationHtml}</td>
