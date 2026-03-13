@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let earnedValues = {};
     let accumulatedEarnings = {};
     let lastRecommendations = {};
-    const refreshInterval = 5000;
+    const refreshInterval = 60000;
     let lastExecutionTime = Date.now();
 
     const updateProgressBar = () => {
