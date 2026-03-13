@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let earnedValues = {};
     let accumulatedEarnings = {};
     let lastRecommendations = {};
-    const refreshInterval = 60000;
+    const refreshInterval = 5000;
     let lastExecutionTime = Date.now();
 
     const updateProgressBar = () => {
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         marketPriceHistory[market.ticker] = [];
                     }
                     const lastHistoryPrice = marketPriceHistory[market.ticker].length > 0 ? marketPriceHistory[market.ticker][marketPriceHistory[market.ticker].length - 1].price : -1;
-                    if (lastHistoryPrice !== market.last_price) {
+                    if (lastHistoryPrice !== Math.trunc(market.last_price_dollars * 100)) {
                         marketPriceHistory[market.ticker].push({ time: now, price: Math.trunc(market.last_price_dollars * 100) });
                         marketPriceHistory[market.ticker] = marketPriceHistory[market.ticker].slice(-40);
                     }
@@ -96,18 +96,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     let priceChange = 0;
                     if (history && history.length > 1) {
                         const previousPrice = history[history.length - 2].price;
-                        priceChange = market.last_price - previousPrice;
+                        priceChange = Math.trunc(market.last_price_dollars * 100) - previousPrice;
                     }
 
                     const currentRecommendation = recommendations[index];
 
                     if (lastRecommendations[market.ticker] !== currentRecommendation) {
                         if (currentRecommendation === 'buy') {
-                            boughtPrices[market.ticker] = Math.trunc(market.last_price *100);
+                            boughtPrices[market.ticker] = Math.trunc(market.last_price_dollars *100);
                             delete soldPrices[market.ticker];
                             delete earnedValues[market.ticker];
                         } else if (currentRecommendation === 'sell' && boughtPrices[market.ticker] !== undefined) {
-                            soldPrices[market.ticker] = market.last_price;
+                            soldPrices[market.ticker] = Math.trunc(market.last_price_dollars * 100);
                             const earned = soldPrices[market.ticker] - boughtPrices[market.ticker];
                             earnedValues[market.ticker] = earned;
                             if (accumulatedEarnings[market.ticker] === undefined) {
