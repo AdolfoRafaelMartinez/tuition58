@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     const lastHistoryPrice = marketPriceHistory[market.ticker].length > 0 ? marketPriceHistory[market.ticker][marketPriceHistory[market.ticker].length - 1].price : -1;
                     if (lastHistoryPrice !== market.last_price) {
-                        marketPriceHistory[market.ticker].push({ time: now, price: Math.round(market.last_price_dollars * 100) });
+                        marketPriceHistory[market.ticker].push({ time: now, price: Math.trunc(market.last_price_dollars * 100) });
                         marketPriceHistory[market.ticker] = marketPriceHistory[market.ticker].slice(-40);
                     }
                 });
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (lastRecommendations[market.ticker] !== currentRecommendation) {
                         if (currentRecommendation === 'buy') {
-                            boughtPrices[market.ticker] = market.last_price;
+                            boughtPrices[market.ticker] = Math.trunc(market.last_price *100);
                             delete soldPrices[market.ticker];
                             delete earnedValues[market.ticker];
                         } else if (currentRecommendation === 'sell' && boughtPrices[market.ticker] !== undefined) {
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         recommendationHtml = `<span style="color: red; font-weight: bold;">Sell</span>`;
                     }
 
-                    const priceChangeDisplay = Math.abs(Math.round(priceChange));
+                    const priceChangeDisplay = Math.abs(Math.trunc(priceChange));
                     const priceChangeClass = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
                     const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
                     const boughtPrice = boughtPrices[market.ticker] !== undefined ? boughtPrices[market.ticker] : '';
