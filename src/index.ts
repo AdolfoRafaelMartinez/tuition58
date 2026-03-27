@@ -67,19 +67,6 @@ app.get('/api/kalshi/positions', async (req, res) => {
     }
 });
 
-app.get('/api/kalshi/limits', async (req, res) => {
-    const limits = await getKalshiLimits();
-    if (limits.error) {
-        res.status(500).json({ error: limits.error });
-    } else {
-        res.json(limits.data);
-    }
-});
-
-app.get('/api', (req, res) => {
-  res.json({"msg": "Hello world"});
-});
-
 app.listen(port, () => {
-  console.log(`Listening on http://localhost:${port}`);
+    console.log(`Listening on http://localhost:${port}`);
 });

@@ -39,17 +39,17 @@ export function generateRecommendations(markets: Market[], marketPriceHistory: M
         const history = marketPriceHistory[market.ticker];
         const lastHistoryPrice = history.length > 0 ? history[history.length - 1].price : -1;
 
-        if (lastHistoryPrice !== market.last_price) {
-            history.push({ time: now, price: market.last_price });
+        if (lastHistoryPrice !== market.last_price_dollars) {
+            history.push({ time: now, price: market.last_price_dollars });
             if (history.length > 20) {
-                history.shift(); 
+                history.shift();
             }
         }
 
         let priceChange = 0;
         if (history.length > 1) {
             const previousPrice = history[history.length - 2].price;
-            priceChange = market.last_price - previousPrice;
+            priceChange = market.last_price_dollars - previousPrice;
         }
 
         let currentRecommendation: Recommendation = '';
@@ -92,7 +92,7 @@ export async function getKalshiBalance(): Promise<KalshiBalanceResult> {
 
         const response = await fetch(baseUrl + url_path, { headers });
         const responseData = await response.json();
-        
+
         if (responseData) {
             return {
                 data: {
@@ -102,7 +102,7 @@ export async function getKalshiBalance(): Promise<KalshiBalanceResult> {
                 error: null,
             };
         } else {
-             return { data: null, error: 'Failed to retrieve a valid balance from Kalshi API.' };
+            return { data: null, error: 'Failed to retrieve a valid balance from Kalshi API.' };
         }
     } catch (error) {
         console.error('Error fetching Kalshi balance:', error);
@@ -139,7 +139,7 @@ export async function getKalshiLimits() {
 
         const response = await fetch(baseUrl + url_path, { headers });
         const responseData = await response.json();
-        
+
         return { data: responseData, error: null };
 
     } catch (error) {
@@ -178,7 +178,7 @@ export async function getKalshiPositions() {
 
         const response = await fetch(baseUrl + url_path, { headers });
         const responseData = await response.json();
-        
+
         return { data: responseData, error: null };
 
     } catch (error) {
@@ -190,7 +190,7 @@ export async function getKalshiPositions() {
 
 export async function getKalshiMarkets(event_ticker: string) {
     try {
-        const options = {method: 'GET'};
+        const options = { method: 'GET' };
         const response = await fetch(`https://api.elections.kalshi.com/trade-api/v2/markets?event_ticker=${event_ticker}`, options);
         const data = await response.json();
         let markets = data.markets;
@@ -200,10 +200,10 @@ export async function getKalshiMarkets(event_ticker: string) {
         });
         markets.sort((a, b) => a.value - b.value);
         markets.forEach((market, ndx) => {
-            if(ndx == 0){
+            if (ndx == 0) {
                 market.upper = market.value - 1;
             } else {
-                if(market.is_bin){
+                if (market.is_bin) {
                     market.lower = Math.floor(market.value);
                     market.upper = Math.ceil(market.value);
                 } else {
@@ -222,70 +222,70 @@ export async function getKalshiMarkets(event_ticker: string) {
 
 export async function placeKalshiOrder(orderParams: any) {
     // try {
-        if (!process.env.API_KEY || !process.env.RSA_PRIVATE_KEY) {
-            console.error("Missing Kalshi API credentials. Please check your .env file.");
-            return { data: null, error: "Missing Kalshi API credentials." };
-        }
+    if (!process.env.API_KEY || !process.env.RSA_PRIVATE_KEY) {
+        console.error("Missing Kalshi API credentials. Please check your .env file.");
+        return { data: null, error: "Missing Kalshi API credentials." };
+    }
 
-        const apiKey = process.env.API_KEY;
-        const privateKey = fs.readFileSync(process.env.RSA_PRIVATE_KEY, 'utf8');
-        const timestamp = Date.now().toString();
-        const resourcePath = '/trade-api/v2/portfolio/orders';
+    const apiKey = process.env.API_KEY;
+    const privateKey = fs.readFileSync(process.env.RSA_PRIVATE_KEY, 'utf8');
+    const timestamp = Date.now().toString();
+    const resourcePath = '/trade-api/v2/portfolio/orders';
 
-        const { ticker, action, side, yes_price, count } = orderParams;
+    const { ticker, action, side, yes_price, count } = orderParams;
 
-        const kalshiOrder: any = {
-            Ticker: ticker,
-            side,
-            count,
-            action,
-            type: 'limit',
-            client_order_id: crypto.randomUUID().toString(),
-            time_in_force: 'immediate_or_cancel',
+    const kalshiOrder: any = {
+        Ticker: ticker,
+        side,
+        count,
+        action,
+        type: 'limit',
+        client_order_id: crypto.randomUUID().toString(),
+        time_in_force: 'immediate_or_cancel',
+    };
+
+    if (side === 'yes') {
+        kalshiOrder.yes_price = yes_price;
+    } else {
+        kalshiOrder.no_price = 100 - yes_price;
+    }
+
+    const body = JSON.stringify(kalshiOrder);
+
+    const method = 'POST';
+
+    const stringToSign = `${timestamp}${method}${resourcePath}`;
+
+    const signature = signPssText(privateKey, stringToSign);
+    const options = {
+        method: method,
+        headers: {
+            'KALSHI-ACCESS-KEY': apiKey,
+            'KALSHI-ACCESS-SIGNATURE': signature,
+            'KALSHI-ACCESS-TIMESTAMP': timestamp,
+            'Content-Type': 'application/json'
+        },
+        body: body
+    };
+
+    const response = await fetch(`https://api.elections.kalshi.com${resourcePath}`, options);
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error placing Kalshi order:', errorText);
+        return { data: null, error: `Failed to place Kalshi order: ${response.statusText} - ${errorText}` };
+    }
+
+    const orderResponse = await response.json();
+
+    if (orderResponse) {
+        return {
+            data: orderResponse,
+            error: null,
         };
-
-        if (side === 'yes') {
-            kalshiOrder.yes_price = yes_price;
-        } else {
-            kalshiOrder.no_price = 100 - yes_price;
-        }
-
-        const body = JSON.stringify(kalshiOrder);
-
-        const method = 'POST';
-        
-        const stringToSign = `${timestamp}${method}${resourcePath}`;
-
-        const signature = signPssText(privateKey, stringToSign);
-        const options = {
-            method: method,
-            headers: {
-                'KALSHI-ACCESS-KEY': apiKey,
-                'KALSHI-ACCESS-SIGNATURE': signature,
-                'KALSHI-ACCESS-TIMESTAMP': timestamp,
-                'Content-Type': 'application/json'
-            },
-            body: body
-        };
-
-        const response = await fetch(`https://api.elections.kalshi.com${resourcePath}`, options);
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error placing Kalshi order:', errorText);
-            return { data: null, error: `Failed to place Kalshi order: ${response.statusText} - ${errorText}` };
-        }
-
-        const orderResponse = await response.json();
-
-        if (orderResponse) {
-            return {
-                data: orderResponse,
-                error: null,
-            };
-        } else {
-             return { data: null, error: 'Failed to place order with Kalshi API. Invalid response from server.' };
-        }
+    } else {
+        return { data: null, error: 'Failed to place order with Kalshi API. Invalid response from server.' };
+    }
     // } catch (error) {
     //     console.error('Error placing Kalshi order:', error);
     //     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';

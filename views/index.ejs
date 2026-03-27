@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,19 +8,24 @@
     <link rel="stylesheet" href="/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
     <div class="container" data-balance="<%= kalshi ? kalshi.balance : 0 %>">
         <div class="section">
             <% if (kalshi) { %>
-                <p><strong>Cash:</strong> <%= kalshi.balance %>&cent;</p>
-                <p><strong>Portfolio:</strong> <%= kalshi.portfolio_value %>&cent;</p>
-            <% } else { %>
-                <p>Kalshi data not available.</p>
-            <% } %>
+                <p><strong>Cash:</strong>
+                    <%= kalshi.balance %>&cent;
+                </p>
+                <p><strong>Portfolio:</strong>
+                    <%= kalshi.portfolio_value %>&cent;
+                </p>
+                <% } else { %>
+                    <p>Kalshi data not available.</p>
+                    <% } %>
         </div>
         <div class="section">
             <form id="market-form">
-                <input type="text" id="event-ticker" name="event-ticker" value="KXHIGHAUS-26MAR13" required>
+                <input type="text" id="event-ticker" name="event-ticker" value="KXHIGHAUS-26MAR26" required>
                 <button type="submit">Get</button>
             </form>
             <div id="market-result"></div>
@@ -38,6 +44,6 @@
     </div>
     <script src="/js/orderForm.js"></script>
     <script src="/js/marketForm.js"></script>
-    <script src="/js/limits.js"></script>
 </body>
+
 </html>

@@ -14,9 +14,9 @@ describe('generateRecommendations', () => {
 
     const marketPriceHistory: MarketPriceHistory = {
       'TEST-TICKER': [
-            { time: new Date(Date.now() - 15000), price: 50 },
-            { time: new Date(Date.now() - 10000), price: 51 },
-            { time: new Date(Date.now() - 5000), price: 52 },
+        { time: new Date(Date.now() - 15000), price: 50 },
+        { time: new Date(Date.now() - 10000), price: 51 },
+        { time: new Date(Date.now() - 5000), price: 52 },
       ],
     };
 
@@ -35,13 +35,34 @@ describe('generateRecommendations', () => {
 
     const marketPriceHistory: MarketPriceHistory = {
       'TEST-TICKER': [
-            { time: new Date(Date.now() - 15000), price: 52 },
-            { time: new Date(Date.now() - 10000), price: 51 },
-            { time: new Date(Date.now() - 5000), price: 50 },
+        { time: new Date(Date.now() - 15000), price: 52 },
+        { time: new Date(Date.now() - 10000), price: 51 },
+        { time: new Date(Date.now() - 5000), price: 50 },
       ],
     };
 
     const recommendations = generateRecommendations(markets, marketPriceHistory);
     expect(recommendations[0]).toBe('sell');
+  });
+
+  it.only('should return nothing for no price change', () => {
+    const markets: Market[] = [
+      {
+        ticker: 'TEST-TICKER',
+        last_price: 50,
+        // Add other required market properties if any, otherwise leave as is
+      } as Market,
+    ];
+
+    const marketPriceHistory: MarketPriceHistory = {
+      'TEST-TICKER': [
+        { time: new Date(Date.now() - 15000), price: 50 },
+        { time: new Date(Date.now() - 10000), price: 50 },
+        { time: new Date(Date.now() - 5000), price: 50 },
+      ],
+    };
+
+    const recommendations = generateRecommendations(markets, marketPriceHistory);
+    expect(recommendations[0]).toBe('');
   });
 });
