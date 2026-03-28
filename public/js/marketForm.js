@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const now = Date.now();
         const timeElapsed = now - lastExecutionTime;
         const percentage = Math.min((timeElapsed / refreshInterval) * 100, 100);
-        
+
         progressBar.style.width = `${percentage}%`;
     };
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (marketsResponse.ok) {
                 const now = new Date();
 
-                 marketsData.markets.forEach(market => {
+                marketsData.markets.forEach(market => {
                     marketData[market.ticker] = market;
                     if (!marketPriceHistory[market.ticker]) {
                         marketPriceHistory[market.ticker] = [];
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <tr>
                             <td>${row.ticker}</td>
                             <td>${row.range}</td>
-                            <td>${row.price}</td>
+                            <td>${Math.trunc(row.price)}</td>
                             <td><canvas id="chart-${row.ticker}" width="100" height="30"></canvas></td>
                             <td class="${row.priceChangeClass}">${row.priceChangeIcon} ${row.priceChangeDisplay}</td>
                         </tr>
@@ -99,12 +99,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (history && history.length > 0) {
                         let chartLabels = history.map(p => p.time.toLocaleTimeString());
                         let chartData = history.map(p => p.price);
-                
+
                         if (chartData.length === 1) {
                             chartLabels.push(chartLabels[0]);
                             chartData.push(chartData[0]);
                         }
-                
+
                         charts[market.ticker] = new Chart(ctx, {
                             type: 'line',
                             data: {
