@@ -189,8 +189,8 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
 
             const history = marketPriceHistory[market.ticker];
             let priceChange = 0;
-            let lastPositivePrice: number | null = null;
-            let lastNegativePrice: number | null = null;
+            let bought_price: number | null = null;
+            let sold_price: number | null = null;
             let lastThreePrices: number[] = [];
 
             if (history && history.length > 0) {
@@ -203,13 +203,13 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                     const currentChange = allPrices[i] - allPrices[i - 1];
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
                     
-                    if (lastPositivePrice === null && currentChange > 0 && prevChange <= 0) {
-                        lastPositivePrice = allPrices[i];
+                    if (bought_price === null && currentChange > 0 && prevChange <= 0) {
+                        bought_price = allPrices[i];
                     }
-                    if (lastNegativePrice === null && currentChange < 0 && prevChange >= 0) {
-                        lastNegativePrice = allPrices[i];
+                    if (sold_price === null && currentChange < 0 && prevChange >= 0) {
+                        sold_price = allPrices[i];
                     }
-                    if (lastPositivePrice !== null && lastNegativePrice !== null) {
+                    if (bought_price !== null && sold_price !== null) {
                         break;
                     }
                 }
@@ -228,8 +228,8 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChangeClass,
                 priceChangeIcon,
                 priceChangeDisplay,
-                lastPositivePrice,
-                lastNegativePrice,
+                bought_price,
+                sold_price,
                 lastThreePrices
             };
         });
