@@ -69,20 +69,31 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Range</th>
                                 <th>Price</th>
                                 <th>Chart</th>
-                                <th>Delta</th>
+                                <th>priceChangeClass</th>
+                                <th>priceChangeIcon</th>
+                                <th>priceChangeDisplay</th>
+                                <th>lastPositivePrice</th>
+                                <th>lastNegativePrice</th>
+                                <th>lastNegativePriceChange</th>
                             </tr>
                         </thead>
                         <tbody>
                 `;
 
                 marketsData.marketRows.forEach((row) => {
+                    const formatVal = (val) => val === null || val === undefined ? 'N/A' : val;
                     tableHtml += `
                         <tr>
                             <td>${row.ticker}</td>
                             <td>${row.range}</td>
                             <td>${Math.trunc(row.price)}</td>
                             <td><canvas id="chart-${row.ticker}" width="100" height="30"></canvas></td>
-                            <td class="${row.priceChangeClass}">${row.priceChangeIcon} ${row.priceChangeDisplay}</td>
+                            <td>${row.priceChangeClass}</td>
+                            <td>${row.priceChangeIcon}</td>
+                            <td>${row.priceChangeDisplay}</td>
+                            <td>${formatVal(row.lastPositivePrice)}</td>
+                            <td>${formatVal(row.lastNegativePrice)}</td>
+                            <td>${formatVal(row.lastNegativePriceChange)}</td>
                         </tr>
                     `;
                 });
