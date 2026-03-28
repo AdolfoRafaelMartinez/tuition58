@@ -20,4 +20,3 @@ export interface MarketPriceHistory {
     [ticker: string]: { time: Date; price: number }[];
 }
 
-export type Recommendation = 'buy' | 'sell' | '';

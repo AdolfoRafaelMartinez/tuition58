@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from 'url';
-import { getKalshiBalance, placeKalshiOrder, getKalshiMarkets, getKalshiPositions, getKalshiLimits, generateRecommendations } from "./services/kalshi.js";
+import { getKalshiBalance, placeKalshiOrder, getKalshiMarkets, getKalshiPositions, getKalshiLimits } from "./services/kalshi.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,15 +21,6 @@ app.get('/', async (req, res) => {
         kalshi: kalshi.data,
         generatedAt: new Date()
     });
-});
-
-app.post('/api/kalshi/recommendations', (req, res) => {
-    const { markets, marketPriceHistory } = req.body;
-    if (!markets || !marketPriceHistory) {
-        return res.status(400).json({ error: 'Missing markets or marketPriceHistory data' });
-    }
-    const recommendations = generateRecommendations(markets, marketPriceHistory);
-    res.json({ recommendations });
 });
 
 app.post('/api/kalshi/order', async (req, res) => {

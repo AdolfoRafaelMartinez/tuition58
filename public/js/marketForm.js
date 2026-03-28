@@ -11,11 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let marketData = {};
     let marketPriceHistory = {};
     let charts = {};
-    let boughtPrices = {}; 
-    let soldPrices = {}; 
-    let earnedValues = {};
-    let accumulatedEarnings = {};
-    let lastRecommendations = {};
     const refreshInterval = 60000;
     let lastExecutionTime = Date.now();
 
@@ -42,17 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (marketsResponse.ok) {
                 const now = new Date();
 
-                const recommendationsResponse = await fetch('/api/kalshi/recommendations', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ markets: marketsData.markets, marketPriceHistory }),
-                });
-                const recommendationsData = await recommendationsResponse.json();
-                const recommendations = recommendationsData.recommendations;
-
-                marketsData.markets.forEach(market => {
+                 marketsData.markets.forEach(market => {
                     marketData[market.ticker] = market;
                     if (!marketPriceHistory[market.ticker]) {
                         marketPriceHistory[market.ticker] = [];
@@ -81,11 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Price</th>
                                 <th>Chart</th>
                                 <th>Delta</th>
-                                <th>Recommendation</th>
-                                <th>Held</th>
-                                <th>Bought</th>
-                                <th>Sold</th>
-                                <th>Earned</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -99,39 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         priceChange = Math.trunc(market.last_price_dollars * 100) - previousPrice;
                     }
 
-                    const currentRecommendation = recommendations[index];
-
-                    if (lastRecommendations[market.ticker] !== currentRecommendation) {
-                        if (currentRecommendation === 'buy') {
-                            boughtPrices[market.ticker] = Math.trunc(market.last_price_dollars *100);
-                            delete soldPrices[market.ticker];
-                            delete earnedValues[market.ticker];
-                        } else if (currentRecommendation === 'sell' && boughtPrices[market.ticker] !== undefined) {
-                            soldPrices[market.ticker] = Math.trunc(market.last_price_dollars * 100);
-                            const earned = soldPrices[market.ticker] - boughtPrices[market.ticker];
-                            earnedValues[market.ticker] = earned;
-                            if (accumulatedEarnings[market.ticker] === undefined) {
-                                accumulatedEarnings[market.ticker] = 0;
-                            }
-                            accumulatedEarnings[market.ticker] += earned;
-                        }
-                    }
-                    lastRecommendations[market.ticker] = currentRecommendation;
-
-                    let recommendationHtml = '';
-                    if (currentRecommendation === 'buy') {
-                        recommendationHtml = `<span style="color: green; font-weight: bold;">Buy</span>`;
-                    } else if (currentRecommendation === 'sell') {
-                        recommendationHtml = `<span style="color: red; font-weight: bold;">Sell</span>`;
-                    }
-
                     const priceChangeDisplay = Math.abs(Math.trunc(priceChange));
                     const priceChangeClass = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
                     const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
-                    const boughtPrice = boughtPrices[market.ticker] !== undefined ? boughtPrices[market.ticker] : '';
-                    const soldPrice = soldPrices[market.ticker] !== undefined ? soldPrices[market.ticker] : '';
-                    const earned = earnedValues[market.ticker] !== undefined ? earnedValues[market.ticker] : '';
-                    const heldDisplay = boughtPrices[market.ticker] !== undefined ? 'Yes' : 'No';
 
 
                     tableHtml += `
@@ -141,11 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${market.last_price_dollars * 100}</td>
                             <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
                             <td class="${priceChangeClass}">${priceChangeIcon} ${priceChangeDisplay}</td>
-                            <td class="recommendation-cell">${recommendationHtml}</td>
-                            <td>${heldDisplay}</td>
-                            <td class="bought-price">${boughtPrice}</td>
-                            <td class="sold-price">${soldPrice}</td>
-                            <td class="earned-value">${earned}</td>
                         </tr>
                     `;
                 });

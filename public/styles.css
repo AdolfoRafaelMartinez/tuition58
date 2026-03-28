@@ -193,7 +193,7 @@ button {
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
-  transition: background-color: 0.3s;
+  transition: background-color 0.3s;
   align-self: flex-start; /* Align button to the left */
 }
 
@@ -230,25 +230,7 @@ button:hover {
     font-weight: bold;
 }
 
-/* Appended Styles for Recommendations */
-.market-table .recommendation-cell {
-    text-align: center;
-}
 
-.recommendation {
-    font-weight: bold;
-    font-size: 1.2em;
-    text-transform: uppercase;
-    display: block;
-}
-
-.buy-recommendation {
-    color: green;
-}
-
-.sell-recommendation {
-    color: red;
-}
 
 /* Delete button styles */
 .delete-form, .delete-order {
@@ -264,38 +246,7 @@ button:hover {
     opacity: 0.7;
 }
 
-/* Recommendation buttons: light gray background with subtle rounding */
-.recommendation, button.recommendation {
-    /* force reset any button backgrounds (including gradients) */
-    background: none !important;
-    background-color: #f0f0f0 !important;
-    background-image: none !important;
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    border: 1px solid #dcdcdc !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-    padding: 10px 14px;
-    cursor: pointer;
-    border-radius: 6px;
-    font-size: 1.1em !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    transition: box-shadow 0.15s ease, border-color 0.15s ease;
-}
 
-.recommendation:focus, button.recommendation:focus {
-    outline: none !important;
-    box-shadow: 0 0 0 4px rgba(0,123,255,0.12) !important;
-    border-color: #b3d7ff !important;
-}
-
-.recommendation.buy-recommendation {
-    color: green !important;
-}
-
-.recommendation.sell-recommendation {
-    color: red !important;
-}
 
 .positive {
     color: green;
