@@ -75,7 +75,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         <tbody>
                 `;
 
-                tableHtml += marketsData.tableHtml;
+                marketsData.marketRows.forEach((row) => {
+                    tableHtml += `
+                        <tr>
+                            <td>${row.ticker}</td>
+                            <td>${row.range}</td>
+                            <td>${row.price}</td>
+                            <td><canvas id="chart-${row.ticker}" width="100" height="30"></canvas></td>
+                            <td class="${row.priceChangeClass}">${row.priceChangeIcon} ${row.priceChangeDisplay}</td>
+                        </tr>
+                    `;
+                });
 
                 tableHtml += `</tbody></table>`;
                 marketResult.innerHTML = tableHtml;

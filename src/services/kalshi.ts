@@ -162,8 +162,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             market.is_bin = market.ticker.toLowerCase().match(/b\d/);
         });
         markets.sort((a, b) => a.value - b.value);
-        let tableHtml = '';
-        markets.forEach((market: any, ndx: number) => {
+        const marketRows = markets.map((market: any, ndx: number) => {
             if (ndx == 0) {
                 market.upper = market.value - 1;
             } else {
@@ -186,18 +185,17 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             const priceChangeClass = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
             const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
 
-            tableHtml += `
-                        <tr>
-                            <td>${market.ticker}</td>
-                            <td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td>
-                            <td>${market.last_price_dollars * 100}</td>
-                            <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
-                            <td class="${priceChangeClass}">${priceChangeIcon} ${priceChangeDisplay}</td>
-                        </tr>
-                    `;
+            return {
+                ticker: market.ticker,
+                range: `${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}`,
+                price: market.last_price_dollars * 100,
+                priceChangeClass,
+                priceChangeIcon,
+                priceChangeDisplay
+            };
         });
         
-        data.tableHtml = tableHtml;
+        data.marketRows = marketRows;
         return { data: data, error: null };
     } catch (error) {
         console.error(`Error fetching Kalshi markets for ${event_ticker}:`, error);
