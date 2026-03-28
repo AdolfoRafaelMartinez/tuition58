@@ -176,9 +176,22 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
 
             const history = marketPriceHistory[market.ticker];
             let priceChange = 0;
+            let lastPositivePrice: number | null = null;
+
             if (history && history.length > 0) {
                 const previousPrice = history[history.length - 1].price;
                 priceChange = market.last_price_dollars * 100 - previousPrice;
+
+                const allPrices = [...history.map((h: any) => h.price), market.last_price_dollars * 100];
+                for (let i = allPrices.length - 1; i > 0; i--) {
+                    const currentChange = allPrices[i] - allPrices[i - 1];
+                    const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
+                    
+                    if (currentChange > 0 && prevChange <= 0) {
+                        lastPositivePrice = allPrices[i];
+                        break;
+                    }
+                }
             }
 
             const priceChangeDisplay = Math.abs(priceChange);
@@ -191,7 +204,8 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 price: market.last_price_dollars * 100,
                 priceChangeClass,
                 priceChangeIcon,
-                priceChangeDisplay
+                priceChangeDisplay,
+                lastPositivePrice
             };
         });
 

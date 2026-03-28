@@ -38,11 +38,46 @@ describe('getKalshiMarkets', () => {
     expect(response.error).toBeNull();
     expect(response.data).toBeDefined();
     expect(response.data.marketRows).toBeDefined();
-    
+
     const row = response.data.marketRows[0];
-    
+
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.priceChangeClass).toBe('positive');
+    expect(row.priceChangeDisplay).toBe(10);
+  });
+
+  it('should assert priceChangeClass is "negative" when marketPriceHistory contains a decreasing price', async () => {
+    // Mock fetch to return a market with a specific price
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({
+          markets: [
+            {
+              ticker: 'TEST-MARKET',
+              last_price_dollars: 0.60,
+              // Other properties needed for the function
+            }
+          ]
+        })
+      })
+    ) as jest.Mock;
+
+    const mockHistory = {
+      'TEST-MARKET': [
+        { time: new Date(), price: 70 } // Previous price is 0 cents. Current is 60 cents. So price increased by 10.
+      ]
+    };
+
+    const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
+
+    expect(response.error).toBeNull();
+    expect(response.data).toBeDefined();
+    expect(response.data.marketRows).toBeDefined();
+
+    const row = response.data.marketRows[0];
+
+    expect(row.ticker).toBe('TEST-MARKET');
+    expect(row.priceChangeClass).toBe('negative');
     expect(row.priceChangeDisplay).toBe(10);
   });
 });
