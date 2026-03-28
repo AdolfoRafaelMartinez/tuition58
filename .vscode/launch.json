@@ -20,6 +20,12 @@
             "type": "node-terminal"
         },
         {
+            "command": "npm test",
+            "name": "Run npm test",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome against localhost",
