@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>lastPositivePrice</th>
                                 <th>lastNegativePrice</th>
                                 <th>lastNegativePriceChange</th>
+                                <th>lastThreePrices</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -94,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${formatVal(row.lastPositivePrice)}</td>
                             <td>${formatVal(row.lastNegativePrice)}</td>
                             <td>${formatVal(row.lastNegativePriceChange)}</td>
+                            <td>${formatVal(row.lastThreePrices ? row.lastThreePrices.join(', ') : null)}</td>
                         </tr>
                     `;
                 });

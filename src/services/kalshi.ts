@@ -142,7 +142,20 @@ export async function getKalshiPositions() {
         const response = await fetch(baseUrl + url_path, { headers });
         const responseData = await response.json();
 
-        return { data: responseData, error: null };
+        function truncateNumbers(obj: any): any {
+            if (typeof obj === 'number') return Math.trunc(obj);
+            if (Array.isArray(obj)) return obj.map(truncateNumbers);
+            if (obj !== null && typeof obj === 'object') {
+                const newObj: any = {};
+                for (const key in obj) {
+                    newObj[key] = truncateNumbers(obj[key]);
+                }
+                return newObj;
+            }
+            return obj;
+        }
+
+        return { data: truncateNumbers(responseData), error: null };
 
     } catch (error) {
         console.error('Error fetching Kalshi positions:', error);
@@ -179,12 +192,14 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             let lastPositivePrice: number | null = null;
             let lastNegativePrice: number | null = null;
             let lastNegativePriceChange: number | null = null;
+            let lastThreePrices: number[] = [];
 
             if (history && history.length > 0) {
                 const previousPrice = history[history.length - 1].price;
                 priceChange = market.last_price_dollars * 100 - previousPrice;
 
                 const allPrices = [...history.map((h: any) => h.price), market.last_price_dollars * 100];
+                lastThreePrices = allPrices.slice(-3);
                 for (let i = allPrices.length - 1; i > 0; i--) {
                     const currentChange = allPrices[i] - allPrices[i - 1];
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
@@ -200,6 +215,8 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                         break;
                     }
                 }
+            } else {
+                lastThreePrices = [market.last_price_dollars * 100];
             }
 
             const priceChangeDisplay = Math.abs(priceChange);
@@ -215,7 +232,8 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChangeDisplay,
                 lastPositivePrice,
                 lastNegativePrice,
-                lastNegativePriceChange
+                lastNegativePriceChange,
+                lastThreePrices
             };
         });
 
