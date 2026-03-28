@@ -81,7 +81,7 @@ describe('getKalshiMarkets', () => {
     expect(row.priceChangeDisplay).toBe(10);
   });
 
-  it('should assert lastPositivePrice returns the last price when the priceChangeClass became positive', async () => {
+  it('should assert bought_price returns the last price when the priceChangeClass became positive', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
@@ -113,10 +113,10 @@ describe('getKalshiMarkets', () => {
     const row = response.data.marketRows[0];
 
     expect(row.ticker).toBe('TEST-MARKET');
-    expect(row.lastPositivePrice).toBe(60);
+    expect(row.bought_price).toBe(60);
   });
 
-  it('should assert lastNegativePrice returns the last price when the priceChangeClass became negative', async () => {
+  it('should assert sold_price returns the last price when the priceChangeClass became negative', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
@@ -147,6 +147,6 @@ describe('getKalshiMarkets', () => {
     const row = response.data.marketRows[0];
 
     expect(row.ticker).toBe('TEST-MARKET');
-    expect(row.lastNegativePrice).toBe(30);
+    expect(row.sold_price).toBe(30);
   });
 });
