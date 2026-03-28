@@ -31,7 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.disabled = true;
 
         try {
-            const marketsResponse = await fetch(`/api/kalshi/markets/${encodeURIComponent(event_ticker)}`);
+            const marketsResponse = await fetch(`/api/kalshi/markets/${encodeURIComponent(event_ticker)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ marketPriceHistory })
+            });
             const marketsData = await marketsResponse.json();
 
             if (marketsResponse.ok) {
@@ -71,29 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <tbody>
                 `;
 
-                marketsData.markets.forEach((market, index) => {
-                    const history = marketPriceHistory[market.ticker];
-                    let priceChange = 0;
-                    if (history && history.length > 1) {
-                        const previousPrice = history[history.length - 2].price;
-                        priceChange = Math.trunc(market.last_price_dollars * 100) - previousPrice;
-                    }
-
-                    const priceChangeDisplay = Math.abs(Math.trunc(priceChange));
-                    const priceChangeClass = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
-                    const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
-
-
-                    tableHtml += `
-                        <tr>
-                            <td>${market.ticker}</td>
-                            <td>${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}</td>
-                            <td>${market.last_price_dollars * 100}</td>
-                            <td><canvas id="chart-${market.ticker}" width="100" height="30"></canvas></td>
-                            <td class="${priceChangeClass}">${priceChangeIcon} ${priceChangeDisplay}</td>
-                        </tr>
-                    `;
-                });
+                tableHtml += marketsData.tableHtml;
 
                 tableHtml += `</tbody></table>`;
                 marketResult.innerHTML = tableHtml;

@@ -33,9 +33,10 @@ app.post('/api/kalshi/order', async (req, res) => {
     }
 });
 
-app.get('/api/kalshi/markets/:event_ticker', async (req, res) => {
+app.post('/api/kalshi/markets/:event_ticker', async (req, res) => {
     const event_ticker = req.params.event_ticker;
-    const marketResult = await getKalshiMarkets(event_ticker);
+    const marketPriceHistory = req.body.marketPriceHistory || {};
+    const marketResult = await getKalshiMarkets(event_ticker, marketPriceHistory);
 
     if (marketResult.error) {
         return res.status(500).json({ error: marketResult.error });
