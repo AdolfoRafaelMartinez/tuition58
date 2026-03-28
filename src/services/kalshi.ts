@@ -191,7 +191,6 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             let priceChange = 0;
             let lastPositivePrice: number | null = null;
             let lastNegativePrice: number | null = null;
-            let lastNegativePriceChange: number | null = null;
             let lastThreePrices: number[] = [];
 
             if (history && history.length > 0) {
@@ -209,7 +208,6 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                     }
                     if (lastNegativePrice === null && currentChange < 0 && prevChange >= 0) {
                         lastNegativePrice = allPrices[i];
-                        lastNegativePriceChange = currentChange;
                     }
                     if (lastPositivePrice !== null && lastNegativePrice !== null) {
                         break;
@@ -232,7 +230,6 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChangeDisplay,
                 lastPositivePrice,
                 lastNegativePrice,
-                lastNegativePriceChange,
                 lastThreePrices
             };
         });

@@ -97,6 +97,7 @@ describe('getKalshiMarkets', () => {
 
     const mockHistory = {
       'TEST-MARKET': [
+        { time: new Date(), price: 30 },
         { time: new Date(), price: 50 },
         { time: new Date(), price: 40 },
         { time: new Date(), price: 60 }
@@ -147,39 +148,5 @@ describe('getKalshiMarkets', () => {
 
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.lastNegativePrice).toBe(30);
-  });
-
-  it('should assert lastNegativePriceChange returns the difference between the last two prices when the priceChangeClass became negative', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({
-          markets: [
-            {
-              ticker: 'TEST-MARKET',
-              last_price_dollars: 0.50,
-            }
-          ]
-        })
-      })
-    ) as jest.Mock;
-
-    const mockHistory = {
-      'TEST-MARKET': [
-        { time: new Date(), price: 40 },
-        { time: new Date(), price: 60 },
-        { time: new Date(), price: 30 }
-      ]
-    };
-
-    const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
-
-    expect(response.error).toBeNull();
-    expect(response.data).toBeDefined();
-    expect(response.data.marketRows).toBeDefined();
-
-    const row = response.data.marketRows[0];
-
-    expect(row.ticker).toBe('TEST-MARKET');
-    expect(row.lastNegativePriceChange).toBe(-30);
   });
 });
