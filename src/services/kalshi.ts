@@ -191,6 +191,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             let priceChange = 0;
             let bought_price: number | null = null;
             let sold_price: number | null = null;
+            let earned_value = 0;
             let lastThreePrices: number[] = [];
 
             if (history && history.length > 0) {
@@ -199,18 +200,21 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
 
                 const allPrices = [...history.map((h: any) => h.price), market.last_price_dollars * 100];
                 lastThreePrices = allPrices.slice(-3);
+                let last_bought_price: number | null = null;
                 for (let i = allPrices.length - 1; i > 0; i--) {
                     const currentChange = allPrices[i] - allPrices[i - 1];
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
-                    
-                    if (bought_price === null && currentChange > 0 && prevChange <= 0) {
-                        bought_price = allPrices[i];
+
+                    if (currentChange > 0 && prevChange <= 0) {
+                        if (bought_price === null) bought_price = allPrices[i];
+                        last_bought_price = allPrices[i];
                     }
-                    if (sold_price === null && currentChange < 0 && prevChange >= 0) {
-                        sold_price = allPrices[i];
-                    }
-                    if (bought_price !== null && sold_price !== null) {
-                        break;
+                    if (currentChange < 0 && prevChange >= 0) {
+                        if (sold_price === null) sold_price = allPrices[i];
+                        if (last_bought_price !== null) {
+                            earned_value += allPrices[i] - last_bought_price;
+                            last_bought_price = null;
+                        }
                     }
                 }
             } else {
@@ -230,6 +234,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChangeDisplay,
                 bought_price,
                 sold_price,
+                earned_value,
                 lastThreePrices
             };
         });
