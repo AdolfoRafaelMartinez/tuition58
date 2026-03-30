@@ -186,14 +186,77 @@ describe('getKalshiMarkets', () => {
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.earned_value).toBe(-15);
   });
-  it.only('should assert what ever i say it has to', async () => {
+  it.only('should assert zero earnings when no history', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
           markets: [
             {
               ticker: 'TEST-MARKET',
-              last_price_dollars: 0.20,
+              last_price_dollars: 0.40, // buy 40
+            }
+          ]
+        })
+      })
+    ) as jest.Mock;
+
+    const mockHistory = {
+      'TEST-MARKET': [
+        // { time: new Date(), price: 30 },
+      ]
+    };
+
+    const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
+
+    expect(response.error).toBeNull();
+    expect(response.data).toBeDefined();
+    expect(response.data.marketRows).toBeDefined();
+
+    const row = response.data.marketRows[0];
+
+    expect(row.ticker).toBe('TEST-MARKET');
+    expect(row.earned_value).toBe(0);
+  });
+  it.only('should assert zero earnings when a negative trend appears', async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({
+          markets: [
+            {
+              ticker: 'TEST-MARKET',
+              last_price_dollars: 0.40,
+            }
+          ]
+        })
+      })
+    ) as jest.Mock;
+
+    const mockHistory = {
+      'TEST-MARKET': [
+        { time: new Date(), price: 50 },
+      ]
+    };
+
+    const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
+    debugger
+
+    expect(response.error).toBeNull();
+    expect(response.data).toBeDefined();
+    expect(response.data.marketRows).toBeDefined();
+
+    const row = response.data.marketRows[0];
+
+    expect(row.ticker).toBe('TEST-MARKET');
+    expect(row.earned_value).toBe(0);
+  });
+  it.only('should assert zero earnings and held as true when a positive trend appears', async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({
+          markets: [
+            {
+              ticker: 'TEST-MARKET',
+              last_price_dollars: 0.40,
             }
           ]
         })
@@ -207,9 +270,8 @@ describe('getKalshiMarkets', () => {
     };
 
     const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
+    debugger
 
-    debugger;
-    
     expect(response.error).toBeNull();
     expect(response.data).toBeDefined();
     expect(response.data.marketRows).toBeDefined();
@@ -217,6 +279,7 @@ describe('getKalshiMarkets', () => {
     const row = response.data.marketRows[0];
 
     expect(row.ticker).toBe('TEST-MARKET');
-    expect(row.earned_value).toBe(10);
+    expect(row.held).toEqual(true);
+    expect(row.earned_value).toBe(0);
   });
 });

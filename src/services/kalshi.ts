@@ -171,19 +171,19 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
         const data = await response.json();
         let markets = data.markets;
         markets.forEach((market) => {
-            market.value = Number(market.ticker.match(/\d+\.?\d$/));
+            market.bin_value = Number(market.ticker.match(/\d+\.?\d$/));
             market.is_bin = market.ticker.toLowerCase().match(/b\d/);
         });
-        markets.sort((a, b) => a.value - b.value);
+        markets.sort((a, b) => a.bin_value - b.bin_value);
         const marketRows = markets.map((market: any, ndx: number) => {
             if (ndx == 0) {
-                market.upper = market.value - 1;
+                market.upper = market.bin_value - 1;
             } else {
                 if (market.is_bin) {
-                    market.lower = Math.floor(market.value);
-                    market.upper = Math.ceil(market.value);
+                    market.lower = Math.floor(market.bin_value);
+                    market.upper = Math.ceil(market.bin_value);
                 } else {
-                    market.lower = market.value + 1;
+                    market.lower = market.bin_value + 1;
                 }
             }
 
@@ -201,13 +201,13 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
 
                 allPrices = [...history.map((h: any) => h.price), market.last_price_dollars * 100];
                 lastThreePrices = allPrices.slice(-3);
-                
+
                 // Calculate earned_value by iterating forward
                 let current_bought_price: number | null = null;
                 for (let i = 1; i < allPrices.length; i++) {
                     const currentChange = allPrices[i] - allPrices[i - 1];
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
-                    
+
                     if (currentChange > 0 && prevChange <= 0) {
                         current_bought_price = allPrices[i];
                     }
@@ -218,12 +218,12 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                         }
                     }
                 }
-                
+
                 // Find most recent bought_price and sold_price for display by iterating backward
                 for (let i = allPrices.length - 1; i > 0; i--) {
                     const currentChange = allPrices[i] - allPrices[i - 1];
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
-                    
+
                     if (bought_price === null && currentChange > 0 && prevChange <= 0) {
                         bought_price = allPrices[i];
                     }
