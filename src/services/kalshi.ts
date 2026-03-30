@@ -194,6 +194,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             let earned_value = 0;
             let lastThreePrices: number[] = [];
             let allPrices: number[] = [];
+			let held = false;
 
             if (history && history.length > 0) {
                 const previousPrice = history[history.length - 1].price;
@@ -209,15 +210,19 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
 
                     if (currentChange > 0 && prevChange <= 0) {
-                        current_bought_price = allPrices[i];
+                        current_bought_price = allPrices[i-1];
                     }
                     if (currentChange < 0 && prevChange >= 0) {
                         if (current_bought_price !== null) {
-                            earned_value += allPrices[i] - current_bought_price;
+                            earned_value += allPrices[i-1] - current_bought_price;
                             current_bought_price = null; // Reset for the next cycle
                         }
                     }
                 }
+
+				if (current_bought_price !== null) {
+					held = true;
+				}
 
                 // Find most recent bought_price and sold_price for display by iterating backward
                 for (let i = allPrices.length - 1; i > 0; i--) {
@@ -225,10 +230,10 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
 
                     if (bought_price === null && currentChange > 0 && prevChange <= 0) {
-                        bought_price = allPrices[i];
+                        bought_price = allPrices[i-1];
                     }
                     if (sold_price === null && currentChange < 0 && prevChange >= 0) {
-                        sold_price = allPrices[i];
+                        sold_price = allPrices[i-1];
                     }
                     if (bought_price !== null && sold_price !== null) {
                         break;
@@ -253,7 +258,8 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 bought_price,
                 sold_price,
                 earned_value,
-                lastThreePrices
+                lastThreePrices,
+				held
             };
         });
 
@@ -268,74 +274,74 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
 
 
 export async function placeKalshiOrder(orderParams: any) {
-    // try {
-    if (!process.env.API_KEY || !process.env.RSA_PRIVATE_KEY) {
-        console.error("Missing Kalshi API credentials. Please check your .env file.");
-        return { data: null, error: "Missing Kalshi API credentials." };
-    }
+    try {
+        if (!process.env.API_KEY || !process.env.RSA_PRIVATE_KEY) {
+            console.error("Missing Kalshi API credentials. Please check your .env file.");
+            return { data: null, error: "Missing Kalshi API credentials." };
+        }
 
-    const apiKey = process.env.API_KEY;
-    const privateKey = fs.readFileSync(process.env.RSA_PRIVATE_KEY, 'utf8');
-    const timestamp = Date.now().toString();
-    const resourcePath = '/trade-api/v2/portfolio/orders';
+        const apiKey = process.env.API_KEY;
+        const privateKey = fs.readFileSync(process.env.RSA_PRIVATE_KEY, 'utf8');
+        const timestamp = Date.now().toString();
+        const resourcePath = '/trade-api/v2/portfolio/orders';
 
-    const { ticker, action, side, yes_price, count } = orderParams;
+        const { ticker, action, side, yes_price, count } = orderParams;
 
-    const kalshiOrder: any = {
-        Ticker: ticker,
-        side,
-        count,
-        action,
-        type: 'limit',
-        client_order_id: crypto.randomUUID().toString(),
-        time_in_force: 'immediate_or_cancel',
-    };
-
-    if (side === 'yes') {
-        kalshiOrder.yes_price = yes_price;
-    } else {
-        kalshiOrder.no_price = 100 - yes_price;
-    }
-
-    const body = JSON.stringify(kalshiOrder);
-
-    const method = 'POST';
-
-    const stringToSign = `${timestamp}${method}${resourcePath}`;
-
-    const signature = signPssText(privateKey, stringToSign);
-    const options = {
-        method: method,
-        headers: {
-            'KALSHI-ACCESS-KEY': apiKey,
-            'KALSHI-ACCESS-SIGNATURE': signature,
-            'KALSHI-ACCESS-TIMESTAMP': timestamp,
-            'Content-Type': 'application/json'
-        },
-        body: body
-    };
-
-    const response = await fetch(`https://api.elections.kalshi.com${resourcePath}`, options);
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error placing Kalshi order:', errorText);
-        return { data: null, error: `Failed to place Kalshi order: ${response.statusText} - ${errorText}` };
-    }
-
-    const orderResponse = await response.json();
-
-    if (orderResponse) {
-        return {
-            data: orderResponse,
-            error: null,
+        const kalshiOrder: any = {
+            Ticker: ticker,
+            side,
+            count,
+            action,
+            type: 'limit',
+            client_order_id: crypto.randomUUID().toString(),
+            time_in_force: 'immediate_or_cancel',
         };
-    } else {
-        return { data: null, error: 'Failed to place order with Kalshi API. Invalid response from server.' };
+
+        if (side === 'yes') {
+            kalshiOrder.yes_price = yes_price;
+        } else {
+            kalshiOrder.no_price = 100 - yes_price;
+        }
+
+        const body = JSON.stringify(kalshiOrder);
+
+        const method = 'POST';
+
+        const stringToSign = `${timestamp}${method}${resourcePath}`;
+
+        const signature = signPssText(privateKey, stringToSign);
+        const options = {
+            method: method,
+            headers: {
+                'KALSHI-ACCESS-KEY': apiKey,
+                'KALSHI-ACCESS-SIGNATURE': signature,
+                'KALSHI-ACCESS-TIMESTAMP': timestamp,
+                'Content-Type': 'application/json'
+            },
+            body: body
+        };
+
+        const response = await fetch(`https://api.elections.kalshi.com${resourcePath}`, options);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error placing Kalshi order:', errorText);
+            return { data: null, error: `Failed to place Kalshi order: ${response.statusText} - ${errorText}` };
+        }
+
+        const orderResponse = await response.json();
+
+        if (orderResponse) {
+            return {
+                data: orderResponse,
+                error: null,
+            };
+        } else {
+            return { data: null, error: 'Failed to place order with Kalshi API. Invalid response from server.' };
+        }
+    } catch (error) {
+        console.error('Error placing Kalshi order:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { data: null, error: `Failed to place Kalshi order: ${errorMessage}` };
     }
-    // } catch (error) {
-    //     console.error('Error placing Kalshi order:', error);
-    //     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-    //     return { data: null, error: `Failed to place Kalshi order: ${errorMessage}` };
-    // }
 }

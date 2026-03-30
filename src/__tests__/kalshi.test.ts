@@ -249,7 +249,7 @@ describe('getKalshiMarkets', () => {
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.earned_value).toBe(0);
   });
-  it.only('should assert zero earnings and held as true when a positive trend appears', async () => {
+  it.only('should assert zero earnings and held to be true when a positive trend appears', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
@@ -270,7 +270,6 @@ describe('getKalshiMarkets', () => {
     };
 
     const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
-    debugger
 
     expect(response.error).toBeNull();
     expect(response.data).toBeDefined();
@@ -279,7 +278,39 @@ describe('getKalshiMarkets', () => {
     const row = response.data.marketRows[0];
 
     expect(row.ticker).toBe('TEST-MARKET');
-    expect(row.held).toEqual(true);
+    expect(row.held).toBe(true);
+    expect(row.earned_value).toBe(0);
+  });
+  it.only('should assert zero earnings and held to be true when a positive trend appears', async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({
+          markets: [
+            {
+              ticker: 'TEST-MARKET',
+              last_price_dollars: 0.40,
+            }
+          ]
+        })
+      })
+    ) as jest.Mock;
+
+    const mockHistory = {
+      'TEST-MARKET': [
+        { time: new Date(), price: 30 },
+      ]
+    };
+
+    const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
+
+    expect(response.error).toBeNull();
+    expect(response.data).toBeDefined();
+    expect(response.data.marketRows).toBeDefined();
+
+    const row = response.data.marketRows[0];
+
+    expect(row.ticker).toBe('TEST-MARKET');
+    expect(row.held).toBe(true);
     expect(row.earned_value).toBe(0);
   });
 });
