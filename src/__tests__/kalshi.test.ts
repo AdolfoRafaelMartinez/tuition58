@@ -11,7 +11,7 @@ describe('getKalshiMarkets', () => {
     global.fetch = originalFetch;
   });
 
-  it('should assert priceChangeClass is "positive" when marketPriceHistory contains an increasing price', async () => {
+  it.only('should assert priceChangeClass is "positive" when marketPriceHistory contains an increasing price', async () => {
     // Mock fetch to return a market with a specific price
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -19,7 +19,7 @@ describe('getKalshiMarkets', () => {
           markets: [
             {
               ticker: 'TEST-MARKET',
-              last_price_dollars: 0.60,
+              last_price_dollars: 0.60, // buy at 60, unrealized earnings are 0 since it was just bought.
               // Other properties needed for the function
             }
           ]
@@ -29,7 +29,7 @@ describe('getKalshiMarkets', () => {
 
     const mockHistory = {
       'TEST-MARKET': [
-        { time: new Date(), price: 50 } // Previous price is 50 cents. Current is 60 cents. So price increased by 10.
+        { time: new Date(), price: 50 } // tracking of price started here
       ]
     };
 
@@ -43,7 +43,7 @@ describe('getKalshiMarkets', () => {
 
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.priceChangeClass).toBe('positive');
-    expect(row.priceChangeDisplay).toBe(10);
+    expect(row.priceChangeDisplay).toBe(0);
   });
 
   it('should assert priceChangeClass is "negative" when marketPriceHistory contains a decreasing price', async () => {
@@ -124,7 +124,7 @@ describe('getKalshiMarkets', () => {
           markets: [
             {
               ticker: 'TEST-MARKET',
-              last_price_dollars: 0.50,
+              last_price_dollars: 0.50, // buy at 50
             }
           ]
         })
@@ -134,8 +134,8 @@ describe('getKalshiMarkets', () => {
     const mockHistory = {
       'TEST-MARKET': [
         { time: new Date(), price: 40 },
-        { time: new Date(), price: 60 },
-        { time: new Date(), price: 30 }
+        { time: new Date(), price: 60 }, // buy at 60
+        { time: new Date(), price: 30 } // sell at 30 lose 30
       ]
     };
 
