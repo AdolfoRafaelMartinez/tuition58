@@ -347,3 +347,37 @@ describe('getKalshiMarkets', () => {
     expect(row.earned_value).toBe(10);
   });
 });
+it.only('should assert more earnings and held to be true when many positive trends appears', async () => {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      json: () => Promise.resolve({
+        markets: [
+          {
+            ticker: 'TEST-MARKET',
+            last_price_dollars: 0.60, // earned 20
+          }
+        ]
+      })
+    })
+  ) as jest.Mock;
+
+  const mockHistory = {
+    'TEST-MARKET': [
+      { time: new Date(), price: 30 },
+      { time: new Date(), price: 40 }, // buy at 40
+      { time: new Date(), price: 50 }, 
+    ]
+  };
+
+  const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
+
+  expect(response.error).toBeNull();
+  expect(response.data).toBeDefined();
+  expect(response.data.marketRows).toBeDefined();
+
+  const row = response.data.marketRows[0];
+
+  expect(row.ticker).toBe('TEST-MARKET');
+  expect(row.held).toBe(true);
+  expect(row.earned_value).toBe(20);
+});
