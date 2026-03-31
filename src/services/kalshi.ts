@@ -210,19 +210,20 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
 
                     if (currentChange > 0 && prevChange <= 0) {
-                        current_bought_price = allPrices[i-1];
+                        current_bought_price = allPrices[i]; // Buy at current price
                     }
                     if (currentChange < 0 && prevChange >= 0) {
                         if (current_bought_price !== null) {
-                            earned_value += allPrices[i-1] - current_bought_price;
-                            current_bought_price = null; // Reset for the next cycle
+                            earned_value += allPrices[i] - current_bought_price; // Sell at current price
+                            current_bought_price = null;
                         }
                     }
                 }
 
-				if (current_bought_price !== null) {
-					held = true;
-				}
+                if (current_bought_price !== null) {
+                    held = true;
+                    earned_value += allPrices[allPrices.length - 1] - current_bought_price;
+                }
 
                 // Find most recent bought_price and sold_price for display by iterating backward
                 for (let i = allPrices.length - 1; i > 0; i--) {
