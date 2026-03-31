@@ -91,7 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 tableHtml += `</tbody></table>`;
                 marketResult.innerHTML = tableHtml;
 
-                marketsData.markets.forEach(market => {
+                marketsData.marketRows.forEach(marketRow => {
+                    const market = marketsData.markets.find(m => m.ticker === marketRow.ticker);
+                    if (!market) return;
+
                     const ctx = document.getElementById(`chart-${market.ticker}`).getContext('2d');
                     if (charts[market.ticker]) {
                         charts[market.ticker].destroy();
@@ -106,6 +109,21 @@ document.addEventListener('DOMContentLoaded', () => {
                             chartData.push(chartData[0]);
                         }
 
+                        const pointRadius = chartData.map((_, i) => 
+                            marketRow.buy_indices.includes(i) || marketRow.sell_indices.includes(i) ? 5 : 1
+                        );
+                        const pointStyle = chartData.map((_, i) => 
+                            marketRow.buy_indices.includes(i) || marketRow.sell_indices.includes(i) ? 'triangle' : 'circle'
+                        );
+                        const pointBackgroundColor = chartData.map((_, i) => {
+                            if (marketRow.buy_indices.includes(i)) return 'green';
+                            if (marketRow.sell_indices.includes(i)) return 'red';
+                            return 'rgba(75, 192, 192, 1)';
+                        });
+                        const pointRotation = chartData.map((_, i) => 
+                            marketRow.sell_indices.includes(i) ? 180 : 0
+                        );
+
                         charts[market.ticker] = new Chart(ctx, {
                             type: 'line',
                             data: {
@@ -117,7 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                     borderWidth: 1,
                                     fill: false,
                                     tension: 0.1,
-                                    pointRadius: 1
+                                    pointRadius,
+                                    pointStyle,
+                                    pointBackgroundColor,
+                                    pointRotation
                                 }]
                             },
                             options: {

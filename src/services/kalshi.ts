@@ -193,7 +193,9 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             let sold_price: number | null = null;
             let earned_value = 0;
             let allPrices: number[] = [];
-			let held = false;
+            let held = false;
+            let buy_indices: number[] = [];
+            let sell_indices: number[] = [];
 
             if (history && history.length > 0) {
                 const previousPrice = history[history.length - 1].price;
@@ -202,7 +204,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 allPrices = [...history.map((h: any) => h.price), market.last_price_dollars * 100];
 
                 let current_bought_price: number | null = null;
-                let peak_price_after_buy: number | null = null; 
+                let peak_price_after_buy: number | null = null;
 
                 for (let i = 1; i < allPrices.length; i++) {
                     const currentChange = allPrices[i] - allPrices[i - 1];
@@ -210,6 +212,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
 
                     if (currentChange > 0 && prevChange <= 0) { // Buy signal
                         if (current_bought_price === null) {
+                            buy_indices.push(i);
                             current_bought_price = allPrices[i];
                             peak_price_after_buy = allPrices[i];
                         }
@@ -219,6 +222,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
 
                     if (currentChange < 0 && prevChange >= 0) { // Sell signal
                         if (current_bought_price !== null) {
+                            sell_indices.push(i);
                             earned_value += allPrices[i] - peak_price_after_buy;
                             current_bought_price = null;
                             peak_price_after_buy = null;
@@ -264,7 +268,9 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 bought_price,
                 sold_price,
                 earned_value,
-				held
+                held,
+                buy_indices,
+                sell_indices
             };
         });
 
