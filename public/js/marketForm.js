@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     borderWidth: 1,
                                     fill: false,
                                     tension: 0.1,
-                                    pointRadius: 0
+                                    pointRadius: 1
                                 }]
                             },
                             options: {
