@@ -202,27 +202,34 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 allPrices = [...history.map((h: any) => h.price), market.last_price_dollars * 100];
 
                 let current_bought_price: number | null = null;
+                let peak_price_after_buy: number | null = null; 
 
                 for (let i = 1; i < allPrices.length; i++) {
                     const currentChange = allPrices[i] - allPrices[i - 1];
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
 
-                    if (currentChange > 0 && prevChange <= 0) {
-                        if (current_bought_price === null) { 
+                    if (currentChange > 0 && prevChange <= 0) { // Buy signal
+                        if (current_bought_price === null) {
                             current_bought_price = allPrices[i];
+                            peak_price_after_buy = allPrices[i];
                         }
+                    } else if (current_bought_price !== null && currentChange > 0) { // Price continues to rise
+                        peak_price_after_buy = allPrices[i];
                     }
-                    
-                    if (currentChange < 0 && prevChange >= 0) {
+
+                    if (currentChange < 0 && prevChange >= 0) { // Sell signal
                         if (current_bought_price !== null) {
-                            earned_value += allPrices[i] - current_bought_price;
-                            current_bought_price = null; 
+                            earned_value += allPrices[i] - peak_price_after_buy;
+                            current_bought_price = null;
+                            peak_price_after_buy = null;
                         }
                     }
                 }
 
                 if (current_bought_price !== null) {
-                    held = true;
+                    if (allPrices.length > 2) {
+                        held = true;
+                    }
                     earned_value += allPrices[allPrices.length - 1] - current_bought_price;
                 }
 
