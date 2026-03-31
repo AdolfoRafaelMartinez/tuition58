@@ -68,8 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Ticker</th>
                                 <th>Range</th>
                                 <th>Price</th>
+                                <th>Change</th>
                                 <th>Chart</th>
-                                <th>Price Change</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -81,8 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${row.ticker}</td>
                             <td>${row.range}</td>
                             <td>${Math.trunc(row.price)}</td>
-                            <td><canvas id="chart-${row.ticker}" width="100" height="30"></canvas></td>
                             <td class="${row.priceChangeClass}">${row.priceChangeIcon} ${row.priceChangeDisplay}</td>
+                            <td><canvas id="chart-${row.ticker}" width="100" height="30"></canvas></td>
                         </tr>
                     `;
                 });
