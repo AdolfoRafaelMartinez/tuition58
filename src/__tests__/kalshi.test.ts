@@ -81,7 +81,7 @@ describe('getKalshiMarkets', () => {
     expect(row.priceChangeDisplay).toBe(10);
   });
 
-  it.only('should assert bought_price returns the last price when the priceChangeClass became positive', async () => {
+  it('should assert bought_price returns the last price when the priceChangeClass became positive', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
@@ -113,7 +113,8 @@ describe('getKalshiMarkets', () => {
     const row = response.data.marketRows[0];
 
     expect(row.ticker).toBe('TEST-MARKET');
-    expect(row.bought_price).toBe(0);
+    expect(row.bought_price).toBe(60);
+    expect(row.earned_value).toBe(0); // -10 from first trade, 10 from open trade
   });
 
   it('should assert sold_price returns the last price when the priceChangeClass became negative', async () => {
@@ -149,6 +150,7 @@ describe('getKalshiMarkets', () => {
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.sold_price).toBe(30);
   });
+
   it('should assert earned_value is increasing for multiple periods of positive trends that alternate with negative trends in the market price', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -186,6 +188,7 @@ describe('getKalshiMarkets', () => {
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.earned_value).toBe(-15);
   });
+
   it('should assert zero earnings when no history', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -217,6 +220,7 @@ describe('getKalshiMarkets', () => {
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.earned_value).toBe(0);
   });
+
   it('should assert zero earnings when a negative trend appears', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -238,7 +242,6 @@ describe('getKalshiMarkets', () => {
     };
 
     const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
-    debugger
 
     expect(response.error).toBeNull();
     expect(response.data).toBeDefined();
@@ -249,7 +252,8 @@ describe('getKalshiMarkets', () => {
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.earned_value).toBe(0);
   });
-  it('should assert zero earnings and held to be true when a positive trend appears', async () => {
+
+  it('should assert some earnings and held to be true when a positive trend appears', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
@@ -281,38 +285,7 @@ describe('getKalshiMarkets', () => {
     expect(row.held).toBe(true);
     expect(row.earned_value).toBe(0);
   });
-  it('should assert zero earnings and held to be true when a positive trend appears', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({
-          markets: [
-            {
-              ticker: 'TEST-MARKET',
-              last_price_dollars: 0.40,
-            }
-          ]
-        })
-      })
-    ) as jest.Mock;
 
-    const mockHistory = {
-      'TEST-MARKET': [
-        { time: new Date(), price: 30 },
-      ]
-    };
-
-    const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
-
-    expect(response.error).toBeNull();
-    expect(response.data).toBeDefined();
-    expect(response.data.marketRows).toBeDefined();
-
-    const row = response.data.marketRows[0];
-
-    expect(row.ticker).toBe('TEST-MARKET');
-    expect(row.earned_value).toBe(0);
-    expect(row.held).toBe(true);
-  });
   it('should assert some earnings and held to be true when a positive trend appears more than once', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -346,38 +319,39 @@ describe('getKalshiMarkets', () => {
     expect(row.held).toBe(true);
     expect(row.earned_value).toBe(10);
   });
-});
-it('should assert more earnings and held to be true when many positive trends appears', async () => {
-  global.fetch = jest.fn(() =>
-    Promise.resolve({
-      json: () => Promise.resolve({
-        markets: [
-          {
-            ticker: 'TEST-MARKET',
-            last_price_dollars: 0.60, // earned 20
-          }
-        ]
+
+  it('should assert more earnings and held to be true when many positive trends appears', async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({
+          markets: [
+            {
+              ticker: 'TEST-MARKET',
+              last_price_dollars: 0.60, // earned 20
+            }
+          ]
+        })
       })
-    })
-  ) as jest.Mock;
+    ) as jest.Mock;
 
-  const mockHistory = {
-    'TEST-MARKET': [
-      { time: new Date(), price: 30 },
-      { time: new Date(), price: 40 }, // buy at 40
-      { time: new Date(), price: 50 },
-    ]
-  };
+    const mockHistory = {
+      'TEST-MARKET': [
+        { time: new Date(), price: 30 },
+        { time: new Date(), price: 40 }, // buy at 40
+        { time: new Date(), price: 50 },
+      ]
+    };
 
-  const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
+    const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
 
-  expect(response.error).toBeNull();
-  expect(response.data).toBeDefined();
-  expect(response.data.marketRows).toBeDefined();
+    expect(response.error).toBeNull();
+    expect(response.data).toBeDefined();
+    expect(response.data.marketRows).toBeDefined();
 
-  const row = response.data.marketRows[0];
+    const row = response.data.marketRows[0];
 
-  expect(row.ticker).toBe('TEST-MARKET');
-  expect(row.held).toBe(true);
-  expect(row.earned_value).toBe(20);
+    expect(row.ticker).toBe('TEST-MARKET');
+    expect(row.held).toBe(true);
+    expect(row.earned_value).toBe(20);
+  });
 });

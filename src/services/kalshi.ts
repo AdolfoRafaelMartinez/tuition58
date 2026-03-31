@@ -170,7 +170,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
         const response = await fetch(`https://api.elections.kalshi.com/trade-api/v2/markets?event_ticker=${event_ticker}`, options);
         const data = await response.json();
         let markets = data.markets;
-        markets.forEach((market) => {
+        markets.forEach((market: any) => {
             market.bin_value = Number(market.ticker.match(/\d+\.?\d$/));
             market.is_bin = market.ticker.toLowerCase().match(/b\d/);
         });
@@ -203,19 +203,22 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 allPrices = [...history.map((h: any) => h.price), market.last_price_dollars * 100];
                 lastThreePrices = allPrices.slice(-3);
 
-                // Calculate earned_value by iterating forward
                 let current_bought_price: number | null = null;
+
                 for (let i = 1; i < allPrices.length; i++) {
                     const currentChange = allPrices[i] - allPrices[i - 1];
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
 
                     if (currentChange > 0 && prevChange <= 0) {
-                        current_bought_price = allPrices[i]; // Buy at current price
+                        if (current_bought_price === null) { 
+                            current_bought_price = allPrices[i];
+                        }
                     }
+                    
                     if (currentChange < 0 && prevChange >= 0) {
                         if (current_bought_price !== null) {
-                            earned_value += allPrices[i] - current_bought_price; // Sell at current price
-                            current_bought_price = null;
+                            earned_value += allPrices[i] - current_bought_price;
+                            current_bought_price = null; 
                         }
                     }
                 }
@@ -231,10 +234,10 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
 
                     if (bought_price === null && currentChange > 0 && prevChange <= 0) {
-                        bought_price = allPrices[i-1];
+                        bought_price = allPrices[i];
                     }
                     if (sold_price === null && currentChange < 0 && prevChange >= 0) {
-                        sold_price = allPrices[i-1];
+                        sold_price = allPrices[i];
                     }
                     if (bought_price !== null && sold_price !== null) {
                         break;
