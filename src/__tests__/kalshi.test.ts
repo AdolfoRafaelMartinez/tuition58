@@ -11,7 +11,7 @@ describe('getKalshiMarkets', () => {
     global.fetch = originalFetch;
   });
 
-  it.only('should assert priceChangeClass is "positive" when marketPriceHistory contains an increasing price', async () => {
+  it('should assert priceChangeClass is "positive" when marketPriceHistory contains an increasing price', async () => {
     // Mock fetch to return a market with a specific price
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -43,7 +43,9 @@ describe('getKalshiMarkets', () => {
 
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.priceChangeClass).toBe('positive');
-    expect(row.priceChangeDisplay).toBe(0);
+    expect(row.priceChangeDisplay).toBe(10);
+    expect(row.earned_value).toBe(0);
+    expect(row.held).toBe(true);
   });
 
   it('should assert priceChangeClass is "negative" when marketPriceHistory contains a decreasing price', async () => {
@@ -79,6 +81,8 @@ describe('getKalshiMarkets', () => {
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.priceChangeClass).toBe('negative');
     expect(row.priceChangeDisplay).toBe(10);
+    expect(row.earned_value).toBe(0);
+    expect(row.held).toBe(false);
   });
 
   it('should assert bought_price returns the last price when the priceChangeClass became positive', async () => {
@@ -115,6 +119,7 @@ describe('getKalshiMarkets', () => {
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.bought_price).toBe(60);
     expect(row.earned_value).toBe(0); // -10 from first trade, 10 from open trade
+    expect(row.held).toBe(true);
   });
 
   it('should assert sold_price returns the last price when the priceChangeClass became negative', async () => {
@@ -149,6 +154,8 @@ describe('getKalshiMarkets', () => {
 
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.sold_price).toBe(30);
+    expect(row.earned_value).toBe(-30); // -10 from first trade, 10 from open trade
+    expect(row.held).toBe(true);
   });
 
   it('should assert earned_value is increasing for multiple periods of positive trends that alternate with negative trends in the market price', async () => {
@@ -187,6 +194,7 @@ describe('getKalshiMarkets', () => {
 
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.earned_value).toBe(-15);
+    expect(row.held).toBe(false);
   });
 
   it('should assert zero earnings when no history', async () => {
@@ -219,6 +227,7 @@ describe('getKalshiMarkets', () => {
 
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.earned_value).toBe(0);
+    expect(row.held).toBe(false);
   });
 
   it('should assert zero earnings when a negative trend appears', async () => {
@@ -251,6 +260,7 @@ describe('getKalshiMarkets', () => {
 
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.earned_value).toBe(0);
+    expect(row.held).toBe(false);
   });
 
   it('should assert some earnings and held to be true when a positive trend appears', async () => {
