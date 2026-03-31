@@ -85,7 +85,15 @@ I have updated the test cases in src/__tests__/kalshi.test.ts to be consistent w
 
 npm run test
 
-I've identified a syntax error in src/__tests__/kalshi.test.ts. A typo, row.earned_ instead of row.earned_value, is causing the test suite to fail.
+I've identified a syntax error in src/__tests__/kalshi.test.ts. A typo, 
+
+row.earned_ 
+
+instead of 
+
+row.earned_value, 
+
+is causing the test suite to fail.
 
 I will correct this typo and run the tests again to confirm that all tests pass.
 
