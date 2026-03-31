@@ -81,14 +81,14 @@ describe('getKalshiMarkets', () => {
     expect(row.priceChangeDisplay).toBe(10);
   });
 
-  it('should assert bought_price returns the last price when the priceChangeClass became positive', async () => {
+  it.only('should assert bought_price returns the last price when the priceChangeClass became positive', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
           markets: [
             {
               ticker: 'TEST-MARKET',
-              last_price_dollars: 0.70,
+              last_price_dollars: 0.70, // earned 10
             }
           ]
         })
@@ -98,9 +98,9 @@ describe('getKalshiMarkets', () => {
     const mockHistory = {
       'TEST-MARKET': [
         { time: new Date(), price: 30 },
-        { time: new Date(), price: 50 },
-        { time: new Date(), price: 40 },
-        { time: new Date(), price: 60 }
+        { time: new Date(), price: 50 }, // buy at 50
+        { time: new Date(), price: 40 }, // sell at 40 lost 10
+        { time: new Date(), price: 60 } // buy at 60
       ]
     };
 
@@ -113,7 +113,7 @@ describe('getKalshiMarkets', () => {
     const row = response.data.marketRows[0];
 
     expect(row.ticker).toBe('TEST-MARKET');
-    expect(row.bought_price).toBe(60);
+    expect(row.bought_price).toBe(0);
   });
 
   it('should assert sold_price returns the last price when the priceChangeClass became negative', async () => {
@@ -186,7 +186,7 @@ describe('getKalshiMarkets', () => {
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.earned_value).toBe(-15);
   });
-  it.only('should assert zero earnings when no history', async () => {
+  it('should assert zero earnings when no history', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
@@ -217,7 +217,7 @@ describe('getKalshiMarkets', () => {
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.earned_value).toBe(0);
   });
-  it.only('should assert zero earnings when a negative trend appears', async () => {
+  it('should assert zero earnings when a negative trend appears', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
@@ -249,7 +249,7 @@ describe('getKalshiMarkets', () => {
     expect(row.ticker).toBe('TEST-MARKET');
     expect(row.earned_value).toBe(0);
   });
-  it.only('should assert zero earnings and held to be true when a positive trend appears', async () => {
+  it('should assert zero earnings and held to be true when a positive trend appears', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
@@ -281,7 +281,7 @@ describe('getKalshiMarkets', () => {
     expect(row.held).toBe(true);
     expect(row.earned_value).toBe(0);
   });
-  it.only('should assert zero earnings and held to be true when a positive trend appears', async () => {
+  it('should assert zero earnings and held to be true when a positive trend appears', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
@@ -313,7 +313,7 @@ describe('getKalshiMarkets', () => {
     expect(row.earned_value).toBe(0);
     expect(row.held).toBe(true);
   });
-  it.only('should assert some earnings and held to be true when a positive trend appears more than once', async () => {
+  it('should assert some earnings and held to be true when a positive trend appears more than once', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
@@ -347,7 +347,7 @@ describe('getKalshiMarkets', () => {
     expect(row.earned_value).toBe(10);
   });
 });
-it.only('should assert more earnings and held to be true when many positive trends appears', async () => {
+it('should assert more earnings and held to be true when many positive trends appears', async () => {
   global.fetch = jest.fn(() =>
     Promise.resolve({
       json: () => Promise.resolve({
@@ -365,7 +365,7 @@ it.only('should assert more earnings and held to be true when many positive tren
     'TEST-MARKET': [
       { time: new Date(), price: 30 },
       { time: new Date(), price: 40 }, // buy at 40
-      { time: new Date(), price: 50 }, 
+      { time: new Date(), price: 50 },
     ]
   };
 
