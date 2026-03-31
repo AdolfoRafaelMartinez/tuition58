@@ -192,7 +192,6 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             let bought_price: number | null = null;
             let sold_price: number | null = null;
             let earned_value = 0;
-            let lastThreePrices: number[] = [];
             let allPrices: number[] = [];
 			let held = false;
 
@@ -201,7 +200,6 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChange = market.last_price_dollars * 100 - previousPrice;
 
                 allPrices = [...history.map((h: any) => h.price), market.last_price_dollars * 100];
-                lastThreePrices = allPrices.slice(-3);
 
                 let current_bought_price: number | null = null;
 
@@ -245,24 +243,20 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 }
             } else {
                 allPrices = [market.last_price_dollars * 100];
-                lastThreePrices = allPrices;
             }
 
             const priceChangeDisplay = Math.abs(priceChange);
-            const priceChangeClass = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
-            const priceChangeIcon = priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '';
 
             return {
                 ticker: market.ticker,
                 range: `${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}`,
                 price: market.last_price_dollars * 100,
-                priceChangeClass,
-                priceChangeIcon,
+                priceChangeClass: priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral',
+                priceChangeIcon: priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '',
                 priceChangeDisplay,
                 bought_price,
                 sold_price,
                 earned_value,
-                lastThreePrices,
 				held
             };
         });
