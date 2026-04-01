@@ -269,7 +269,7 @@ describe('getKalshiMarkets', () => {
     expect(row.earned_value).toBe(0)
   });
 
-  it('should handle two up one down', async () => {
+  it('should handle three up', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
@@ -304,5 +304,43 @@ describe('getKalshiMarkets', () => {
     expect(row.priceChangeIcon).toBe('<span class="triangle-down">&#9660;</span>');
     expect(row.held).toBe(false);
     expect(row.earned_value).toBe(-10)
+  });
+
+  it('should handle two up one down', async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({
+          markets: [
+            {
+              ticker: 'TEST-MARKET',
+              last_price_dollars: 0.90,
+            }
+          ]
+        })
+      })
+    ) as jest.Mock;
+
+    const mockHistory = {
+      'TEST-MARKET': [
+        { time: new Date(), price: 50 },
+        { time: new Date(), price: 60 },
+        { time: new Date(), price: 70 }, // buy
+        { time: new Date(), price: 80 },
+      ]
+    };
+
+    const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
+
+    expect(response.error).toBeNull();
+    expect(response.data).toBeDefined();
+    expect(response.data.marketRows).toBeDefined();
+
+    const row = response.data.marketRows[0];
+
+    expect(row.ticker).toBe('TEST-MARKET');
+    expect(row.priceChangeDisplay).toBe(10);
+    expect(row.priceChangeIcon).toBe('<span class="triangle-up">&#9650;</span>');
+    expect(row.held).toBe(true);
+    expect(row.earned_value).toBe(20)
   });
 });
