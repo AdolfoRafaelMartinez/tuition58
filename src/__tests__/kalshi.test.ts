@@ -269,7 +269,7 @@ describe('getKalshiMarkets', () => {
     expect(row.earned_value).toBe(0)
   });
 
-  it('should handle three up', async () => {
+  it('should handle two up one down', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({
