@@ -210,7 +210,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                     const currentChange = allPrices[i] - allPrices[i - 1];
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
 
-                    if (currentChange > 0 && prevChange <= 0) { // Buy signal
+                    if (currentChange > 0 && prevChange > 0) { // Buy signal
                         if (current_bought_price === null) {
                             buy_indices.push(i);
                             current_bought_price = allPrices[i];
@@ -242,7 +242,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                     const currentChange = allPrices[i] - allPrices[i - 1];
                     const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
 
-                    if (bought_price === null && currentChange > 0 && prevChange <= 0) {
+                    if (bought_price === null && currentChange > 0 && prevChange > 0) {
                         bought_price = allPrices[i];
                     }
                     if (sold_price === null && currentChange < 0 && prevChange >= 0) {
