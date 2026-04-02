@@ -220,7 +220,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                         peak_price_after_buy = allPrices[i];
                     }
 
-                    if (currentChange < 0 && prevChange >= 0) { // Sell signal
+                    if (currentChange < 0 && prevChange < 0) { // Sell signal
                         if (current_bought_price !== null) {
                             sell_indices.push(i);
                             earned_value += allPrices[i] - peak_price_after_buy;
