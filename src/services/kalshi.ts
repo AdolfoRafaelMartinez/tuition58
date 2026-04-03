@@ -269,7 +269,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             }
 
             const priceChangeDisplay = Math.abs(priceChange);
-
+            allPrices = allPrices.map(Math.trunc);
             return {
                 ticker: market.ticker,
                 range: `${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}`,
