@@ -230,6 +230,15 @@ button:hover {
     font-weight: bold;
 }
 
+.signal-buy {
+    color: green;
+    font-weight: bold;
+}
+
+.signal-sell {
+    color: red;
+    font-weight: bold;
+}
 
 
 /* Delete button styles */

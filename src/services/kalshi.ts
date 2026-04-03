@@ -208,9 +208,8 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
 
                 for (let i = 1; i < allPrices.length; i++) {
                     const currentChange = allPrices[i] - allPrices[i - 1];
-                    const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
 
-                    if (currentChange > 0 && prevChange > 0) { // Buy signal
+                    if (currentChange > 2) { // Buy signal
                         if (current_bought_price === null) {
                             buy_indices.push(i);
                             current_bought_price = allPrices[i];
@@ -220,7 +219,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                         peak_price_after_buy = allPrices[i];
                     }
 
-                    if (currentChange < 0 && prevChange < 0) { // Sell signal
+                    if (currentChange < -2) { // Sell signal
                         if (current_bought_price !== null) {
                             sell_indices.push(i);
                             earned_value += allPrices[i] - peak_price_after_buy;
@@ -231,7 +230,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 }
 
                 if (current_bought_price !== null) {
-                    if (allPrices.length > 2) {
+                    if (allPrices.length > 1) {
                         held = true;
                     }
                     earned_value += allPrices[allPrices.length - 1] - current_bought_price;
@@ -240,12 +239,11 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 // Find most recent bought_price and sold_price for display by iterating backward
                 for (let i = allPrices.length - 1; i > 0; i--) {
                     const currentChange = allPrices[i] - allPrices[i - 1];
-                    const prevChange = i > 1 ? allPrices[i - 1] - allPrices[i - 2] : 0;
 
-                    if (bought_price === null && currentChange > 0 && prevChange > 0) {
+                    if (bought_price === null && currentChange > 2) {
                         bought_price = allPrices[i];
                     }
-                    if (sold_price === null && currentChange < 0 && prevChange >= 0) {
+                    if (sold_price === null && currentChange < -2) {
                         sold_price = allPrices[i];
                     }
                     if (bought_price !== null && sold_price !== null) {
@@ -257,17 +255,15 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             }
 
             let signal = 'hold';
-            if (allPrices.length >= 3) {
+            if (allPrices.length >= 2) {
                 const lastPrice = allPrices[allPrices.length - 1];
                 const secondLastPrice = allPrices[allPrices.length - 2];
-                const thirdLastPrice = allPrices[allPrices.length - 3];
 
                 const currentChange = lastPrice - secondLastPrice;
-                const prevChange = secondLastPrice - thirdLastPrice;
 
-                if (currentChange > 0 && prevChange > 0) {
+                if (currentChange > 2) {
                     signal = 'buy';
-                } else if (currentChange < 0 && prevChange < 0) {
+                } else if (currentChange < -2) {
                     signal = 'sell';
                 }
             }
