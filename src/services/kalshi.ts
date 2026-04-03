@@ -256,6 +256,22 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 allPrices = [market.last_price_dollars * 100];
             }
 
+            let signal = 'hold';
+            if (allPrices.length >= 3) {
+                const lastPrice = allPrices[allPrices.length - 1];
+                const secondLastPrice = allPrices[allPrices.length - 2];
+                const thirdLastPrice = allPrices[allPrices.length - 3];
+
+                const currentChange = lastPrice - secondLastPrice;
+                const prevChange = secondLastPrice - thirdLastPrice;
+
+                if (currentChange > 0 && prevChange > 0) {
+                    signal = 'buy';
+                } else if (currentChange < 0 && prevChange < 0) {
+                    signal = 'sell';
+                }
+            }
+
             const priceChangeDisplay = Math.abs(priceChange);
 
             return {
@@ -270,7 +286,8 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 earned_value,
                 held,
                 buy_indices,
-                sell_indices
+                sell_indices,
+                signal
             };
         });
 
