@@ -283,7 +283,8 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 held,
                 buy_indices,
                 sell_indices,
-                signal
+                signal,
+                allPrices
             };
         });
 
