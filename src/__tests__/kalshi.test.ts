@@ -124,4 +124,49 @@ describe('getKalshiMarkets', () => {
     expect(lowPriceMarket.signal).toBe('hold');
     expect(highPriceMarket.signal).toBe('buy');
   });
+
+  it('should buy the highest priced market when three markets exist', async () => {
+    // Mock fetch to return three markets with different prices
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({
+          markets: [
+            {
+              ticker: 'TEST-MARKET-LOW',
+              last_price_dollars: 0.10,
+            },
+            {
+              ticker: 'TEST-MARKET-MID',
+              last_price_dollars: 0.20,
+            },
+            {
+              ticker: 'TEST-MARKET-HIGH',
+              last_price_dollars: 0.30,
+            }
+          ]
+        })
+      })
+    ) as jest.Mock;
+  
+    const mockHistory = {
+      'TEST-MARKET-LOW': [],
+      'TEST-MARKET-MID': [],
+      'TEST-MARKET-HIGH': []
+    };
+  
+    const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
+  
+    expect(response.error).toBeNull();
+    expect(response.data).toBeDefined();
+    expect(response.data.marketRows).toBeDefined();
+    expect(response.data.marketRows.length).toBe(3);
+  
+    const lowPriceMarket = response.data.marketRows.find(m => m.ticker === 'TEST-MARKET-LOW');
+    const midPriceMarket = response.data.marketRows.find(m => m.ticker === 'TEST-MARKET-MID');
+    const highPriceMarket = response.data.marketRows.find(m => m.ticker === 'TEST-MARKET-HIGH');
+  
+    expect(lowPriceMarket.signal).toBe('hold');
+    expect(midPriceMarket.signal).toBe('hold');
+    expect(highPriceMarket.signal).toBe('buy');
+  });
 });
