@@ -131,7 +131,7 @@ export async function getKalshiPositions() {
         // Strip query parameters from path before signing
         const pathWithoutQuery = url_path.split('?')[0];
         const msgString = timestampStr + method + pathWithoutQuery;
-        const sig = signPssText(privateKeyPem, msgString);
+        const sig = signPssText(privateKeypem, msgString);
 
         const headers = {
             'KALSHI-ACCESS-KEY': process.env.API_KEY,
@@ -175,6 +175,10 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             market.is_bin = market.ticker.toLowerCase().match(/b\d/);
         });
         markets.sort((a, b) => a.bin_value - b.bin_value);
+
+        let potentialBuys = [];
+        let potentialSells = [];
+
         let marketRows = markets.map((market: any, ndx: number) => {
             if (ndx == 0) {
                 market.upper = market.bin_value - 1;
@@ -255,9 +259,9 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 const currentChange = lastPrice - secondLastPrice;
 
                 if (currentChange > 2) {
-                    signal = 'buy';
+                    potentialBuys.push({ ticker: market.ticker, price: currentPrice });
                 } else if (currentChange < -2) {
-                    signal = 'sell';
+                    potentialSells.push({ ticker: market.ticker, price: currentPrice });
                 }
             }
 
@@ -281,23 +285,20 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             };
         });
 
-        const buySignals = marketRows.filter(row => row.signal === 'buy');
-        if (buySignals.length > 1) {
-            let highestPrice = 0;
-            let highestPriceTicker: string | null = null;
+        if (potentialBuys.length > 0) {
+            const bestBuy = potentialBuys.reduce((prev, current) => (prev.price > current.price) ? prev : current);
+            const bestBuyRow = marketRows.find(row => row.ticker === bestBuy.ticker);
+            if (bestBuyRow) {
+                bestBuyRow.signal = 'buy';
+            }
+        }
 
-            buySignals.forEach(row => {
-                if (row.price > highestPrice) {
-                    highestPrice = row.price;
-                    highestPriceTicker = row.ticker;
-                }
-            });
-
-            marketRows.forEach(row => {
-                if (row.signal === 'buy' && row.ticker !== highestPriceTicker) {
-                    row.signal = 'hold';
-                }
-            });
+        if (potentialSells.length > 0) {
+            const bestSell = potentialSells.reduce((prev, current) => (prev.price < current.price) ? prev : current);
+            const bestSellRow = marketRows.find(row => row.ticker === bestSell.ticker);
+            if (bestSellRow) {
+                bestSellRow.signal = 'sell';
+            }
         }
 
         data.marketRows = marketRows;
