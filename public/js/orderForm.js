@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     const orderResult = document.getElementById('order-result');
-    const placeAllOrdersButton = document.getElementById('place-all-orders');
     const clearAllOrdersButton = document.getElementById('clear-all-orders');
     const orderFormsContainer = document.getElementById('order-forms-container');
 
@@ -68,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function cancelOrders() {
         proposedOrders = [];
         isReviewMode = false;
-        placeAllOrdersButton.textContent = 'Place All Orders';
         orderResult.innerHTML = '';
     }
 
@@ -100,8 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         orderResult.innerHTML = orderExecutionHTML;
         proposedOrders = [];
         isReviewMode = false;
-        placeAllOrdersButton.textContent = 'Place All Orders';
-        placeAllOrdersButton.style.display = 'none';
         clearAllOrdersButton.style.display = 'none';
         orderFormsContainer.innerHTML = '';
     }
@@ -110,57 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // This function is no longer used since we've moved to a dialog pattern
     }
 
-    if (placeAllOrdersButton) {
-        placeAllOrdersButton.addEventListener('click', async () => {
-            if (!isReviewMode) {
-                // Collect orders from forms
-                const forms = document.querySelectorAll('.order-form');
-                proposedOrders = [];
-
-                for (const form of forms) {
-                    const ticker = form.querySelector('input[name="ticker"]').value;
-                    const action = form.querySelector('input[name="action"]').value;
-                    const side = form.querySelector('input[name="side"]').value;
-                    const count = parseInt(form.querySelector('input[name="contracts"]').value, 10);
-                    const price = parseInt(form.querySelector('input[name="price"]').value, 10);
-
-                    if (count > 0) {
-                        proposedOrders.push({
-                            ticker,
-                            action,
-                            side,
-                            count,
-                            yes_price: price,
-                            proposedTime: new Date(),
-                        });
-                    }
-                }
-
-                if (proposedOrders.length === 0) {
-                    orderResult.innerHTML = '<p>No orders with a count greater than 0 were found.</p>';
-                    return;
-                }
-
-                // Switch to review mode
-                isReviewMode = true;
-                placeAllOrdersButton.textContent = 'Confirm Place Orders';
-                if(clearAllOrdersButton){
-                    clearAllOrdersButton.style.display = 'block';
-                }
-                renderProposedOrders();
-            } else {
-                // This is the "Confirm Place Orders" click
-                renderProposedOrders();
-            }
-        });
-    }
-
     if (clearAllOrdersButton) {
         clearAllOrdersButton.addEventListener('click', () => {
             orderFormsContainer.innerHTML = '';
             proposedOrders = [];
             isReviewMode = false;
-            placeAllOrdersButton.style.display = 'none';
             clearAllOrdersButton.style.display = 'none';
             orderResult.innerHTML = '';
         });

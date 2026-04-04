@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const eventTickerInput = document.getElementById('event-ticker');
     const submitButton = marketForm.querySelector('button[type="submit"]');
     const orderFormsContainer = document.getElementById('order-forms-container');
-    const placeAllOrdersButton = document.getElementById('place-all-orders');
     const clearAllOrdersButton = document.getElementById('clear-all-orders');
     const container = document.querySelector('.container');
     let marketData = {};
@@ -64,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <tr>
                                 <th>Ticker</th>
                                 <th>Range</th>
+                                <th>Price</th>
                                 <th>Prices</th>
                                 <th>Change</th>
                                 <th>Signal</th>
@@ -80,7 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <tr>
                             <td>${row.ticker}</td>
                             <td>${row.range}</td>
-                            <td>${row.allPrices && row.allPrices.length > 0 ? row.allPrices.join(', ') : 'N/A'}</td>
+                            <td>${row.price}</td>
+                            <td>${row.allPrices && row.allPrices.length > 0 ? row.allPrices.map(p => Math.trunc(p)).join(', ') : 'N/A'}</td>
                             <td class="${row.priceChangeClass}">${row.priceChangeIcon} ${Math.trunc(row.priceChangeDisplay)}</td>
                             <td>${row.signal}</td>
                             <td>${row.held ? 'Yes' : 'No'}</td>
@@ -92,6 +93,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 tableHtml += `</tbody></table>`;
                 marketResult.innerHTML = tableHtml;
+                
+                orderFormsContainer.innerHTML = '';
+                const sellTickers = new Set();
+                const buySignal = marketsData.marketRows.find(row => row.signal === 'buy');
+
+                if (buySignal) {
+                    createOrderForm(buySignal.ticker, 'buy', buySignal.price);
+                    marketsData.marketRows.forEach(row => {
+                        if (row.held && row.ticker !== buySignal.ticker) {
+                            sellTickers.add(row.ticker);
+                        }
+                    });
+                }
+
+                marketsData.marketRows.forEach(row => {
+                    if (row.signal === 'sell' && row.held) {
+                        sellTickers.add(row.ticker);
+                    }
+                });
+
+                sellTickers.forEach(ticker => {
+                    const row = marketsData.marketRows.find(r => r.ticker === ticker);
+                    if (row) {
+                        createOrderForm(ticker, 'sell', row.price);
+                    }
+                });
 
                 marketsData.marketRows.forEach(marketRow => {
                     const market = marketsData.markets.find(m => m.ticker === marketRow.ticker);
@@ -186,7 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         orderFormsContainer.insertAdjacentHTML('beforeend', formHtml);
-        placeAllOrdersButton.style.display = 'block';
         clearAllOrdersButton.style.display = 'block';
     };
 
@@ -198,10 +224,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 form.remove();
             }
             if (orderFormsContainer.children.length === 0) {
-                placeAllOrdersButton.style.display = 'none';
                 clearAllOrdersButton.style.display = 'none';
             }
         }
+    });
+
+    clearAllOrdersButton.addEventListener('click', () => {
+        orderFormsContainer.innerHTML = '';
+        clearAllOrdersButton.style.display = 'none';
     });
 
     window.fetchAndDisplayMarkets = fetchAndDisplayMarkets;

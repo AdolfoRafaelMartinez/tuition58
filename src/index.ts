@@ -33,6 +33,27 @@ app.post('/api/kalshi/order', async (req, res) => {
     }
 });
 
+app.post('/api/kalshi/place-orders', async (req, res) => {
+    const { orders } = req.body;
+
+    if (!orders || !Array.isArray(orders)) {
+        return res.status(400).json({ error: 'Invalid orders format.' });
+    }
+
+    const results = [];
+    for (const order of orders) {
+        const result = await placeKalshiOrder(order);
+        results.push(result);
+    }
+
+    const hasError = results.some(r => r.error);
+    if (hasError) {
+        res.status(500).json({ error: 'One or more orders failed to place.', results });
+    } else {
+        res.json({ success: true, results });
+    }
+});
+
 app.post('/api/kalshi/markets/:event_ticker', async (req, res) => {
     const event_ticker = req.params.event_ticker;
     const marketPriceHistory = req.body.marketPriceHistory || {};
