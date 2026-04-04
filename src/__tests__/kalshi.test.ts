@@ -169,4 +169,49 @@ describe('getKalshiMarkets', () => {
     expect(midPriceMarket.signal).toBe('hold');
     expect(highPriceMarket.signal).toBe('buy');
   });
+
+  it('should sell a previously owned market and buy a new highest priced market', async () => {
+    // Mock fetch to return two markets with different prices
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({
+          markets: [
+            {
+              ticker: 'PREVIOUSLY-OWNED',
+              last_price_dollars: 0.10, // Price has dropped
+            },
+            {
+              ticker: 'NEW-HOT-MARKET',
+              last_price_dollars: 0.30, // Price has increased
+            }
+          ]
+        })
+      })
+    ) as jest.Mock;
+
+    const mockHistory = {
+      'PREVIOUSLY-OWNED': [
+        { time: new Date(Date.now() - 2000), price: 5 }, // Bought at 5
+        { time: new Date(Date.now() - 1000), price: 15 } // Price went up
+      ],
+      'NEW-HOT-MARKET': [
+        { time: new Date(Date.now() - 1000), price: 25 } // Price was 25
+      ]
+    };
+
+    const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
+
+    expect(response.error).toBeNull();
+    expect(response.data).toBeDefined();
+    expect(response.data.marketRows).toBeDefined();
+    expect(response.data.marketRows.length).toBe(2);
+
+    const previouslyOwnedMarket = response.data.marketRows.find(m => m.ticker === 'PREVIOUSLY-OWNED');
+    const newHotMarket = response.data.marketRows.find(m => m.ticker === 'NEW-HOT-MARKET');
+
+    expect(previouslyOwnedMarket.signal).toBe('sell');
+    expect(previouslyOwnedMarket.held).toBe(false); // It should not be held after selling
+    expect(newHotMarket.signal).toBe('buy');
+    expect(newHotMarket.held).toBe(true); // It should be held after buying
+  });
 });
