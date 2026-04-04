@@ -131,7 +131,7 @@ export async function getKalshiPositions() {
         // Strip query parameters from path before signing
         const pathWithoutQuery = url_path.split('?')[0];
         const msgString = timestampStr + method + pathWithoutQuery;
-        const sig = signPssText(privateKeypem, msgString);
+        const sig = signPssText(privateKeyPem, msgString);
 
         const headers = {
             'KALSHI-ACCESS-KEY': process.env.API_KEY,
@@ -263,6 +263,8 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 } else if (currentChange < -2) {
                     potentialSells.push({ ticker: market.ticker, price: currentPrice });
                 }
+            } else if (allPrices.length === 1 && currentPrice > 0 && currentPrice < 50) {
+                potentialBuys.push({ ticker: market.ticker, price: currentPrice });
             }
 
             const priceChangeDisplay = Math.abs(priceChange);
