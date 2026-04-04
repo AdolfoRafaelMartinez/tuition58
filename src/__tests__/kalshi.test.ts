@@ -1,4 +1,4 @@
-import { getKalshiMarkets } from '../services/kalshi';
+import { getKalshiMarkets } from '../services/kalshi.js';
 
 describe('getKalshiMarkets', () => {
   let originalFetch: typeof global.fetch;
