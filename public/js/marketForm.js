@@ -4,8 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const positionsResult = document.getElementById('positions-result');
     const eventTickerInput = document.getElementById('event-ticker');
     const submitButton = marketForm.querySelector('button[type="submit"]');
-    const orderFormsContainer = document.getElementById('order-forms-container');
-    const clearAllOrdersButton = document.getElementById('clear-all-orders');
     const container = document.querySelector('.container');
     let marketData = {};
     let marketPriceHistory = {};
@@ -93,32 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 tableHtml += `</tbody></table>`;
                 marketResult.innerHTML = tableHtml;
-                
-                orderFormsContainer.innerHTML = '';
-                const sellTickers = new Set();
-                const buySignal = marketsData.marketRows.find(row => row.signal === 'buy');
-
-                if (buySignal) {
-                    createOrderForm(buySignal.ticker, 'buy', buySignal.price);
-                    marketsData.marketRows.forEach(row => {
-                        if (row.held && row.ticker !== buySignal.ticker) {
-                            sellTickers.add(row.ticker);
-                        }
-                    });
-                }
-
-                marketsData.marketRows.forEach(row => {
-                    if (row.signal === 'sell' && row.held) {
-                        sellTickers.add(row.ticker);
-                    }
-                });
-
-                sellTickers.forEach(ticker => {
-                    const row = marketsData.marketRows.find(r => r.ticker === ticker);
-                    if (row) {
-                        createOrderForm(ticker, 'sell', row.price);
-                    }
-                });
 
                 marketsData.marketRows.forEach(marketRow => {
                     const market = marketsData.markets.find(m => m.ticker === marketRow.ticker);
@@ -191,48 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.disabled = false;
         }
     };
-
-    const createOrderForm = (ticker, action, price) => {
-        const formId = `order-form-${Date.now()}`;
-        const side = 'yes';
-        const contracts = 1;
-        const timeString = new Date().toLocaleTimeString();
-
-        const formHtml = `
-            <div class="order-form" id="${formId}">
-                <div class="order-details">
-                    <strong>${action.toUpperCase()} ${ticker}</strong>
-                    <span>${contracts} contract @ ${price}¢ - <em>${timeString}</em></span>
-                </div>
-                <input type="hidden" name="ticker" value="${ticker}">
-                <input type="hidden" name="action" value="${action}">
-                <input type="hidden" name="side" value="${side}">
-                <input type="hidden" name="contracts" value="${contracts}">
-                <input type="hidden" name="price" value="${price}">
-                <button type="button" class="delete-order" data-form-id="${formId}">&#10006;</button>
-            </div>
-        `;
-        orderFormsContainer.insertAdjacentHTML('beforeend', formHtml);
-        clearAllOrdersButton.style.display = 'block';
-    };
-
-    orderFormsContainer.addEventListener('click', (event) => {
-        if (event.target.classList.contains('delete-order')) {
-            const formId = event.target.dataset.formId;
-            const form = document.getElementById(formId);
-            if (form) {
-                form.remove();
-            }
-            if (orderFormsContainer.children.length === 0) {
-                clearAllOrdersButton.style.display = 'none';
-            }
-        }
-    });
-
-    clearAllOrdersButton.addEventListener('click', () => {
-        orderFormsContainer.innerHTML = '';
-        clearAllOrdersButton.style.display = 'none';
-    });
 
     window.fetchAndDisplayMarkets = fetchAndDisplayMarkets;
 
