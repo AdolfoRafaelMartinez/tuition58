@@ -14,10 +14,10 @@ describe('getKalshiMarkets', () => {
   it('should handle nothing happening', async () => {
     const mockHistory = {
       'MARKET1': [
-        { time: new Date(Date.now() - 1000), price: 10 } 
+        { time: new Date(Date.now() - 1000), price: 10 }
       ],
       'MARKET2': [
-        { time: new Date(Date.now() - 1000), price: 10 } 
+        { time: new Date(Date.now() - 1000), price: 10 }
       ]
     };
     global.fetch = jest.fn(() =>
@@ -26,7 +26,7 @@ describe('getKalshiMarkets', () => {
           markets: [
             {
               ticker: 'MARKET1',
-              last_price_dollars: 0.10, 
+              last_price_dollars: 0.10,
             },
             {
               ticker: 'MARKET2',
@@ -53,13 +53,13 @@ describe('getKalshiMarkets', () => {
     expect(market2.held).toBe(false);
   });
 
-  it('should handle market2 rising', async () => {
+  it('should handle one market rising', async () => {
     const mockHistory = {
       'MARKET1': [
-        { time: new Date(Date.now() - 1000), price: 10 } 
+        { time: new Date(Date.now() - 1000), price: 10 }
       ],
       'MARKET2': [
-        { time: new Date(Date.now() - 1000), price: 10 } 
+        { time: new Date(Date.now() - 1000), price: 10 }
       ]
     };
     global.fetch = jest.fn(() =>
@@ -68,7 +68,7 @@ describe('getKalshiMarkets', () => {
           markets: [
             {
               ticker: 'MARKET1',
-              last_price_dollars: 0.10, 
+              last_price_dollars: 0.10,
             },
             {
               ticker: 'MARKET2',
@@ -98,10 +98,10 @@ describe('getKalshiMarkets', () => {
   it('should handle both markets rising', async () => {
     const mockHistory = {
       'MARKET1': [
-        { time: new Date(Date.now() - 1000), price: 10 } 
+        { time: new Date(Date.now() - 1000), price: 10 }
       ],
       'MARKET2': [
-        { time: new Date(Date.now() - 1000), price: 10 } 
+        { time: new Date(Date.now() - 1000), price: 10 }
       ]
     };
     global.fetch = jest.fn(() =>
@@ -110,7 +110,7 @@ describe('getKalshiMarkets', () => {
           markets: [
             {
               ticker: 'MARKET1',
-              last_price_dollars: 0.20, 
+              last_price_dollars: 0.20,
             },
             {
               ticker: 'MARKET2',
@@ -131,19 +131,21 @@ describe('getKalshiMarkets', () => {
     const market1 = response.data.marketRows.find(m => m.ticker === 'MARKET1');
     const market2 = response.data.marketRows.find(m => m.ticker === 'MARKET2');
 
-    expect(market1.signal).toBe('hold');
     expect(market1.held).toBe(false);
-    expect(market2.signal).toBe('hold');
+    expect(market1.signal).toBe('hold');
     expect(market2.held).toBe(false);
+    expect(market2.signal).toBe('hold');
   });
 
   it('should handle one market falling', async () => {
     const mockHistory = {
       'MARKET1': [
-        { time: new Date(Date.now() - 1000), price: 10 } 
+        { time: new Date(Date.now() - 2000), price: 20 },
+        { time: new Date(Date.now() - 1000), price: 20 }
       ],
       'MARKET2': [
-        { time: new Date(Date.now() - 1000), price: 20 } // ~owned / buy
+        { time: new Date(Date.now() - 2000), price: 10 }, // ~owned / buy
+        { time: new Date(Date.now() - 1000), price: 20 } // owned / hold
       ]
     };
     global.fetch = jest.fn(() =>
@@ -152,7 +154,7 @@ describe('getKalshiMarkets', () => {
           markets: [
             {
               ticker: 'MARKET1',
-              last_price_dollars: 0.10, 
+              last_price_dollars: 0.20,
             },
             {
               ticker: 'MARKET2',
@@ -179,13 +181,15 @@ describe('getKalshiMarkets', () => {
     expect(market2.signal).toBe('sell');
   });
 
-  it('should handle owned and hold a market', async () => {
+  it('should handle own and hold a market', async () => {
     const mockHistory = {
       'MARKET1': [
-        { time: new Date(Date.now() - 1000), price: 10 } 
+        { time: new Date(Date.now() - 2000), price: 20 },
+        { time: new Date(Date.now() - 1000), price: 20 }
       ],
       'MARKET2': [
-        { time: new Date(Date.now() - 1000), price: 20 } // ~owned / buy
+        { time: new Date(Date.now() - 2000), price: 10 }, // ~owned / buy
+        { time: new Date(Date.now() - 1000), price: 20 } // owned / hold
       ]
     };
     global.fetch = jest.fn(() =>
@@ -194,7 +198,7 @@ describe('getKalshiMarkets', () => {
           markets: [
             {
               ticker: 'MARKET1',
-              last_price_dollars: 0.10, 
+              last_price_dollars: 0.20,
             },
             {
               ticker: 'MARKET2',
