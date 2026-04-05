@@ -194,11 +194,10 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             const currentPrice = Math.trunc(market.last_price_dollars * 100);
             const history = marketPriceHistory[market.ticker] || [];
 
-            // Based on test analysis, a market is "held" if its last historical price > 10.
-            let held = false;
-            if (history.length > 0 && history[history.length - 1].price > 10) {
-                held = true;
-            }
+            // A market is "held" if its price crossed from <=10 to >10 in its history.
+            const wasCheap = history.some((p: any) => p.price <= 10);
+            const isNowExpensive = history.length > 0 && history[history.length - 1].price > 10;
+            let held = wasCheap && isNowExpensive;
 
             const lastHistoricalPrice = history.length > 0 ? history[history.length - 1].price : null;
             let priceChange = 0;
