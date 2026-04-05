@@ -176,8 +176,9 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
         });
         markets.sort((a, b) => a.bin_value - b.bin_value);
 
-        let potentialBuys = [];
-        let potentialSells = [];
+        const risingBuys = [];
+        const newBuys = [];
+        const potentialSells = [];
 
         let marketRows = markets.map((market: any, ndx: number) => {
             if (ndx == 0) {
@@ -194,56 +195,96 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             const currentPrice = Math.trunc(market.last_price_dollars * 100);
             const history = marketPriceHistory[market.ticker] || [];
 
-            // A market is "held" if its price crossed from <=10 to >10 in its history.
-            const wasCheap = history.some((p: any) => p.price <= 10);
-            const isNowExpensive = history.length > 0 && history[history.length - 1].price > 10;
-            let held = wasCheap && isNowExpensive;
+            const wasCheap = history.some((p: any) => p.price < 10);
+            const isNowExpensive = currentPrice > 10;
+            const wasExpensive = history.some((p: any) => p.price >= 10);
+            const isNowAtLeast10 = currentPrice >= 10;
+
+            let held = (wasExpensive && isNowAtLeast10) || (wasCheap && isNowExpensive);
 
             const lastHistoricalPrice = history.length > 0 ? history[history.length - 1].price : null;
             let priceChange = 0;
             if (lastHistoricalPrice !== null) {
                 priceChange = currentPrice - lastHistoricalPrice;
+            }
+
+            if (lastHistoricalPrice !== null) {
                 if (priceChange > 2) {
-                    potentialBuys.push({ ticker: market.ticker, price: currentPrice });
+                    risingBuys.push({ ticker: market.ticker, price: currentPrice });
                 } else if (priceChange < -2) {
                     potentialSells.push({ ticker: market.ticker, price: currentPrice });
                 }
             } else if (history.length === 0 && currentPrice > 0 && currentPrice < 50) {
-                potentialBuys.push({ ticker: market.ticker, price: currentPrice });
+                newBuys.push({ ticker: market.ticker, price: currentPrice });
             }
 
             return {
                 ticker: market.ticker,
                 range: `${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}`,
                 price: currentPrice,
+                priceChange: priceChange,
                 priceChangeClass: priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral',
                 priceChangeIcon: priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '',
                 priceChangeDisplay: Math.abs(priceChange),
                 held: held,
                 signal: 'hold',
-                // Dummy data for compatibility
                 bought_price: null, sold_price: null, earned_value: 0, buy_indices: [], sell_indices: [], allPrices: []
             };
         });
 
-        // --- Signal Processing --- 
-        const heldCount = marketRows.filter(r => r.held).length;
-
-        // Sell logic: If we hold a market and its price drops, sell it.
-        marketRows.forEach(row => {
-            if (row.held) {
-                const shouldSell = potentialSells.some(s => s.ticker === row.ticker);
-                if (shouldSell) {
-                    row.signal = 'sell';
-                }
-            }
+        const strongBuys = risingBuys.filter(b => {
+            const row = marketRows.find(r => r.ticker === b.ticker);
+            return row && row.held;
         });
 
-        // Buy logic: Only buy if we hold nothing and there is exactly one clear opportunity.
-        if (heldCount === 0 && potentialBuys.length === 1) {
-            const bestBuyRow = marketRows.find(row => row.ticker === potentialBuys[0].ticker);
-            if (bestBuyRow) {
-                bestBuyRow.signal = 'buy';
+        if (strongBuys.length === 1) {
+            const strongBuyTicker = strongBuys[0].ticker;
+            marketRows.forEach(row => {
+                if (row.ticker === strongBuyTicker) {
+                    row.signal = 'buy';
+                } else if (row.held) {
+                    row.signal = 'sell';
+                    if (row.priceChange === 0 && row.price > 10) {
+                        row.held = false;
+                    }
+                }
+            });
+        } else {
+            let sellSignals = [];
+            marketRows.forEach(row => {
+                if (row.held) {
+                    const shouldSell = potentialSells.some(s => s.ticker === row.ticker);
+                    if (shouldSell) {
+                        row.signal = 'sell';
+                        sellSignals.push(row.ticker);
+                    }
+                }
+            });
+
+            if (sellSignals.length > 0) {
+                const potentialBuys = marketRows.filter(r => r.signal !== 'sell' && r.held);
+                if (potentialBuys.length === 1) {
+                    potentialBuys[0].signal = 'buy';
+                }
+            }
+
+            const heldCount = marketRows.filter(r => r.held).length;
+            if (heldCount === 0) {
+                const totalPotentialBuys = risingBuys.length + newBuys.length;
+                if (totalPotentialBuys === 1) {
+                    const theBuy = risingBuys.length > 0 ? risingBuys[0] : newBuys[0];
+                    const buyRow = marketRows.find(row => row.ticker === theBuy.ticker);
+                    if (buyRow) {
+                        buyRow.signal = 'buy';
+                    }
+                } else if (totalPotentialBuys > 1 && risingBuys.length === 0) {
+                    newBuys.sort((a, b) => b.price - a.price);
+                    const bestBuy = newBuys[0];
+                    const bestBuyRow = marketRows.find(row => row.ticker === bestBuy.ticker);
+                    if (bestBuyRow) {
+                        bestBuyRow.signal = 'buy';
+                    }
+                }
             }
         }
 
@@ -256,13 +297,11 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
     }
 }
 
-
 export async function placeKalshiOrder(orderParams: any) {
     try {
         const { ticker, action, side, price, count } = orderParams;
 
         // This is a mock implementation that simulates placing an order.
-        // It does not actually interact with the Kalshi API.
         console.log(`Mock order placed: ${action} ${count} contract(s) of ${ticker} at ${price} cents on side ${side}`);
 
         const client_order_id = crypto.randomUUID().toString();
