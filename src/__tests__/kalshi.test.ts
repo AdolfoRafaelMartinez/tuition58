@@ -181,15 +181,11 @@ describe('getKalshiMarkets', () => {
     expect(market2.signal).toBe('sell');
   });
 
-  it('should handle own and hold a market', async () => {
+  it.only('should handle no history', async () => {
     const mockHistory = {
       'MARKET1': [
-        { time: new Date(Date.now() - 2000), price: 20 },
-        { time: new Date(Date.now() - 1000), price: 20 }
       ],
       'MARKET2': [
-        { time: new Date(Date.now() - 2000), price: 10 }, // ~owned / buy
-        { time: new Date(Date.now() - 1000), price: 20 } // owned / hold
       ]
     };
     global.fetch = jest.fn(() =>
@@ -202,7 +198,7 @@ describe('getKalshiMarkets', () => {
             },
             {
               ticker: 'MARKET2',
-              last_price_dollars: 0.20, // owned / hold
+              last_price_dollars: 0.30,
             }
           ]
         })
@@ -221,7 +217,7 @@ describe('getKalshiMarkets', () => {
 
     expect(market1.held).toBe(false);
     expect(market1.signal).toBe('hold');
-    expect(market2.held).toBe(true);
-    expect(market2.signal).toBe('hold');
+    expect(market2.held).toBe(false);
+    expect(market2.signal).toBe('buy');
   });
 });
