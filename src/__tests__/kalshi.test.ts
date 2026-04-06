@@ -49,8 +49,10 @@ describe('getKalshiMarkets', () => {
 
     expect(market1.held).toBe(false);
     expect(market1.signal).toBe('none');
+    expect(market1.earned).toBe(0);
     expect(market2.held).toBe(false);
     expect(market2.signal).toBe('none');
+    expect(market2.earned).toBe(0);
   });
 
   it('should handle one market trailing', async () => {
