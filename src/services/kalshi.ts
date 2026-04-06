@@ -212,7 +212,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
         const maxPrice = Math.max(...marketRows.map(row => row.price));
 
         marketRows.forEach(row => {
-            row.leader = (row.price === maxPrice && maxPrice > 0).toString();
+            row.leader = (row.price === maxPrice && maxPrice > 0);
         });
 
         data.marketRows = marketRows;
