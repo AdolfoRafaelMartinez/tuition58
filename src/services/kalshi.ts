@@ -176,10 +176,6 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
         });
         markets.sort((a, b) => a.bin_value - b.bin_value);
 
-        const risingBuys = [];
-        const newBuys = [];
-        const potentialSells = [];
-
         let marketRows = markets.map((market: any, ndx: number) => {
             if (ndx == 0) {
                 market.upper = market.bin_value - 1;
@@ -208,16 +204,6 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChange = currentPrice - lastHistoricalPrice;
             }
 
-            if (lastHistoricalPrice !== null) {
-                if (priceChange > 2) {
-                    risingBuys.push({ ticker: market.ticker, price: currentPrice });
-                } else if (priceChange < -2) {
-                    potentialSells.push({ ticker: market.ticker, price: currentPrice });
-                }
-            } else if (history.length === 0 && currentPrice > 0 && currentPrice < 50) {
-                newBuys.push({ ticker: market.ticker, price: currentPrice });
-            }
-
             return {
                 ticker: market.ticker,
                 range: `${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}`,
@@ -227,100 +213,10 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChangeIcon: priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '',
                 priceChangeDisplay: Math.abs(priceChange),
                 held: held,
-                signal: held ? 'hold' : 'none',
                 earned: 0,
                 bought_price: null, sold_price: null, earned_value: 0, buy_indices: [], sell_indices: [], allPrices: history.map((p: any) => p.price).concat([currentPrice])
             };
         });
-
-        const strongBuys = risingBuys.filter(b => {
-            const row = marketRows.find(r => r.ticker === b.ticker);
-            return row && row.held;
-        });
-
-        if (strongBuys.length === 1) {
-            const strongBuyTicker = strongBuys[0].ticker;
-            marketRows.forEach(row => {
-                if (row.ticker === strongBuyTicker) {
-                    row.signal = 'buy';
-                } else if (row.held) {
-                    row.signal = 'sell';
-                    if (row.priceChange === 0 && row.price > 10) {
-                        row.held = false;
-                    }
-                    if (row.price <= 10) {
-                        row.held = false;
-                    }
-                }
-            });
-        } else {
-            let sellSignals = [];
-            marketRows.forEach(row => {
-                if (row.held) {
-                    const shouldSell = potentialSells.some(s => s.ticker === row.ticker);
-                    if (shouldSell) {
-                        row.signal = 'sell';
-                        sellSignals.push(row.ticker);
-                        if (row.price <= 10) {
-                            row.held = false;
-                        }
-                    }
-                }
-            });
-
-            if (sellSignals.length > 0) {
-                const potentialBuys = marketRows.filter(r => r.signal !== 'sell' && r.held);
-                if (potentialBuys.length === 1) {
-                    potentialBuys[0].signal = 'buy';
-                }
-            }
-
-            const heldCount = marketRows.filter(r => r.held).length;
-            if (heldCount === 0) {
-                const totalPotentialBuys = risingBuys.length + newBuys.length;
-                if (totalPotentialBuys === 1) {
-                    const theBuy = risingBuys.length > 0 ? risingBuys[0] : newBuys[0];
-                    const buyRow = marketRows.find(row => row.ticker === theBuy.ticker);
-                    if (buyRow) {
-                        buyRow.signal = 'buy';
-                    }
-                } else if (totalPotentialBuys > 1 && risingBuys.length === 0) {
-                    newBuys.sort((a, b) => b.price - a.price);
-                    const bestBuy = newBuys[0];
-                    const bestBuyRow = marketRows.find(row => row.ticker === bestBuy.ticker);
-                    if (bestBuyRow) {
-                        bestBuyRow.signal = 'buy';
-                    }
-                }
-            }
-        }
-
-        const maxPrice = Math.max(...marketRows.map((r: any) => r.price));
-        const leadingCount = marketRows.filter((r: any) => r.price === maxPrice).length;
-        const hasLeadingMarket = leadingCount === 1;
-        const hasAnySells = marketRows.some((r: any) => r.signal === 'sell');
-
-        if (!hasLeadingMarket && risingBuys.length === 0 && maxPrice > 10) {
-            marketRows.forEach((row: any) => {
-                row.signal = 'none';
-                if (row.priceChange === 0 && row.price >= 10) {
-                    row.held = false;
-                }
-            });
-        }
-
-        if (hasLeadingMarket && risingBuys.length === 0 && !hasAnySells && maxPrice > 10) {
-            marketRows.forEach((row: any) => {
-                if (row.price === maxPrice) {
-                    row.signal = 'buy';
-                } else {
-                    row.signal = 'sell';
-                    if (row.priceChange === 0 && row.price >= 10) {
-                        row.held = false;
-                    }
-                }
-            });
-        }
 
         marketRows.forEach((row: any) => {
             row.earned = row.held ? row.priceChange : 0;
