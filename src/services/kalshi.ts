@@ -322,6 +322,10 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             });
         }
 
+        marketRows.forEach((row: any) => {
+            row.earned = row.held ? row.priceChange : 0;
+        });
+
         data.marketRows = marketRows;
         return { data: data, error: null };
     } catch (error) {
