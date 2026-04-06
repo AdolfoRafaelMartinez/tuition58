@@ -229,7 +229,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 held: held,
                 signal: held ? 'hold' : 'none',
                 earned: 0,
-                bought_price: null, sold_price: null, earned_value: 0, buy_indices: [], sell_indices: [], allPrices: []
+                bought_price: null, sold_price: null, earned_value: 0, buy_indices: [], sell_indices: [], allPrices: history.map((p: any) => p.price).concat([currentPrice])
             };
         });
 
