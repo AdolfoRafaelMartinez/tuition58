@@ -302,4 +302,46 @@ describe('getKalshiMarkets', () => {
     expect(market2.held).toBe(true);
     expect(market2.signal).toBe('none');
   });
+
+  it('should handle a point in history and a leading market', async () => {
+    const mockHistory = {
+      'MARKET1': [
+        { time: new Date(Date.now() - 1000), price: 20 }
+      ],
+      'MARKET2': [
+        { time: new Date(Date.now() - 1000), price: 30 }
+      ]
+    };
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({
+          markets: [
+            {
+              ticker: 'MARKET1',
+              last_price_dollars: 0.20,
+            },
+            {
+              ticker: 'MARKET2',
+              last_price_dollars: 0.30,
+            }
+          ]
+        })
+      })
+    ) as jest.Mock;
+
+    const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
+
+    expect(response.error).toBeNull();
+    expect(response.data).toBeDefined();
+    expect(response.data.marketRows).toBeDefined();
+    expect(response.data.marketRows.length).toBe(2);
+
+    const market1 = response.data.marketRows.find(m => m.ticker === 'MARKET1');
+    const market2 = response.data.marketRows.find(m => m.ticker === 'MARKET2');
+
+    expect(market1.held).toBe(false);
+    expect(market1.signal).toBe('none');
+    expect(market2.held).toBe(true);
+    expect(market2.signal).toBe('buy');
+  });
 });

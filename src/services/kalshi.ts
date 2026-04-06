@@ -291,12 +291,26 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
         const maxPrice = Math.max(...marketRows.map((r: any) => r.price));
         const leadingCount = marketRows.filter((r: any) => r.price === maxPrice).length;
         const hasLeadingMarket = leadingCount === 1;
+        const hasAnySells = marketRows.some((r: any) => r.signal === 'sell');
 
         if (!hasLeadingMarket && risingBuys.length === 0 && maxPrice > 10) {
             marketRows.forEach((row: any) => {
                 row.signal = 'none';
-                if (row.priceChange === 0 && row.price > 10) {
+                if (row.priceChange === 0 && row.price >= 10) {
                     row.held = false;
+                }
+            });
+        }
+
+        if (hasLeadingMarket && risingBuys.length === 0 && !hasAnySells && maxPrice > 10) {
+            marketRows.forEach((row: any) => {
+                if (row.price === maxPrice) {
+                    row.signal = 'buy';
+                } else {
+                    row.signal = 'none';
+                    if (row.priceChange === 0 && row.price >= 10) {
+                        row.held = false;
+                    }
                 }
             });
         }
