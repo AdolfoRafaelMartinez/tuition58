@@ -64,8 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Price</th>
                                 <th>Prices</th>
                                 <th>Change</th>
-                                <th>Held</th>
-                                <th>Earned</th>
                                 <th>Chart</th>
                             </tr>
                         </thead>
@@ -80,8 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${row.price}</td>
                             <td>${row.allPrices && row.allPrices.length > 0 ? row.allPrices.map(p => Math.trunc(p)).join(', ') : 'N/A'}</td>
                             <td class="${row.priceChangeClass}">${row.priceChangeIcon} ${Math.trunc(row.priceChangeDisplay)}</td>
-                            <td>${row.held ? 'Yes' : 'No'}</td>
-                            <td>${Math.trunc(row.earned_value)}</td>
                             <td><canvas id="chart-${row.ticker}" width="100" height="30"></canvas></td>
                         </tr>
                     `;

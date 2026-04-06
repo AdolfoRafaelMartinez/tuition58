@@ -174,9 +174,9 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             market.bin_value = Number(market.ticker.match(/\d+\.?\d$/));
             market.is_bin = market.ticker.toLowerCase().match(/b\d/);
         });
-        markets.sort((a, b) => a.bin_value - b.bin_value);
+        markets.sort((a: { bin_value: number; }, b: { bin_value: number; }) => a.bin_value - b.bin_value);
 
-        let marketRows = markets.map((market: any, ndx: number) => {
+        let marketRows: any[] = markets.map((market: any, ndx: number) => {
             if (ndx == 0) {
                 market.upper = market.bin_value - 1;
             } else {
@@ -190,13 +190,6 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
 
             const currentPrice = Math.trunc(market.last_price_dollars * 100);
             const history = marketPriceHistory[market.ticker] || [];
-
-            const wasCheap = history.some((p: any) => p.price <= 10);
-            const isNowExpensive = currentPrice > 10;
-            const wasExpensive = history.some((p: any) => p.price > 10);
-            const isNowAtLeast10 = currentPrice >= 10;
-
-            let held = (wasExpensive && isNowAtLeast10) || (wasCheap && isNowExpensive);
 
             const lastHistoricalPrice = history.length > 0 ? history[history.length - 1].price : null;
             let priceChange = 0;
@@ -212,14 +205,14 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChangeClass: priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral',
                 priceChangeIcon: priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '',
                 priceChangeDisplay: Math.abs(priceChange),
-                held: held,
-                earned: 0,
-                bought_price: null, sold_price: null, earned_value: 0, buy_indices: [], sell_indices: [], allPrices: history.map((p: any) => p.price).concat([currentPrice])
+                bought_price: null, sold_price: null, buy_indices: [], sell_indices: [], allPrices: history.map((p: any) => p.price).concat([currentPrice])
             };
         });
 
-        marketRows.forEach((row: any) => {
-            row.earned = row.held ? row.priceChange : 0;
+        const maxPrice = Math.max(...marketRows.map(row => row.price));
+
+        marketRows.forEach(row => {
+            row.leader = (row.price === maxPrice && maxPrice > 0).toString();
         });
 
         data.marketRows = marketRows;
