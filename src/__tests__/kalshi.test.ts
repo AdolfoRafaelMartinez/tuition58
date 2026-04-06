@@ -57,10 +57,13 @@ describe('getKalshiMarkets', () => {
 
     expect(market1.priceChangeClass).toBe('neutral');
     expect(market1.priceChangeDisplay).toBe(0);
+    expect(market1.leader).toBe(false);
     expect(market2.priceChangeClass).toBe('negative');
     expect(market2.priceChangeDisplay).toBe(10);
+    expect(market2.leader).toBe(false);
     expect(market3.priceChangeClass).toBe('positive');
     expect(market3.priceChangeDisplay).toBe(10);
+    expect(market3.leader).toBe(true);
   });
 
   it.only('should handle one continues lead', async () => {
@@ -112,10 +115,13 @@ describe('getKalshiMarkets', () => {
 
     expect(market1.priceChangeClass).toBe('neutral');
     expect(market1.priceChangeDisplay).toBe(0);
+    expect(market1.leader).toBe(false);
     expect(market2.priceChangeClass).toBe('positive');
     expect(market2.priceChangeDisplay).toBe(10);
+    expect(market2.leader).toBe(false);
     expect(market3.priceChangeClass).toBe('positive');
     expect(market3.priceChangeDisplay).toBe(10);
+    expect(market3.leader).toBe(true);
   });
 
   it.only('should handle one loses lead', async () => {
@@ -167,10 +173,13 @@ describe('getKalshiMarkets', () => {
 
     expect(market1.priceChangeClass).toBe('neutral');
     expect(market1.priceChangeDisplay).toBe(0);
+    expect(market1.leader).toBe(false);
     expect(market2.priceChangeClass).toBe('positive');
     expect(market2.priceChangeDisplay).toBe(20);
+    expect(market2.leader).toBe(true);
     expect(market3.priceChangeClass).toBe('negative');
     expect(market3.priceChangeDisplay).toBe(10);
+    expect(market3.leader).toBe(false);
   });
 
   // it('should handle one market leading', async () => {
