@@ -195,9 +195,9 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             const currentPrice = Math.trunc(market.last_price_dollars * 100);
             const history = marketPriceHistory[market.ticker] || [];
 
-            const wasCheap = history.some((p: any) => p.price < 10);
+            const wasCheap = history.some((p: any) => p.price <= 10);
             const isNowExpensive = currentPrice > 10;
-            const wasExpensive = history.some((p: any) => p.price >= 10);
+            const wasExpensive = history.some((p: any) => p.price > 10);
             const isNowAtLeast10 = currentPrice >= 10;
 
             let held = (wasExpensive && isNowAtLeast10) || (wasCheap && isNowExpensive);
@@ -227,7 +227,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChangeIcon: priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '',
                 priceChangeDisplay: Math.abs(priceChange),
                 held: held,
-                signal: history.length === 0 ? 'none' : 'hold',
+                signal: held ? 'hold' : 'none',
                 bought_price: null, sold_price: null, earned_value: 0, buy_indices: [], sell_indices: [], allPrices: []
             };
         });
@@ -247,6 +247,9 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                     if (row.priceChange === 0 && row.price > 10) {
                         row.held = false;
                     }
+                    if (row.price <= 10) {
+                        row.held = false;
+                    }
                 }
             });
         } else {
@@ -257,6 +260,9 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                     if (shouldSell) {
                         row.signal = 'sell';
                         sellSignals.push(row.ticker);
+                        if (row.price <= 10) {
+                            row.held = false;
+                        }
                     }
                 }
             });
@@ -307,7 +313,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 if (row.price === maxPrice) {
                     row.signal = 'buy';
                 } else {
-                    row.signal = 'none';
+                    row.signal = 'sell';
                     if (row.priceChange === 0 && row.price >= 10) {
                         row.held = false;
                     }

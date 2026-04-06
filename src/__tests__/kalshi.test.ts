@@ -47,20 +47,20 @@ describe('getKalshiMarkets', () => {
     const market1 = response.data.marketRows.find(m => m.ticker === 'MARKET1');
     const market2 = response.data.marketRows.find(m => m.ticker === 'MARKET2');
 
-    expect(market1.held).toBe(true);
-    expect(market1.signal).toBe('hold');
-    expect(market2.held).toBe(true);
-    expect(market2.signal).toBe('hold');
+    expect(market1.held).toBe(false);
+    expect(market1.signal).toBe('none');
+    expect(market2.held).toBe(false);
+    expect(market2.signal).toBe('none');
   });
 
-  it('should handle one market falling', async () => {
+  it('should handle one market trailing', async () => {
     const mockHistory = {
       'MARKET1': [
         { time: new Date(Date.now() - 2000), price: 20 }, // !own / buy 
         { time: new Date(Date.now() - 1000), price: 20 }  //  own / none
       ],
       'MARKET2': [
-        { time: new Date(Date.now() - 2000), price: 10 }, // !own / none 
+        { time: new Date(Date.now() - 2000), price: 10 }, // !own / sell 
         { time: new Date(Date.now() - 1000), price: 20 }  // !own / none
       ]
     };
@@ -74,7 +74,7 @@ describe('getKalshiMarkets', () => {
             },
             {
               ticker: 'MARKET2',
-              last_price_dollars: 0.10, // !own / none
+              last_price_dollars: 0.10, // !own / sell
             }
           ]
         })
@@ -93,7 +93,7 @@ describe('getKalshiMarkets', () => {
 
     expect(market1.held).toBe(true);
     expect(market1.signal).toBe('buy');
-    expect(market2.held).toBe(true);
+    expect(market2.held).toBe(false);
     expect(market2.signal).toBe('sell');
   });
 
@@ -172,7 +172,7 @@ describe('getKalshiMarkets', () => {
     const market2 = response.data.marketRows.find(m => m.ticker === 'MARKET2');
 
     expect(market1.held).toBe(false);
-    expect(market1.signal).toBe('none');
+    expect(market1.signal).toBe('sell');
     expect(market2.held).toBe(false);
     expect(market2.signal).toBe('buy');
   });
@@ -180,10 +180,10 @@ describe('getKalshiMarkets', () => {
   it('should handle a point in history and no leading market', async () => {
     const mockHistory = {
       'MARKET1': [
-        { time: new Date(Date.now() - 1000), price: 20 }
+        { time: new Date(Date.now() - 1000), price: 20 } // !own / sell
       ],
       'MARKET2': [
-        { time: new Date(Date.now() - 1000), price: 30 }
+        { time: new Date(Date.now() - 1000), price: 30 } // !own / buy
       ]
     };
     global.fetch = jest.fn(() =>
@@ -192,11 +192,11 @@ describe('getKalshiMarkets', () => {
           markets: [
             {
               ticker: 'MARKET1',
-              last_price_dollars: 0.20,
+              last_price_dollars: 0.20, // !own / none
             },
             {
               ticker: 'MARKET2',
-              last_price_dollars: 0.20,
+              last_price_dollars: 0.20, // own / none
             }
           ]
         })
@@ -222,10 +222,10 @@ describe('getKalshiMarkets', () => {
   it('should handle a point in history and a leading market', async () => {
     const mockHistory = {
       'MARKET1': [
-        { time: new Date(Date.now() - 1000), price: 20 }
+        { time: new Date(Date.now() - 1000), price: 20 } // !own / sell
       ],
       'MARKET2': [
-        { time: new Date(Date.now() - 1000), price: 30 }
+        { time: new Date(Date.now() - 1000), price: 30 } // !own / buy
       ]
     };
     global.fetch = jest.fn(() =>
@@ -234,11 +234,11 @@ describe('getKalshiMarkets', () => {
           markets: [
             {
               ticker: 'MARKET1',
-              last_price_dollars: 0.20,
+              last_price_dollars: 0.20, // !own / sell
             },
             {
               ticker: 'MARKET2',
-              last_price_dollars: 0.30,
+              last_price_dollars: 0.30, // own / buy
             }
           ]
         })
@@ -256,7 +256,7 @@ describe('getKalshiMarkets', () => {
     const market2 = response.data.marketRows.find(m => m.ticker === 'MARKET2');
 
     expect(market1.held).toBe(false);
-    expect(market1.signal).toBe('none');
+    expect(market1.signal).toBe('sell');
     expect(market2.held).toBe(true);
     expect(market2.signal).toBe('buy');
   });
