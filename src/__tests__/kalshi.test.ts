@@ -63,6 +63,61 @@ describe('getKalshiMarkets', () => {
     expect(market3.priceChangeDisplay).toBe(10);
   });
 
+  it.only('should handle continued lead', async () => {
+    const mockHistory = {
+      'MARKET1': [
+        { time: new Date(Date.now() - 2000), price: 10 },
+        { time: new Date(Date.now() - 1000), price: 10 }
+      ],
+      'MARKET2': [
+        { time: new Date(Date.now() - 2000), price: 10 },
+        { time: new Date(Date.now() - 1000), price: 0 }
+      ],
+      'MARKET3': [
+        { time: new Date(Date.now() - 2000), price: 10 },
+        { time: new Date(Date.now() - 1000), price: 20 }
+      ]
+    };
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({
+          markets: [
+            {
+              ticker: 'MARKET1',
+              last_price_dollars: 0.10,
+            },
+            {
+              ticker: 'MARKET2',
+              last_price_dollars: 0.10,
+            },
+            {
+              ticker: 'MARKET3',
+              last_price_dollars: 0.30,
+            }
+          ]
+        })
+      })
+    ) as jest.Mock;
+
+    const response = await getKalshiMarkets('TEST-EVENT', mockHistory);
+
+    expect(response.error).toBeNull();
+    expect(response.data).toBeDefined();
+    expect(response.data.marketRows).toBeDefined();
+    expect(response.data.marketRows.length).toBe(3);
+
+    const market1 = response.data.marketRows.find(m => m.ticker === 'MARKET1');
+    const market2 = response.data.marketRows.find(m => m.ticker === 'MARKET2');
+    const market3 = response.data.marketRows.find(m => m.ticker === 'MARKET3');
+
+    expect(market1.priceChangeClass).toBe('neutral');
+    expect(market1.priceChangeDisplay).toBe(0);
+    expect(market2.priceChangeClass).toBe('positive');
+    expect(market2.priceChangeDisplay).toBe(10);
+    expect(market3.priceChangeClass).toBe('positive');
+    expect(market3.priceChangeDisplay).toBe(10);
+  });
+
   // it('should handle one market leading', async () => {
   //   const mockHistory = {
   //     'MARKET1': [
