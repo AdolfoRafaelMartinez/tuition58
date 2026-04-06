@@ -227,7 +227,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChangeIcon: priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '',
                 priceChangeDisplay: Math.abs(priceChange),
                 held: held,
-                signal: 'hold',
+                signal: history.length === 0 ? 'none' : 'hold',
                 bought_price: null, sold_price: null, earned_value: 0, buy_indices: [], sell_indices: [], allPrices: []
             };
         });
@@ -286,6 +286,19 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                     }
                 }
             }
+        }
+
+        const maxPrice = Math.max(...marketRows.map((r: any) => r.price));
+        const leadingCount = marketRows.filter((r: any) => r.price === maxPrice).length;
+        const hasLeadingMarket = leadingCount === 1;
+
+        if (!hasLeadingMarket && risingBuys.length === 0 && maxPrice > 10) {
+            marketRows.forEach((row: any) => {
+                row.signal = 'none';
+                if (row.priceChange === 0 && row.price > 10) {
+                    row.held = false;
+                }
+            });
         }
 
         data.marketRows = marketRows;
