@@ -172,7 +172,7 @@ describe('getKalshiMarkets', () => {
     expect(market3.priceChangeDisplay).toBe(10);
     expect(market3.leader).toBe(true);
 
-    expect(portfolio_value).toBe(10);
+    expect(response.data.portfolio_value).toBe(10);
     
   });
 
@@ -235,7 +235,7 @@ describe('getKalshiMarkets', () => {
     expect(market3.priceChangeDisplay).toBe(10);
     expect(market3.leader).toBe(false);
 
-    expect(portfolio_value).toBe(-10);
+    expect(response.data.portfolio_value).toBe(-10);
     
   });
 
@@ -304,7 +304,7 @@ describe('getKalshiMarkets', () => {
     expect(market3.priceChangeDisplay).toBe(0);
     expect(market3.leader).toBe(false);
 
-    expect(portfolio_value).toBe(0);
+    expect(response.data.portfolio_value).toBe(0);
     
   });
 
@@ -376,7 +376,7 @@ describe('getKalshiMarkets', () => {
     expect(market3.priceChangeDisplay).toBe(0);
     expect(market3.leader).toBe(false);
 
-    expect(portfolio_value).toBe(10);
+    expect(response.data.portfolio_value).toBe(10);
     
   });
 
@@ -451,7 +451,7 @@ describe('getKalshiMarkets', () => {
     expect(market3.priceChangeDisplay).toBe(0);
     expect(market3.leader).toBe(false);
 
-    expect(portfolio_value).toBe(20);
+    expect(response.data.portfolio_value).toBe(20);
     
   });
 });

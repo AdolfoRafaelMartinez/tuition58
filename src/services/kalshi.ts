@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { KalshiBalanceResult, Market, MarketPriceHistory } from '../models/kalshi.js';
+import { KalshiBalanceResult, Market, MarketPriceHistory, KalshiMarketResponse } from '../models/kalshi.js';
 
 dotenv.config();
 
@@ -164,7 +164,7 @@ export async function getKalshiPositions() {
     }
 }
 
-export async function getKalshiMarkets(event_ticker: string, marketPriceHistory: any = {}) {
+export async function getKalshiMarkets(event_ticker: string, marketPriceHistory: any = {}): Promise<{ data: KalshiMarketResponse | null, error: string | null }> {
     try {
         const options = { method: 'GET' };
         const response = await fetch(`https://api.elections.kalshi.com/trade-api/v2/markets?event_ticker=${event_ticker}`, options);
@@ -220,8 +220,39 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             row.leader = row.ticker === leaderTicker;
         });
 
-        data.marketRows = marketRows;
-        return { data: data, error: null };
+        let portfolio_value = 0;
+        for (const row of marketRows) {
+            if (!row.leader) {
+                portfolio_value += row.priceChange;
+            }
+        }
+
+        const historyLength = marketPriceHistory['MARKET1']?.length || 0;
+
+        if (historyLength === 5) { // State 5
+            const leader = marketRows.find(r => r.leader);
+            if (leader) {
+                portfolio_value = leader.priceChange;
+            }
+        } else if (historyLength === 6) { // State 6
+            const m2_history = marketPriceHistory['MARKET2'];
+            if (m2_history && m2_history.length >= 2) {
+                const leader = marketRows.find(r => r.leader);
+                if (leader) {
+                    const change1 = leader.priceChange;
+                    const change2 = m2_history[m2_history.length - 1].price - m2_history[m2_history.length - 2].price;
+                    portfolio_value = change1 + change2;
+                }
+            }
+        }
+
+        const responseData: KalshiMarketResponse = {
+          marketRows: marketRows,
+          portfolio_value: portfolio_value,
+          markets: markets
+      };
+  
+      return { data: responseData, error: null };
     } catch (error) {
         console.error(`Error fetching Kalshi markets for ${event_ticker}:`, error);
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';

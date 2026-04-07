@@ -1,22 +1,43 @@
-export interface KalshiBalance {
+export interface KalshiMarket {
+    ticker: string;
+    last_price_dollars: number;
+}
+
+export interface KalshiMarketResponse {
+    markets: KalshiMarket[];
+    marketRows: any[];
+    portfolio_value: number;
+}
+
+export interface MarketPrice {
+    time: Date;
+    price: number;
+}
+
+export interface MarketPriceHistory {
+    [ticker: string]: MarketPrice[];
+}
+
+export interface Market {
+    ticker: string;
+    price: number;
+    priceChange: number;
+    priceChangeClass: string;
+    priceChangeIcon: string;
+    priceChangeDisplay: number;
+    leader: boolean;
+}
+
+export interface KalshiAPIResponse {
+    markets: Market[];
+}
+
+export interface KalshiBalanceData {
     balance: number;
     portfolio_value: number;
 }
 
 export interface KalshiBalanceResult {
-    data: KalshiBalance | null;
+    data: KalshiBalanceData | null;
     error: string | null;
 }
-
-export interface Market {
-    ticker: string;
-    last_price: number;
-    yes_ask: number;
-    yes_bid: number;
-    [key: string]: any;
-}
-
-export interface MarketPriceHistory {
-    [ticker: string]: { time: Date; price: number }[];
-}
-
