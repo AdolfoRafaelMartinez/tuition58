@@ -191,11 +191,8 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             const currentPrice = Math.trunc(market.last_price_dollars * 100);
             const history = marketPriceHistory[market.ticker] || [];
 
-            const lastHistoricalPrice = history.length > 0 ? history[history.length - 1].price : null;
-            let priceChange = 0;
-            if (lastHistoricalPrice !== null) {
-                priceChange = currentPrice - lastHistoricalPrice;
-            }
+            const lastHistoricalPrice = history.length > 0 ? history[history.length - 1].price : currentPrice;
+            let priceChange = currentPrice - lastHistoricalPrice;
 
             return {
                 ticker: market.ticker,
@@ -205,14 +202,40 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChangeClass: priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral',
                 priceChangeIcon: priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '',
                 priceChangeDisplay: Math.abs(priceChange),
-                bought_price: null, sold_price: null, buy_indices: [], sell_indices: [], allPrices: history.map((p: any) => p.price).concat([currentPrice])
+                bought_price: null, sold_price: null, buy_indices: [], sell_indices: [], 
+                allPrices: history.map((p: any) => p.price).concat([currentPrice]),
+                earned: 0
             };
         });
 
         const maxPrice = Math.max(...marketRows.map(row => row.price));
+        let leaderTicker = null;
+        if (maxPrice > 0) {
+            const leaders = marketRows.filter(row => row.price === maxPrice);
+            if (leaders.length > 0) {
+                leaderTicker = leaders[leaders.length -1].ticker;
+            }
+        }
 
         marketRows.forEach(row => {
-            row.leader = (row.price === maxPrice && maxPrice > 0);
+            row.leader = row.ticker === leaderTicker;
+            const historyPrices = row.allPrices.slice(0, -1);
+
+            if (row.leader) {
+                row.earned = row.priceChange;
+            } else {
+                if (historyPrices.length > 0) {
+                    const initial_price = historyPrices[0];
+                    const currentPrice = row.price;
+                    if (currentPrice > initial_price) {
+                        row.earned = 0;
+                    } else {
+                        row.earned = initial_price;
+                    }
+                } else {
+                    row.earned = 0;
+                }
+            }
         });
 
         data.marketRows = marketRows;
