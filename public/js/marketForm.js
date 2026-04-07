@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Price</th>
                                 <th>Prices</th>
                                 <th>Change</th>
+                                <th>Leader</th>
                                 <th>Chart</th>
                             </tr>
                         </thead>
@@ -78,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${row.price}</td>
                             <td>${row.allPrices && row.allPrices.length > 0 ? row.allPrices.map(p => Math.trunc(p)).join(', ') : 'N/A'}</td>
                             <td class="${row.priceChangeClass}">${row.priceChangeIcon} ${Math.trunc(row.priceChangeDisplay)}</td>
+                            <td>${row.leader}</td>
                             <td><canvas id="chart-${row.ticker}" width="100" height="30"></canvas></td>
                         </tr>
                     `;
@@ -131,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     fill: false,
                                     tension: 0.1,
                                     pointRadius,
-                                    pointStyle,
+                                     pointStyle,
                                     pointBackgroundColor,
                                     pointRotation
                                 }]
