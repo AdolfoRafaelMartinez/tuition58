@@ -62,6 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Ticker</th>
                                 <th>Range</th>
                                 <th>Price</th>
+                                <th>Bought Price</th>
+                                <th>Earned</th>
                                 <th>Prices</th>
                                 <th>Change</th>
                                 <th>Leader</th>
@@ -77,6 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${row.ticker}</td>
                             <td>${row.range}</td>
                             <td>${row.price}</td>
+                            <td>${row.bought_price !== undefined ? row.bought_price : 'N/A'}</td>
+                            <td>${row.earned !== undefined ? row.earned : 'N/A'}</td>
                             <td>${row.allPrices && row.allPrices.length > 0 ? row.allPrices.map(p => Math.trunc(p)).join(', ') : 'N/A'}</td>
                             <td class="${row.priceChangeClass}">${row.priceChangeIcon} ${Math.trunc(row.priceChangeDisplay)}</td>
                             <td>${row.leader}</td>
