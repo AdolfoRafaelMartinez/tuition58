@@ -234,7 +234,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChangeClass: priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral',
                 priceChangeIcon: priceChange > 0 ? '<span class="triangle-up">&#9650;</span>' : priceChange < 0 ? '<span class="triangle-down">&#9660;</span>' : '',
                 priceChangeDisplay: Math.abs(priceChange),
-                bought_price: null, sold_price: null, buy_indices: [], sell_indices: [], 
+                bought_price: null, sold_price: null, buy_indices: [], sell_indices: [],
                 allPrices: history.map((p: any) => p.price).concat([currentPrice]),
                 earned: earned,
             };
@@ -242,12 +242,8 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
 
         marketRows.forEach(row => {
             row.leader = row.ticker === leaderTicker;
-            const history = marketPriceHistory[row.ticker] || [];
-            if (row.leader) {
-                const lastHistoricalPrice = history.length > 0 ? history[history.length - 1].price : row.price;
-                if (history.length === 0 || history.length === 1 || lastHistoricalPrice === 0) {
-                    row.earned = 0;
-                }
+            if (row.leader && row.ticker !== previousLeaderTicker) {
+                row.earned = 0;
             }
         });
 
@@ -263,7 +259,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 }
             }
         }
-        
+
         if (historyLength === 5) { // State 5
             const leader = marketRows.find(r => r.leader);
             if (leader) {
@@ -285,7 +281,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
           portfolio_value: portfolio_value,
           markets: markets
       };
-  
+
       return { data: responseData, error: null };
     } catch (error) {
         console.error(`Error fetching Kalshi markets for ${event_ticker}:`, error);

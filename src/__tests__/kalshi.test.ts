@@ -11,7 +11,7 @@ describe('getKalshiMarkets', () => {
     global.fetch = originalFetch;
   });
 
-  it.only('should handle state 0', async () => {
+  it('should handle state 0', async () => {
     const mockHistory = {
     };
     global.fetch = jest.fn(() =>
@@ -56,7 +56,7 @@ describe('getKalshiMarkets', () => {
     expect(market3.priceChangeDisplay).toBe(0);
   });
 
-  it.only('should handle state 1', async () => {
+  it('should handle state 1', async () => {
     const mockHistory = {
       'MARKET1': [
         { time: new Date(Date.now() - 1000), price: 10 }
@@ -116,7 +116,7 @@ describe('getKalshiMarkets', () => {
     expect(response.data.portfolio_value).toBe(0);
   });
 
-  it.only('should handle state 2', async () => {
+  it('should handle state 2', async () => {
     const mockHistory = {
       'MARKET1': [
         { time: new Date(Date.now() - 2000), price: 10 },
@@ -180,7 +180,7 @@ describe('getKalshiMarkets', () => {
     
   });
 
-  it.only('should handle state 3', async () => {
+  it('should handle state 3', async () => {
     const mockHistory = {
       'MARKET1': [
         { time: new Date(Date.now() - 2000), price: 10 },
@@ -245,7 +245,7 @@ describe('getKalshiMarkets', () => {
     
   });
 
-  it.only('should handle state 4', async () => {
+  it('should handle state 4', async () => {
     const mockHistory = {
       'MARKET1': [
         { time: new Date(Date.now() - 4000), price: 10 },
