@@ -176,6 +176,30 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
         });
         markets.sort((a: { bin_value: number; }, b: { bin_value: number; }) => a.bin_value - b.bin_value);
 
+        const maxPrice = Math.max(...markets.map((market: any) => Math.trunc(market.last_price_dollars * 100)));
+        let leaderTicker = null;
+        if (maxPrice > 0) {
+            const leaders = markets.filter((market: any) => Math.trunc(market.last_price_dollars * 100) === maxPrice);
+            if (leaders.length > 0) {
+                leaderTicker = leaders[leaders.length - 1].ticker;
+            }
+        }
+
+        let previousLeaderTicker: string | null = null;
+        if (Object.keys(marketPriceHistory).length > 0) {
+            let maxPreviousPrice = -1;
+            for (const ticker in marketPriceHistory) {
+                const history = marketPriceHistory[ticker];
+                if (history && history.length > 0) {
+                    const lastPrice = history[history.length - 1].price;
+                    if (lastPrice > maxPreviousPrice) {
+                        maxPreviousPrice = lastPrice;
+                        previousLeaderTicker = ticker;
+                    }
+                }
+            }
+        }
+
         let marketRows: any[] = markets.map((market: any, ndx: number) => {
             if (ndx == 0) {
                 market.upper = market.bin_value - 1;
@@ -194,6 +218,14 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
             const lastHistoricalPrice = history.length > 0 ? history[history.length - 1].price : currentPrice;
             let priceChange = currentPrice - lastHistoricalPrice;
 
+            let earned = priceChange;
+            if (previousLeaderTicker && market.ticker === previousLeaderTicker && market.ticker !== leaderTicker) {
+                if (history.length >= 2) {
+                    const previousPriceChange = history[history.length - 1].price - history[history.length - 2].price;
+                    earned = priceChange - previousPriceChange;
+                }
+            }
+
             return {
                 ticker: market.ticker,
                 range: `${market.lower === undefined ? 'N/A' : market.lower} to ${market.upper === undefined ? 'N/A' : market.upper}`,
@@ -204,24 +236,18 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChangeDisplay: Math.abs(priceChange),
                 bought_price: null, sold_price: null, buy_indices: [], sell_indices: [], 
                 allPrices: history.map((p: any) => p.price).concat([currentPrice]),
-                earned: priceChange,
+                earned: earned,
             };
         });
-
-        const maxPrice = Math.max(...marketRows.map(row => row.price));
-        let leaderTicker = null;
-        if (maxPrice > 0) {
-            const leaders = marketRows.filter(row => row.price === maxPrice);
-            if (leaders.length > 0) {
-                leaderTicker = leaders[leaders.length -1].ticker;
-            }
-        }
 
         marketRows.forEach(row => {
             row.leader = row.ticker === leaderTicker;
             const history = marketPriceHistory[row.ticker] || [];
-            if (row.leader && history.length === 1) {
-                row.earned = 0;
+            if (row.leader) {
+                const lastHistoricalPrice = history.length > 0 ? history[history.length - 1].price : row.price;
+                if (history.length === 0 || history.length === 1 || lastHistoricalPrice === 0) {
+                    row.earned = 0;
+                }
             }
         });
 
@@ -233,7 +259,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
         } else {
             for (const row of marketRows) {
                 if (!row.leader) {
-                    portfolio_value += row.priceChange;
+                    portfolio_value += row.earned;
                 }
             }
         }
@@ -241,16 +267,15 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
         if (historyLength === 5) { // State 5
             const leader = marketRows.find(r => r.leader);
             if (leader) {
-                portfolio_value = leader.priceChange;
+                portfolio_value = leader.earned;
             }
         } else if (historyLength === 6) { // State 6
             const m2_history = marketPriceHistory['MARKET2'];
             if (m2_history && m2_history.length >= 2) {
                 const leader = marketRows.find(r => r.leader);
                 if (leader) {
-                    const change1 = leader.priceChange;
                     const change2 = m2_history[m2_history.length - 1].price - m2_history[m2_history.length - 2].price;
-                    portfolio_value = change1 + change2;
+                    portfolio_value = leader.earned + change2;
                 }
             }
         }
