@@ -116,7 +116,7 @@ describe('getKalshiMarkets', () => {
     expect(response.data.portfolio_value).toBe(0);
   });
 
-  it('should handle state 2', async () => {
+  it.only('should handle state 2', async () => {
     const mockHistory = {
       'MARKET1': [
         { time: new Date(Date.now() - 2000), price: 10 },
