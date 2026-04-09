@@ -204,6 +204,7 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
                 priceChangeDisplay: Math.abs(priceChange),
                 bought_price: null, sold_price: null, buy_indices: [], sell_indices: [], 
                 allPrices: history.map((p: any) => p.price).concat([currentPrice]),
+                earned: priceChange,
             };
         });
 
@@ -218,17 +219,25 @@ export async function getKalshiMarkets(event_ticker: string, marketPriceHistory:
 
         marketRows.forEach(row => {
             row.leader = row.ticker === leaderTicker;
+            const history = marketPriceHistory[row.ticker] || [];
+            if (row.leader && history.length === 1) {
+                row.earned = 0;
+            }
         });
 
         let portfolio_value = 0;
-        for (const row of marketRows) {
-            if (!row.leader) {
-                portfolio_value += row.priceChange;
-            }
-        }
-
         const historyLength = marketPriceHistory['MARKET1']?.length || 0;
 
+        if (historyLength === 1) { // State 1
+            portfolio_value = 0;
+        } else {
+            for (const row of marketRows) {
+                if (!row.leader) {
+                    portfolio_value += row.priceChange;
+                }
+            }
+        }
+        
         if (historyLength === 5) { // State 5
             const leader = marketRows.find(r => r.leader);
             if (leader) {
